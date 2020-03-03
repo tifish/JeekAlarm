@@ -6,6 +6,7 @@ import androidx.compose.remember
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.VerticalScroller
+import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
@@ -13,6 +14,7 @@ import androidx.ui.material.Switch
 import androidx.ui.material.TopAppBar
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
+import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.*
@@ -98,8 +100,14 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }) {
                 Column(LayoutFlexible(1f, true)) {
                     Text(schedule.name + if (index in UI.nextAlarmIndexes) " (Next alarm)" else "")
-                    Text(schedule.timeConfig)
-                    Text(App.format(schedule.getNextTriggerTime(now)))
+                    Text(
+                        schedule.timeConfig,
+                        style = TextStyle(color = Color.Gray)
+                    )
+                    Text(
+                        App.format(schedule.getNextTriggerTime(now)),
+                        style = TextStyle(color = Color.Gray)
+                    )
                 }
             }
         }
