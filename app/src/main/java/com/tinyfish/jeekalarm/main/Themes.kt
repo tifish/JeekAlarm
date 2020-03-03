@@ -9,8 +9,8 @@ object DarkColorPalette : ColorPalette {
     override var primaryVariant = Color.Magenta
     override var secondary = Color.Magenta
     override var secondaryVariant = Color(0xFF039BE5) // Switch on
-    override var background = Color.Magenta
-    override var surface = Color.Black // Surface, Switch off
+    override var background = Color.Black // Scaffold's content background
+    override var surface = Color.White // Surface, Switch off
     override var error = Color.Red
     override var onPrimary = Color.White // text on primary
     override var onSecondary = Color.White

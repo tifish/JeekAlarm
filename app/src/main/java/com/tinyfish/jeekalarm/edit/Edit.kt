@@ -9,6 +9,7 @@ import androidx.ui.core.Text
 import androidx.ui.layout.*
 import androidx.ui.material.BottomAppBar
 import androidx.ui.material.Button
+import androidx.ui.material.Scaffold
 import androidx.ui.material.TopAppBar
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
@@ -45,11 +46,11 @@ fun EditScreen(scheduleIndex: Int) {
         editingSchedule = originalSchedule.copy()
     }
 
-    Column {
-        TopBar()
-        Editor(LayoutFlexible(1f, true))
-        BottomBar(scheduleIndex == -1)
-    }
+    Scaffold(
+        topAppBar = { TopBar() },
+        bodyContent = { Editor() },
+        bottomAppBar = { BottomBar(scheduleIndex == -1) }
+    )
 }
 
 @Composable
@@ -65,8 +66,8 @@ class BarButtonData(
 )
 
 @Composable
-private fun Editor(layoutFlexible: ParentDataModifier) {
-    Column(layoutFlexible + LayoutPadding(20.dp)) {
+private fun Editor() {
+    Column {
         MyCheckbox("Enabled", editingSchedule::enabled)
         HeightSpacer()
         MyCheckbox("Only Once", editingSchedule::onlyOnce)

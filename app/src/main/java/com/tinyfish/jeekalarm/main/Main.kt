@@ -43,11 +43,11 @@ fun Main() {
 
 @Composable
 fun MainScreen() {
-    Column {
-        TopBar()
-        ScheduleList(LayoutFlexible(1f, true))
-        BottomBar()
-    }
+    Scaffold(
+        topAppBar = { TopBar() },
+        bodyContent = { ScheduleList() },
+        bottomAppBar = { BottomBar() }
+    )
 }
 
 @Composable
@@ -58,8 +58,8 @@ private fun TopBar() {
 }
 
 @Composable
-private fun ScheduleList(parentDataModifier: Modifier) {
-    VerticalScroller(modifier = parentDataModifier) {
+private fun ScheduleList() {
+    VerticalScroller {
         Column(LayoutPadding(20.dp)) {
             remember { UI.scheduleChangeTrigger }
 
