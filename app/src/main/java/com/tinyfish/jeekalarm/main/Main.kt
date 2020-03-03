@@ -3,19 +3,19 @@ package com.tinyfish.jeekalarm.main
 import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.compose.remember
-import androidx.compose.state
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.*
-import androidx.ui.material.*
+import androidx.ui.material.Button
+import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Switch
+import androidx.ui.material.TopAppBar
 import androidx.ui.material.ripple.Ripple
+import androidx.ui.material.surface.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.App
-import com.tinyfish.jeekalarm.HeightSpacer
-import com.tinyfish.jeekalarm.ScreenType
-import com.tinyfish.jeekalarm.UI
+import com.tinyfish.jeekalarm.*
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
@@ -39,11 +39,16 @@ fun Main() {
 
 @Composable
 fun MainScreen() {
-    Scaffold(
-        topAppBar = { TopBar() },
-        bodyContent = { ScheduleList() },
-        bottomAppBar = { BottomBar() }
-    )
+    Column {
+        TopBar()
+        Surface(
+            color = DarkColorPalette.background,
+            modifier = LayoutFlexible(1f, true)
+        ) {
+            ScheduleList()
+        }
+        BottomBar()
+    }
 }
 
 @Composable
@@ -71,15 +76,17 @@ private fun ScheduleList() {
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
-        Recompose { recompose ->
-            Switch(
-                checked = schedule.enabled,
-                onCheckedChange = {
-                    schedule.enabled = it
-                    ScheduleManager.saveConfig()
-                    recompose()
-                }
-            )
+        if (!UI.isDeleting) {
+            Recompose { recompose ->
+                Switch(
+                    checked = schedule.enabled,
+                    onCheckedChange = {
+                        schedule.enabled = it
+                        ScheduleManager.saveConfig()
+                        recompose()
+                    }
+                )
+            }
         }
 
         Spacer(LayoutWidth(20.dp))
@@ -97,36 +104,12 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }
         }
 
-        Spacer(LayoutWidth(20.dp))
-
-        var askForDeleting by state { false }
-        if (askForDeleting) {
-            AlertDialog(
-                onCloseRequest = { },
-                text = { Text("Delete this alarm?") },
-                confirmButton = {
-                    Button(onClick = {
-                        ScheduleManager.scheduleList.removeAt(index)
-                        ScheduleManager.saveConfig()
-
-                        askForDeleting = false
-                    }) {
-                        Text("OK")
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = {
-                        askForDeleting = false
-                    }) {
-                        Text("Cancel")
-                    }
-                },
-                buttonLayout = AlertDialogButtonLayout.SideBySide
-            )
-        } else {
+        if (UI.isDeleting) {
+            Spacer(LayoutWidth(20.dp))
             Button(
                 onClick = {
-                    askForDeleting = true
+                    ScheduleManager.scheduleList.removeAt(index)
+                    ScheduleManager.saveConfig()
                 }) {
                 Text("Delete")
             }
@@ -136,16 +119,31 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
 @Composable
 private fun BottomBar() {
-    BottomAppBar(
-        navigationIcon = {
-            Button(onClick = {
-                App.editScheduleIndex = -1
-                UI.screen = ScreenType.EDIT
-            }) {
-                Text("Add")
+    Surface(elevation = 2.dp, color = DarkColorPalette.background) {
+        Container(modifier = LayoutHeight(56.dp), expanded = true) {
+            Row(arrangement = Arrangement.Center) {
+                if (UI.isDeleting) {
+                    Button(onClick = {
+                        UI.isDeleting = false
+                    }) {
+                        Text("Finish")
+                    }
+                } else {
+                    Button(onClick = {
+                        App.editScheduleIndex = -1
+                        UI.screen = ScreenType.EDIT
+                    }) {
+                        Text("Add")
+                    }
+
+                    WidthSpacer()
+                    Button(onClick = {
+                        UI.isDeleting = true
+                    }) {
+                        Text("Delete")
+                    }
+                }
             }
-        },
-        actionData = listOf<String>()
-    ) {
+        }
     }
 }

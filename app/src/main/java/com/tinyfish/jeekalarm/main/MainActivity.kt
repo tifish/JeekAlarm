@@ -26,6 +26,7 @@ class MainActivity : AppCompatActivity() {
 
         setContent {
             UI.init()
+
             Main()
         }
     }
@@ -46,7 +47,8 @@ class MainActivity : AppCompatActivity() {
     ) {
         if (resultCode == Activity.RESULT_OK) {
             if (requestCode == FileSelector.PICK_MP3_FILE ||
-                requestCode == FileSelector.PICK_FOLDER) {
+                requestCode == FileSelector.PICK_FOLDER
+            ) {
                 onFileSelect(resultData?.data)
             }
         }

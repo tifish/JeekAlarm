@@ -6,10 +6,9 @@ import androidx.compose.remember
 import androidx.compose.state
 import androidx.ui.core.Text
 import androidx.ui.layout.*
-import androidx.ui.material.BottomAppBar
 import androidx.ui.material.Button
-import androidx.ui.material.Scaffold
 import androidx.ui.material.TopAppBar
+import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
@@ -18,6 +17,7 @@ import com.tinyfish.jeekalarm.HeightSpacer
 import com.tinyfish.jeekalarm.ScreenType
 import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.WidthSpacer
+import com.tinyfish.jeekalarm.main.DarkColorPalette
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.ui.SimpleCheckbox
@@ -45,11 +45,16 @@ fun EditScreen(scheduleIndex: Int) {
         editingSchedule = originalSchedule.copy()
     }
 
-    Scaffold(
-        topAppBar = { TopBar() },
-        bodyContent = { Editor() },
-        bottomAppBar = { BottomBar(scheduleIndex == -1) }
-    )
+    Column {
+        TopBar()
+        Surface(
+            color = DarkColorPalette.background,
+            modifier = LayoutFlexible(1f, true)
+        ) {
+            Editor()
+        }
+        BottomBar(scheduleIndex == -1)
+    }
 }
 
 @Composable
@@ -66,7 +71,7 @@ class BarButtonData(
 
 @Composable
 private fun Editor() {
-    Column {
+    Column(LayoutPadding(20.dp)) {
         MyCheckbox("Enabled", editingSchedule::enabled)
         HeightSpacer()
         MyCheckbox("Only Once", editingSchedule::onlyOnce)
@@ -218,52 +223,56 @@ private fun MyTextField(
     }
 }
 
-@Composable
 private fun BottomBar(isAdding: Boolean) {
-    BottomAppBar(
-        navigationIcon = {
-            Button(onClick = {
-                if (isAdding) {
-                    editingSchedule.timeConfigChanged()
-                    ScheduleManager.scheduleList.add(editingSchedule)
-                } else {
-                    editingSchedule.copyTo(originalSchedule)
-                    originalSchedule.timeConfigChanged()
-                }
-                ScheduleManager.saveConfig()
-
-                ScheduleManager.stopPlaying()
-                UI.screen = ScreenType.MAIN
-            }) {
-                Text(if (isAdding) "Add" else "Save")
-            }
-        },
-        actionData = listOf(
-            BarButtonData("Cancel", onClick = {
-                ScheduleManager.stopPlaying()
-                UI.screen = ScreenType.MAIN
-            }),
-            BarButtonData("Now", onClick = {
-                Calendar.getInstance().apply {
-                    editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
-                    editingSchedule.hourConfig = get(Calendar.HOUR).toString()
-                    editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
-                    editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
-                    uiTimeConfigChanged++
-                }
-            }),
-            BarButtonData(if (UI.isPlaying) "Stop" else "Play", onClick = {
-                if (UI.isPlaying)
+    Surface(elevation = 2.dp, color = DarkColorPalette.background) {
+        Container(modifier = LayoutHeight(56.dp), expanded = true) {
+            Row(arrangement = Arrangement.Center) {
+                Button(onClick = {
                     ScheduleManager.stopPlaying()
-                else
-                    editingSchedule.play()
-            })
-        )
-    ) { buttonData ->
-        Row {
-            WidthSpacer()
-            Button(onClick = buttonData.onClick) {
-                Text(buttonData.text)
+                    UI.screen = ScreenType.MAIN
+                }) {
+                    Text("Cancel")
+                }
+
+                WidthSpacer()
+                Button(onClick = {
+                    if (isAdding) {
+                        editingSchedule.timeConfigChanged()
+                        ScheduleManager.scheduleList.add(editingSchedule)
+                    } else {
+                        editingSchedule.copyTo(originalSchedule)
+                        originalSchedule.timeConfigChanged()
+                    }
+                    ScheduleManager.saveConfig()
+
+                    ScheduleManager.stopPlaying()
+                    UI.screen = ScreenType.MAIN
+                }) {
+                    Text(if (isAdding) "Add" else "Save")
+                }
+
+                WidthSpacer()
+                Button(onClick = {
+                    Calendar.getInstance().apply {
+                        editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
+                        editingSchedule.hourConfig = get(Calendar.HOUR).toString()
+                        editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
+                        editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
+                        uiTimeConfigChanged++
+                    }
+                }) {
+                    Text("Now")
+                }
+
+                WidthSpacer()
+                Button(onClick = {
+                    if (UI.isPlaying)
+                        ScheduleManager.stopPlaying()
+                    else
+                        editingSchedule.play()
+                }) {
+                    Text(if (UI.isPlaying) "Stop" else "Play")
+                }
             }
         }
     }

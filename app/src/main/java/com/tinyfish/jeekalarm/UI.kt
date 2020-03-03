@@ -20,6 +20,7 @@ object UI {
     var nextAlarmIndexes by state { ScheduleManager.nextAlarmIndexes.toList() }
     var scheduleChangeTrigger by state { 0 }
     var isPlaying by state { false }
+    var isDeleting by state { false }
 
     fun init() {
         uiInitialized = true
