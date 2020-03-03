@@ -95,8 +95,10 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         Ripple(bounded = true) {
             Clickable(onClick = {
-                App.editScheduleIndex = index
-                UI.screen = ScreenType.EDIT
+                if (!UI.isDeleting) {
+                    App.editScheduleIndex = index
+                    UI.screen = ScreenType.EDIT
+                }
             }) {
                 Column(LayoutFlexible(1f, true)) {
                     Text(schedule.name + if (index in UI.nextAlarmIndexes) " (Next alarm)" else "")
