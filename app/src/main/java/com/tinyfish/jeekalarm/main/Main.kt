@@ -4,14 +4,12 @@ import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.compose.remember
 import androidx.compose.state
-import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.*
 import androidx.ui.material.*
 import androidx.ui.material.ripple.Ripple
-import androidx.ui.material.surface.Surface
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.App
@@ -32,11 +30,9 @@ private fun MainPreview() {
 @Composable
 fun Main() {
     MaterialTheme(colors = DarkColorPalette) {
-        Surface {
-            when (UI.screen) {
-                ScreenType.MAIN -> MainScreen()
-                ScreenType.EDIT -> EditScreen(App.editScheduleIndex)
-            }
+        when (UI.screen) {
+            ScreenType.MAIN -> MainScreen()
+            ScreenType.EDIT -> EditScreen(App.editScheduleIndex)
         }
     }
 }

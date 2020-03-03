@@ -4,7 +4,6 @@ import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.compose.remember
 import androidx.compose.state
-import androidx.ui.core.ParentDataModifier
 import androidx.ui.core.Text
 import androidx.ui.layout.*
 import androidx.ui.material.BottomAppBar

@@ -2,7 +2,6 @@ package com.tinyfish.jeekalarm.edit
 
 import android.content.Intent
 import android.net.Uri
-import android.provider.DocumentsContract
 import com.tinyfish.jeekalarm.main.MainActivity
 
 object FileSelector {
