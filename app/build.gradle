@@ -28,6 +28,11 @@ android {
         compose true
     }
 
+    composeOptions {
+        // Fix "Backend Internal error"
+        kotlinCompilerExtensionVersion "$compose_version"
+    }
+
     // Set both the Java and Kotlin compilers to target Java 8.
 
     compileOptions {
@@ -52,15 +57,15 @@ dependencies {
     implementation 'androidx.recyclerview:recyclerview:1.1.0'
 
     // You also need to include the following Compose toolkit dependencies.
-    implementation "androidx.ui:ui-tooling:$jetpack_version"
-    implementation "androidx.ui:ui-layout:$jetpack_version"
-    implementation "androidx.ui:ui-material:$jetpack_version"
+    implementation "androidx.ui:ui-tooling:$compose_version"
+    implementation "androidx.ui:ui-layout:$compose_version"
+    implementation "androidx.ui:ui-material:$compose_version"
 
-    implementation("androidx.compose:compose-runtime:$jetpack_version")
-    implementation("androidx.ui:ui-core:$jetpack_version")
-    implementation("androidx.ui:ui-framework:$jetpack_version")
-    implementation("androidx.ui:ui-foundation:$jetpack_version")
-    implementation("androidx.ui:ui-animation:$jetpack_version")
+    implementation("androidx.compose:compose-runtime:$compose_version")
+    implementation("androidx.ui:ui-core:$compose_version")
+    implementation("androidx.ui:ui-framework:$compose_version")
+    implementation("androidx.ui:ui-foundation:$compose_version")
+    implementation("androidx.ui:ui-animation:$compose_version")
 
     implementation 'com.beust:klaxon:5.0.1'
 }

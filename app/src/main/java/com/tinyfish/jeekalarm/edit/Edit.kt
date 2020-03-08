@@ -7,21 +7,21 @@ import androidx.compose.state
 import androidx.ui.core.Text
 import androidx.ui.layout.*
 import androidx.ui.material.Button
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TopAppBar
 import androidx.ui.material.surface.Surface
+import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
-import com.tinyfish.jeekalarm.HeightSpacer
-import com.tinyfish.jeekalarm.ScreenType
-import com.tinyfish.jeekalarm.UI
-import com.tinyfish.jeekalarm.WidthSpacer
-import com.tinyfish.jeekalarm.main.DarkColorPalette
+import com.tinyfish.jeekalarm.*
+import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.ui.SimpleCheckbox
 import com.tinyfish.jeekalarm.ui.SimpleTextField
+import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 import java.util.*
 import kotlin.reflect.KMutableProperty0
 
@@ -48,7 +48,7 @@ fun EditScreen(scheduleIndex: Int) {
     Column {
         TopBar()
         Surface(
-            color = DarkColorPalette.background,
+            color = MaterialTheme.colors().background,
             modifier = LayoutFlexible(1f, true)
         ) {
             Editor()
@@ -63,11 +63,6 @@ private fun TopBar() {
         title = { Text(text = "Edit Schedule") }
     )
 }
-
-class BarButtonData(
-    var text: String,
-    var onClick: () -> Unit
-)
 
 @Composable
 private fun Editor() {
@@ -153,13 +148,17 @@ private fun FileSelect(hint: String, text: String, onSelect: () -> Unit, onClear
         Text(hint, LayoutWidth(100.dp))
         Text(text, LayoutFlexible(1f, true))
 
-        Button(onClick = onSelect) {
-            Text("Select")
-        }
+        SimpleVectorButton(
+            vectorResource(R.drawable.ic_location_searching),
+            "Select",
+            onClick = onSelect
+        )
         WidthSpacer()
-        Button(onClick = onClear) {
-            Text("Clear")
-        }
+        SimpleVectorButton(
+            vectorResource(R.drawable.ic_clear),
+            "Clear",
+            onClick = onClear
+        )
     }
 }
 
@@ -224,18 +223,19 @@ private fun MyTextField(
 }
 
 private fun BottomBar(isAdding: Boolean) {
-    Surface(elevation = 2.dp, color = DarkColorPalette.background) {
-        Container(modifier = LayoutHeight(56.dp), expanded = true) {
+    Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
+        Container(modifier = LayoutHeight(100.dp), expanded = true) {
             Row(arrangement = Arrangement.Center) {
-                Button(onClick = {
+                SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
                     ScheduleManager.stopPlaying()
                     UI.screen = ScreenType.MAIN
-                }) {
-                    Text("Cancel")
                 }
 
-                WidthSpacer()
-                Button(onClick = {
+                WidthSpacer(36.dp)
+                SimpleVectorButton(
+                    vectorResource(if (isAdding) R.drawable.ic_add else R.drawable.ic_done),
+                    if (isAdding) "Add" else "Save"
+                ) {
                     if (isAdding) {
                         editingSchedule.timeConfigChanged()
                         ScheduleManager.scheduleList.add(editingSchedule)
@@ -247,12 +247,10 @@ private fun BottomBar(isAdding: Boolean) {
 
                     ScheduleManager.stopPlaying()
                     UI.screen = ScreenType.MAIN
-                }) {
-                    Text(if (isAdding) "Add" else "Save")
                 }
 
-                WidthSpacer()
-                Button(onClick = {
+                WidthSpacer(36.dp)
+                SimpleVectorButton(vectorResource(R.drawable.ic_access_time), "Now") {
                     Calendar.getInstance().apply {
                         editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
                         editingSchedule.hourConfig = get(Calendar.HOUR).toString()
@@ -260,18 +258,17 @@ private fun BottomBar(isAdding: Boolean) {
                         editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
                         uiTimeConfigChanged++
                     }
-                }) {
-                    Text("Now")
                 }
 
-                WidthSpacer()
-                Button(onClick = {
+                WidthSpacer(36.dp)
+                SimpleVectorButton(
+                    vectorResource(if (UI.isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow),
+                    if (UI.isPlaying) "Stop" else "Play"
+                ) {
                     if (UI.isPlaying)
                         ScheduleManager.stopPlaying()
                     else
                         editingSchedule.play()
-                }) {
-                    Text(if (UI.isPlaying) "Stop" else "Play")
                 }
             }
         }

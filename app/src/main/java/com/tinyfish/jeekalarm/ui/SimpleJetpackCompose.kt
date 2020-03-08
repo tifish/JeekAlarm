@@ -7,11 +7,14 @@ import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.Clickable
-import androidx.ui.layout.LayoutWidth
-import androidx.ui.layout.Row
-import androidx.ui.layout.Spacer
-import androidx.ui.material.Checkbox
+import androidx.ui.foundation.shape.DrawShape
+import androidx.ui.foundation.shape.corner.CircleShape
+import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.graphics.vector.VectorAsset
+import androidx.ui.layout.*
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Switch
+import androidx.ui.material.ripple.Ripple
 import androidx.ui.text.TextFieldValue
 import androidx.ui.text.TextRange
 import androidx.ui.text.TextStyle
@@ -82,5 +85,28 @@ fun SimpleTextField(
             },
             textStyle = textStyle
         )
+    }
+}
+
+@Composable
+fun SimpleVectorButton(vectorAsset: VectorAsset, text: String = "", onClick: () -> Unit) {
+    Ripple(bounded = false) {
+        Clickable(onClick = onClick) {
+            Column {
+                Container(
+                    width = vectorAsset.defaultWidth,
+                    height = vectorAsset.defaultHeight,
+                    modifier = LayoutGravity.Center
+                ) {
+                    DrawShape(shape = CircleShape, color = MaterialTheme.colors().primary)
+                    DrawVector(vectorAsset)
+                }
+
+                if (text != "") {
+                    Spacer(modifier = LayoutHeight(vectorAsset.defaultHeight / 8))
+                    Text(text = text, modifier = LayoutGravity.Center)
+                }
+            }
+        }
     }
 }

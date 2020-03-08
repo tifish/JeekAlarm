@@ -5,6 +5,7 @@ import androidx.compose.state
 import androidx.ui.layout.LayoutHeight
 import androidx.ui.layout.LayoutWidth
 import androidx.ui.layout.Spacer
+import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 
@@ -20,7 +21,7 @@ object UI {
     var nextAlarmIndexes by state { ScheduleManager.nextAlarmIndexes.toList() }
     var scheduleChangeTrigger by state { 0 }
     var isPlaying by state { false }
-    var isDeleting by state { false }
+    var isRemoving by state { false }
 
     fun init() {
         uiInitialized = true
@@ -28,11 +29,11 @@ object UI {
 }
 
 @Composable
-fun HeightSpacer() {
-    Spacer(LayoutHeight(10.dp))
+fun HeightSpacer(height: Dp = 10.dp) {
+    Spacer(LayoutHeight(height))
 }
 
 @Composable
-fun WidthSpacer() {
-    Spacer(LayoutWidth(10.dp))
+fun WidthSpacer(width: Dp = 10.dp) {
+    Spacer(LayoutWidth(width))
 }
