@@ -4,6 +4,7 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.beust.klaxon.Klaxon
+import com.tinyfish.jeekalarm.alarm.Notification
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import java.text.SimpleDateFormat
 import java.util.*
@@ -18,9 +19,6 @@ class App : Application() {
         fun format(calendar: Calendar?): String {
             return if (calendar == null) "" else simpleDateFormat.format(calendar.time)
         }
-
-        val nowString: String
-            get() = format(Calendar.getInstance())
 
         var editScheduleIndex = -1
     }

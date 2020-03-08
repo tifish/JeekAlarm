@@ -80,7 +80,7 @@ fun NotificationContent(notificationActivity: NotificationActivity, alarmIndexes
 
             Spacer(LayoutWidth(36 .dp))
 
-            SimpleVectorButton(vectorResource(R.drawable.ic_close), "Close") {
+            SimpleVectorButton(vectorResource(R.drawable.ic_close), "Dismiss") {
                 notificationActivity.finish()
             }
         }

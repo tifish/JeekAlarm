@@ -9,7 +9,6 @@ import com.tinyfish.jeekalarm.schedule.ScheduleManager
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Log.d("BootReceiver", "onReceive ${App.nowString}")
         ScheduleManager.setNextAlarm()
     }
 }
