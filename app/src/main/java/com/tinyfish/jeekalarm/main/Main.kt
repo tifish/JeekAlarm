@@ -36,7 +36,7 @@ private fun ItemPreview() {
 }
 
 @Composable
-fun Main() {
+fun MainUI() {
     MaterialTheme(colors = DarkColorPalette) {
         when (UI.screen) {
             ScreenType.MAIN -> MainScreen()

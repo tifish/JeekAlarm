@@ -40,7 +40,7 @@ object Notification {
 
         val notification =
             NotificationCompat.Builder(App.context, "Alarm").run {
-                setContentTitle("Alarm")
+                setContentTitle("JeekAlarm")
                 setContentText(alarmNames.joinToString("\n"))
                 setOngoing(true)
                 setAutoCancel(true)

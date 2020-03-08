@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
         setContent {
             UI.init()
 
-            Main()
+            MainUI()
         }
     }
 
