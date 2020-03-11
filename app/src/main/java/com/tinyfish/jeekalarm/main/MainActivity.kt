@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (UI.screen == ScreenType.MAIN)
+        if (UI.screen.value == ScreenType.MAIN)
             super.onBackPressed()
     }
 

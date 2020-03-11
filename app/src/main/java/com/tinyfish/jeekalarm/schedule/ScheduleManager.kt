@@ -22,15 +22,15 @@ object ScheduleManager {
     fun saveConfig() {
         ScheduleParser.saveToFile(configFile, scheduleList)
 
-        UI.scheduleChangeTrigger++
+        UI.scheduleChangeTrigger.value++
         setNextAlarm()
     }
 
     var nextAlarmIndexes = mutableListOf<Int>()
         private set(value) {
             field = value
-            if (uiInitialized)
-                UI.nextAlarmIndexes = value.toList()
+            if (UI.initialized)
+                UI.nextAlarmIndexes.value = value.toList()
         }
 
     fun setNextAlarm() {
@@ -77,19 +77,19 @@ object ScheduleManager {
         Music.stop()
         Vibration.stop()
 
-        UI.isPlaying = false
+        UI.isPlaying.value = false
     }
 
     fun pausePlaying() {
         Music.pause()
         Vibration.stop()
 
-        UI.isPlaying = false
+        UI.isPlaying.value = false
     }
 
     fun resumePlaying() {
         Music.resume()
 
-        UI.isPlaying = true
+        UI.isPlaying.value = true
     }
 }

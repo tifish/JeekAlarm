@@ -3,7 +3,7 @@ package com.tinyfish.jeekalarm.main
 import androidx.ui.graphics.Color
 import androidx.ui.material.ColorPalette
 
-// 0.1.0dev5
+// 0.1.0dev6
 object DarkColorPalette : ColorPalette {
     override var primary = Color(0xFF039BE5) // TopAppBar, BottomAppBar, Button
     override var primaryVariant = Color.Magenta

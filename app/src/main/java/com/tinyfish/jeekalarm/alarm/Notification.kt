@@ -78,6 +78,10 @@ object Notification {
         val openPendingIntent = PendingIntent.getActivity(App.context, 0, openIntent, 0)
 
 
+        val pauseIntent = Intent(App.context, NotificationDismissReceiver::class.java)
+        val pausePendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(App.context, 0, pauseIntent, 0)
+
         val dismissIntent = Intent(App.context, NotificationDismissReceiver::class.java)
         val dismissPendingIntent: PendingIntent =
             PendingIntent.getBroadcast(App.context, 0, dismissIntent, 0)
@@ -93,6 +97,7 @@ object Notification {
                 setCategory(NotificationCompat.CATEGORY_ALARM)
                 setSmallIcon(R.drawable.ic_launcher_foreground)
                 setContentIntent(openPendingIntent)
+                addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)
                 addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
                 build()
             }

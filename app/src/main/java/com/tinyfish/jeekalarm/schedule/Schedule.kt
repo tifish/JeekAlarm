@@ -254,7 +254,7 @@ data class Schedule(
         if (vibration)
             Vibration.vibrate(vibrationCount)
 
-        UI.isPlaying = true
+        UI.isPlaying.value = true
     }
 
     private fun playMusic() {

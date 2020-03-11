@@ -1,9 +1,6 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.Composable
-import androidx.compose.Recompose
-import androidx.compose.remember
-import androidx.compose.state
+import androidx.compose.*
 import androidx.ui.core.Text
 import androidx.ui.layout.*
 import androidx.ui.material.Button
@@ -12,7 +9,6 @@ import androidx.ui.material.TopAppBar
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
-import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
 import com.tinyfish.jeekalarm.*
@@ -28,16 +24,12 @@ import kotlin.reflect.KMutableProperty0
 private lateinit var originalSchedule: Schedule
 private lateinit var editingSchedule: Schedule
 
-private var uiTimeConfigChanged by state { 0 }
-
-@Preview
-@Composable
-private fun EditPreview() {
-    EditScreen(-1)
-}
+private lateinit var uiTimeConfigChanged: MutableState<Int>
 
 @Composable
 fun EditScreen(scheduleIndex: Int) {
+    uiTimeConfigChanged = state { 0 }
+
     if (scheduleIndex == -1) {
         editingSchedule = Schedule()
     } else {
@@ -134,7 +126,7 @@ private fun Editor() {
                     HeightSpacer()
                     Text(
                         editingSchedule.vibrationCount.toString(),
-                        modifier = LayoutPadding(left = 20.dp)
+                        modifier = LayoutPadding(start = 20.dp)
                     )
                 }
             }
@@ -222,13 +214,14 @@ private fun MyTextField(
     }
 }
 
+@Composable
 private fun BottomBar(isAdding: Boolean) {
     Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
         Container(modifier = LayoutHeight(100.dp), expanded = true) {
             Row(arrangement = Arrangement.Center) {
                 SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
                     ScheduleManager.stopPlaying()
-                    UI.screen = ScreenType.MAIN
+                    UI.screen.value = ScreenType.MAIN
                 }
 
                 WidthSpacer(36.dp)
@@ -246,7 +239,7 @@ private fun BottomBar(isAdding: Boolean) {
                     ScheduleManager.saveConfig()
 
                     ScheduleManager.stopPlaying()
-                    UI.screen = ScreenType.MAIN
+                    UI.screen.value = ScreenType.MAIN
                 }
 
                 WidthSpacer(36.dp)
@@ -256,16 +249,16 @@ private fun BottomBar(isAdding: Boolean) {
                         editingSchedule.hourConfig = get(Calendar.HOUR).toString()
                         editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
                         editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
-                        uiTimeConfigChanged++
+                        uiTimeConfigChanged.value++
                     }
                 }
 
                 WidthSpacer(36.dp)
                 SimpleVectorButton(
-                    vectorResource(if (UI.isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow),
-                    if (UI.isPlaying) "Stop" else "Play"
+                    vectorResource(if (UI.isPlaying.value) R.drawable.ic_stop else R.drawable.ic_play_arrow),
+                    if (UI.isPlaying.value) "Stop" else "Play"
                 ) {
-                    if (UI.isPlaying)
+                    if (UI.isPlaying.value)
                         ScheduleManager.stopPlaying()
                     else
                         editingSchedule.play()

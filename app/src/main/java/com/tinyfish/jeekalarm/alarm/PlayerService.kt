@@ -18,14 +18,22 @@ class PlayerService : Service() {
         mediaSession = MediaSession(this, "PlayerService")
         mediaSession.setPlaybackState(
             PlaybackState.Builder()
-                .setState(PlaybackState.STATE_PLAYING, 0, 1f) //you simulate a player which plays something.
+                .setState(
+                    PlaybackState.STATE_PLAYING,
+                    0,
+                    1f
+                ) //you simulate a player which plays something.
                 .build()
         )
         //this will only work on Lollipop and up, see https://code.google.com/p/android/issues/detail?id=224134
         val myVolumeProvider: VolumeProvider =
-            object : VolumeProvider(VOLUME_CONTROL_RELATIVE,  /*max volume*/10,  /*initial volume level*/5) {
+            object : VolumeProvider(
+                VOLUME_CONTROL_RELATIVE,  /*max volume*/
+                10,  /*initial volume level*/
+                5
+            ) {
                 override fun onAdjustVolume(direction: Int) {
-                    if (UI.isPlaying)
+                    if (UI.isPlaying.value)
                         ScheduleManager.pausePlaying()
                     /*
                     -1 -- volume down

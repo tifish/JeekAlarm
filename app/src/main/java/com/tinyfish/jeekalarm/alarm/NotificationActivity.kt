@@ -69,10 +69,10 @@ fun NotificationContent(notificationActivity: NotificationActivity, alarmIndexes
 
         Row {
             SimpleVectorButton(
-                vectorResource(if (UI.isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow),
-                if (UI.isPlaying) "Pause" else "Play"
+                vectorResource(if (UI.isPlaying.value) R.drawable.ic_pause else R.drawable.ic_play_arrow),
+                if (UI.isPlaying.value) "Pause" else "Play"
             ) {
-                if (UI.isPlaying)
+                if (UI.isPlaying.value)
                     ScheduleManager.pausePlaying()
                 else
                     ScheduleManager.resumePlaying()

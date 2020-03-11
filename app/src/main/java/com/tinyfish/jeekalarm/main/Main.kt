@@ -13,7 +13,6 @@ import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
-import androidx.ui.tooling.preview.Preview
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.*
 import com.tinyfish.jeekalarm.R
@@ -23,22 +22,10 @@ import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 import java.util.*
 
-@Preview
-@Composable
-private fun MainPreview() {
-    MainScreen()
-}
-
-@Preview
-@Composable
-private fun ItemPreview() {
-    ScheduleItem(index = 1, schedule = Schedule(), now = Calendar.getInstance())
-}
-
 @Composable
 fun MainUI() {
     MaterialTheme(colors = DarkColorPalette) {
-        when (UI.screen) {
+        when (UI.screen.value) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen(App.editScheduleIndex)
         }
@@ -85,7 +72,7 @@ private fun ScheduleList() {
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
-        if (!UI.isRemoving) {
+        if (!UI.isRemoving.value) {
             Recompose { recompose ->
                 Container(modifier = LayoutGravity.Center) {
                     Switch(
@@ -104,13 +91,13 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         Ripple(bounded = true) {
             Clickable(onClick = {
-                if (!UI.isRemoving) {
+                if (!UI.isRemoving.value) {
                     App.editScheduleIndex = index
-                    UI.screen = ScreenType.EDIT
+                    UI.screen.value = ScreenType.EDIT
                 }
             }) {
                 Column(LayoutFlexible(1f, true)) {
-                    Text(schedule.name + if (index in UI.nextAlarmIndexes) " (Next alarm)" else "")
+                    Text(schedule.name + if (index in UI.nextAlarmIndexes.value) " (Next alarm)" else "")
                     Text(
                         schedule.timeConfig,
                         style = TextStyle(color = Color.Gray)
@@ -123,7 +110,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }
         }
 
-        if (UI.isRemoving) {
+        if (UI.isRemoving.value) {
             Spacer(LayoutWidth(20.dp))
             SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
                 ScheduleManager.scheduleList.removeAt(index)
@@ -138,20 +125,20 @@ private fun BottomBar() {
     Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
         Container(modifier = LayoutHeight(100.dp), expanded = true) {
             Row(arrangement = Arrangement.Center) {
-                if (UI.isRemoving) {
+                if (UI.isRemoving.value) {
                     SimpleVectorButton(vectorResource(R.drawable.ic_done), "Done") {
-                        UI.isRemoving = false
+                        UI.isRemoving.value = false
                     }
                 } else {
                     SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
                         App.editScheduleIndex = -1
-                        UI.screen = ScreenType.EDIT
+                        UI.screen.value = ScreenType.EDIT
                     }
 
                     WidthSpacer(36.dp)
 
                     SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
-                        UI.isRemoving = true
+                        UI.isRemoving.value = true
                     }
                 }
             }
