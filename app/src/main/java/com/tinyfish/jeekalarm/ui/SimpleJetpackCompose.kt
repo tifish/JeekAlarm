@@ -8,7 +8,6 @@ import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.DrawBackground
-import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.graphics.vector.DrawVector
 import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.layout.*
@@ -20,6 +19,10 @@ import androidx.ui.text.TextRange
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
 import kotlin.reflect.KMutableProperty0
+
+@Composable
+fun <T> Use(observeValue: T) {
+}
 
 @Composable
 fun SimpleCheckbox(
@@ -98,6 +101,7 @@ fun SimpleVectorButton(vectorAsset: VectorAsset, text: String = "", onClick: () 
                     height = vectorAsset.defaultHeight,
                     modifier = LayoutGravity.Center
                 ) {
+                    DrawBackground(color = MaterialTheme.colors().background)
                     DrawVector(vectorAsset)
                 }
 

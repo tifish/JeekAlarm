@@ -1,6 +1,9 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.*
+import androidx.compose.Composable
+import androidx.compose.MutableState
+import androidx.compose.Recompose
+import androidx.compose.state
 import androidx.ui.core.Text
 import androidx.ui.layout.*
 import androidx.ui.material.Button
@@ -18,6 +21,7 @@ import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.ui.SimpleCheckbox
 import com.tinyfish.jeekalarm.ui.SimpleTextField
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
+import com.tinyfish.jeekalarm.ui.Use
 import java.util.*
 import kotlin.reflect.KMutableProperty0
 
@@ -66,7 +70,7 @@ private fun Editor() {
         HeightSpacer()
         MyTextField("Name: ", editingSchedule::name)
         Column {
-            remember { uiTimeConfigChanged }
+            Use(uiTimeConfigChanged.value)
             MyTextField("Minute: ", editingSchedule::minuteConfig, true)
             MyTextField("Hour: ", editingSchedule::hourConfig, true)
             MyTextField("Day: ", editingSchedule::dayConfig, true)
