@@ -3,10 +3,16 @@ package com.tinyfish.jeekalarm.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 
-class AlarmReceiver : BroadcastReceiver() {
+class NotificationPauseReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        Notification.showAlarm(ScheduleManager.nextAlarmIndexes)
+        if (UI.isPlaying.value)
+            ScheduleManager.pausePlaying()
+        else
+            ScheduleManager.resumePlaying()
+
+        Notification.updateAlarm()
     }
 }

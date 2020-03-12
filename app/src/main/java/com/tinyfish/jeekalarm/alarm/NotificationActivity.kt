@@ -24,7 +24,7 @@ class NotificationActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        Log.d("NotificationActivity", "onCreate")
+        ScheduleManager.pausePlaying()
 
         val alarmIndexes = intent.extras!!.getIntArray("alarmIndexes")!!
 

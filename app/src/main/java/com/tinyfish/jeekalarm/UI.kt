@@ -26,6 +26,9 @@ object UI {
 
     @Composable
     fun init() {
+        if (initialized)
+            return
+
         screen = state { ScreenType.MAIN }
         nextAlarmIndexes = state { ScheduleManager.nextAlarmIndexes.toList() }
         scheduleChangeTrigger = state { 0 }

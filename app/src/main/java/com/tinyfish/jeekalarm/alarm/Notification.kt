@@ -9,6 +9,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.main.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import java.util.*
@@ -68,8 +69,17 @@ object Notification {
         notificationManager.notify(1, notification)
     }
 
-    fun showAlarm(alarmIndexes: List<Int>) {
+    var lastAlarmIndexes = mutableListOf<Int>()
+
+    fun showAlarm(alarmIndexes: List<Int>, isUpdating: Boolean = false) {
         initOnce()
+
+        if (!isUpdating) {
+            lastAlarmIndexes.clear()
+            lastAlarmIndexes.addAll(alarmIndexes)
+
+            ScheduleManager.scheduleList[ScheduleManager.nextAlarmIndexes[0]].play()
+        }
 
         val openIntent = Intent(App.context, NotificationActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
@@ -77,8 +87,7 @@ object Notification {
         }
         val openPendingIntent = PendingIntent.getActivity(App.context, 0, openIntent, 0)
 
-
-        val pauseIntent = Intent(App.context, NotificationDismissReceiver::class.java)
+        val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
         val pausePendingIntent: PendingIntent =
             PendingIntent.getBroadcast(App.context, 0, pauseIntent, 0)
 
@@ -87,24 +96,44 @@ object Notification {
             PendingIntent.getBroadcast(App.context, 0, dismissIntent, 0)
 
         val alarmNames = getAlarmNames(alarmIndexes)
-        val notification =
-            NotificationCompat.Builder(App.context, "Alarm").run {
-                setContentTitle("JeekAlarm triggered:")
-                setContentText(alarmNames.joinToString("\n"))
-                setOngoing(true)
-                setAutoCancel(true)
-                priority = NotificationCompat.PRIORITY_HIGH
-                setCategory(NotificationCompat.CATEGORY_ALARM)
-                setSmallIcon(R.drawable.ic_launcher_foreground)
-                setContentIntent(openPendingIntent)
-                addAction(R.drawable.ic_pause, "Pause", pausePendingIntent)
-                addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
-                build()
-            }
+        val notification = NotificationCompat.Builder(App.context, "Alarm").run {
+            setContentTitle("JeekAlarm triggered:")
+            setContentText(alarmNames.joinToString("\n"))
+            setOngoing(true)
+            setAutoCancel(true)
+            priority = NotificationCompat.PRIORITY_HIGH
+            setCategory(NotificationCompat.CATEGORY_ALARM)
+            setSmallIcon(R.drawable.ic_launcher_foreground)
+            setContentIntent(openPendingIntent)
+            addAction(
+                R.drawable.ic_pause,
+                if (UI.isPlaying.value) "Pause" else "Play",
+                pausePendingIntent
+            )
+            addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
+            build()
+        }
 
         notificationManager.notify(2, notification)
 
-        onNotify()
+        if (!isUpdating) {
+            var modified = false
+            for (alarmIndex in ScheduleManager.nextAlarmIndexes) {
+                val schedule = ScheduleManager.scheduleList[alarmIndex]
+                if (schedule.onlyOnce) {
+                    schedule.enabled = false
+                    modified = true
+                }
+            }
+            if (modified)
+                ScheduleManager.saveConfig()
+            else
+                ScheduleManager.setNextAlarm()
+        }
+    }
+
+    fun updateAlarm() {
+        showAlarm(lastAlarmIndexes, true)
     }
 
     private fun getAlarmNames(alarmIndexes: List<Int>): List<String> {
@@ -113,23 +142,6 @@ object Notification {
             alarmNames.add(ScheduleManager.scheduleList[alarmIndex].name)
         }
         return alarmNames
-    }
-
-    private fun onNotify() {
-        ScheduleManager.scheduleList[ScheduleManager.nextAlarmIndexes[0]].play()
-
-        var modified = false
-        for (alarmIndex in ScheduleManager.nextAlarmIndexes) {
-            val schedule = ScheduleManager.scheduleList[alarmIndex]
-            if (schedule.onlyOnce) {
-                schedule.enabled = false
-                modified = true
-            }
-        }
-        if (modified)
-            ScheduleManager.saveConfig()
-        else
-            ScheduleManager.setNextAlarm()
     }
 
     fun cancelAlarm() {

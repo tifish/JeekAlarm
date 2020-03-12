@@ -28,6 +28,7 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver android:name=".alarm.NotificationPauseReceiver" />
         <receiver android:name=".alarm.NotificationDismissReceiver" />
 
 <!--        <service android:name=".alarm.PlayerService"/>-->
