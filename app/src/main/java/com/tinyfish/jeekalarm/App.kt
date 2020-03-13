@@ -15,7 +15,7 @@ class App : Application() {
         lateinit var context: Context
         var json = Klaxon()
 
-        private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd hh:mm:ss", Locale.CHINA)
+        private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
         fun format(calendar: Calendar?): String {
             return if (calendar == null) "" else simpleDateFormat.format(calendar.time)
         }
