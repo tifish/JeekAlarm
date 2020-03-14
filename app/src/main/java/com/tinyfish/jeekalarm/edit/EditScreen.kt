@@ -2,6 +2,7 @@ package com.tinyfish.jeekalarm.edit
 
 import androidx.compose.*
 import androidx.ui.core.Text
+import androidx.ui.foundation.Icon
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TopAppBar
@@ -46,7 +47,11 @@ fun EditScreen(scheduleIndex: Int) {
 @Composable
 private fun TopBar() {
     TopAppBar(
-        title = { Text(text = "Edit Schedule") }
+        title = {
+            Icon(vectorResource(R.drawable.ic_edit))
+            WidthSpacer()
+            Text(text = "Edit Schedule")
+        }
     )
 }
 

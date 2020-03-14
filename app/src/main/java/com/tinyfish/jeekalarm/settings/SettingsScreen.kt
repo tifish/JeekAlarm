@@ -3,6 +3,7 @@ package com.tinyfish.jeekalarm.settings
 import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.ui.core.Text
+import androidx.ui.foundation.Icon
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TopAppBar
@@ -32,7 +33,11 @@ fun SettingsScreen() {
 @Composable
 private fun TopBar() {
     TopAppBar(
-        title = { Text(text = "Edit Schedule") }
+        title = {
+            Icon(vectorResource(R.drawable.ic_settings))
+            WidthSpacer()
+            Text(text = "Settings")
+        }
     )
 }
 

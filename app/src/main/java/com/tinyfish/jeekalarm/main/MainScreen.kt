@@ -4,6 +4,7 @@ import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
+import androidx.ui.foundation.Icon
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
@@ -54,7 +55,11 @@ fun MainScreen() {
 @Composable
 private fun TopBar() {
     TopAppBar(
-        title = { Text("JeekAlarm") }
+        title = {
+            Icon(vectorResource(R.drawable.ic_alarm))
+            WidthSpacer()
+            Text("JeekAlarm")
+        }
     )
 }
 
