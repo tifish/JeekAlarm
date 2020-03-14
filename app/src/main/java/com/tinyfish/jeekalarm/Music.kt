@@ -15,13 +15,14 @@ object Music {
     }
 
     fun play(file: File, loop: Boolean = true): MediaPlayer? {
+        return play(Uri.fromFile(file), loop)
+    }
+
+    fun play(uri: Uri, loop: Boolean = true): MediaPlayer? {
         mediaPlayer.apply {
             reset()
 
-            setDataSource(
-                App.context,
-                Uri.fromFile(file)
-            )
+            setDataSource(App.context, uri)
 
             setAudioAttributes(
                 AudioAttributes.Builder()

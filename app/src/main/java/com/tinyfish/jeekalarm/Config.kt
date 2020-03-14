@@ -6,7 +6,8 @@ object Config {
     var data = ConfigData()
 
     data class ConfigData(
-        var DefaultMusicFile: String? = "Song/散曲/2CELLOS - Pirates of the Caribbean.mp3"
+        var defaultMusicFile: String = "",
+        var defaultMusicFolder: String = ""
     )
 
     private val configFile: File by lazy {
@@ -14,10 +15,8 @@ object Config {
     }
 
     fun load() {
-        if (!configFile.exists())
-            return
-
-        data = App.json.parse<ConfigData>(configFile) ?: ConfigData()
+        if (configFile.exists())
+            data = App.json.parse<ConfigData>(configFile) ?: ConfigData()
     }
 
     fun save() {

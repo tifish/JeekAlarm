@@ -21,6 +21,7 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 import com.tinyfish.jeekalarm.ui.Use
 import java.util.*
@@ -31,6 +32,7 @@ fun MainUI() {
         when (UI.screen.value) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen(App.editScheduleIndex)
+            ScreenType.SETTINGS -> SettingsScreen()
         }
     }
 }
@@ -139,9 +141,13 @@ private fun BottomBar() {
                     }
 
                     WidthSpacer(36.dp)
-
                     SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
                         UI.isRemoving.value = true
+                    }
+
+                    WidthSpacer(24.dp)
+                    SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
+                        UI.screen.value = ScreenType.SETTINGS
                     }
                 }
             }

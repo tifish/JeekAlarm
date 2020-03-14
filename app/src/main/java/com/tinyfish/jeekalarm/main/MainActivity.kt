@@ -10,6 +10,7 @@ import com.tinyfish.jeekalarm.Permissions
 import com.tinyfish.jeekalarm.ScreenType
 import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.edit.FileSelector
+import com.tinyfish.jeekalarm.settings.onSettingsScreenPressOK
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -40,6 +41,8 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (UI.screen.value == ScreenType.MAIN)
             super.onBackPressed()
+        else if (UI.screen.value == ScreenType.SETTINGS)
+            onSettingsScreenPressOK()
     }
 
     override fun onActivityResult(

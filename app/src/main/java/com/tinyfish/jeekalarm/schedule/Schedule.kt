@@ -1,6 +1,7 @@
 package com.tinyfish.jeekalarm.schedule
 
 import android.os.Environment
+import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
 import com.beust.klaxon.Json
@@ -258,8 +259,14 @@ data class Schedule(
     }
 
     private fun playMusic() {
-        if (musicFolder.isNotEmpty()) {
-            val folder = File(Environment.getExternalStorageDirectory().path, musicFolder)
+        val finalMusicFolder =
+            if (musicFolder.isEmpty())
+                Config.data.defaultMusicFolder
+            else
+                musicFolder
+
+        if (finalMusicFolder.isNotEmpty()) {
+            val folder = File(Environment.getExternalStorageDirectory().path, finalMusicFolder)
             val musicFiles = mutableListOf<File>()
             for (file in folder.listFiles() ?: return) {
                 val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
@@ -272,14 +279,18 @@ data class Schedule(
 
             val randomIndex = Random.nextInt(musicFiles.size)
             Music.play(musicFiles[randomIndex])
+
         } else {
-            val musicFile =
+            val finalMusicFile =
                 if (musicFile.isEmpty())
-                    Config.data.DefaultMusicFile!!
+                    Config.data.defaultMusicFile
                 else
                     musicFile
-            Music.play(musicFile)
+
+            if (finalMusicFile.isNotEmpty())
+                Music.play(finalMusicFile)
+            else
+                Music.play(Settings.System.DEFAULT_ALARM_ALERT_URI)
         }
     }
-
 }

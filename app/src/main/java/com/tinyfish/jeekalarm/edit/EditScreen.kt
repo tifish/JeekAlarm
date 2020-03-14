@@ -1,29 +1,19 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.Composable
-import androidx.compose.MutableState
-import androidx.compose.Recompose
-import androidx.compose.state
+import androidx.compose.*
 import androidx.ui.core.Text
 import androidx.ui.layout.*
-import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TopAppBar
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
-import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
-import androidx.ui.unit.sp
 import com.tinyfish.jeekalarm.*
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
-import com.tinyfish.jeekalarm.ui.SimpleCheckbox
-import com.tinyfish.jeekalarm.ui.SimpleTextField
-import com.tinyfish.jeekalarm.ui.SimpleVectorButton
-import com.tinyfish.jeekalarm.ui.Use
+import com.tinyfish.jeekalarm.ui.*
 import java.util.*
-import kotlin.reflect.KMutableProperty0
 
 private lateinit var originalSchedule: Schedule
 private lateinit var editingSchedule: Schedule
@@ -88,7 +78,7 @@ private fun Editor() {
             if (editingSchedule.playMusic) {
                 HeightSpacer()
                 Recompose { recomposeFileSelect ->
-                    FileSelect("Music File:", editingSchedule.musicFile,
+                    MyFileSelect("Music File:", editingSchedule.musicFile,
                         onSelect = {
                             FileSelector.openMusicFile {
                                 editingSchedule.musicFile = it?.path?.substringAfter(':')!!
@@ -104,7 +94,7 @@ private fun Editor() {
 
                 HeightSpacer()
                 Recompose { recomposeFileSelect ->
-                    FileSelect("Music Folder:", editingSchedule.musicFolder,
+                    MyFileSelect("Music Folder:", editingSchedule.musicFolder,
                         onSelect = {
                             FileSelector.openFolder {
                                 editingSchedule.musicFolder = it?.path?.substringAfter(':')!!
@@ -132,86 +122,6 @@ private fun Editor() {
                         editingSchedule.vibrationCount.toString(),
                         modifier = LayoutPadding(start = 20.dp)
                     )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun FileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -> Unit) {
-    Row {
-        Text(hint, LayoutWidth(100.dp))
-        Text(text, LayoutFlexible(1f, true))
-
-        SimpleVectorButton(
-            vectorResource(R.drawable.ic_location_searching),
-            "Select",
-            onClick = onSelect
-        )
-        WidthSpacer()
-        SimpleVectorButton(
-            vectorResource(R.drawable.ic_clear),
-            "Clear",
-            onClick = onClear
-        )
-    }
-}
-
-@Composable
-private fun MyCheckbox(
-    text: String,
-    booleanProp: KMutableProperty0<Boolean>,
-    textStyle: TextStyle? = null,
-    onCheckedChange: (Boolean) -> Unit = {}
-) {
-    SimpleCheckbox(
-        text = text,
-        booleanProp = booleanProp,
-        textStyle = textStyle,
-        onCheckedChange = onCheckedChange,
-        textModifier = LayoutHeight(36.dp) + LayoutWidth(200.dp)
-    )
-}
-
-@Composable
-private fun MyTextField(
-    hint: String,
-    textProp: KMutableProperty0<String>,
-    isTimeConfig: Boolean = false
-) {
-    Container(LayoutHeight(36.dp)) {
-        Row {
-            val focusedState = state { false }
-
-            Recompose { recompose ->
-                SimpleTextField(
-                    hint = hint,
-                    textProp = textProp,
-                    hintModifier = LayoutWidth(80.dp),
-                    onFocus = { focusedState.value = true },
-                    onBlur = { focusedState.value = false },
-                    textModifier = LayoutWidth(160.dp),
-                    textStyle = TextStyle(fontSize = (20.sp)),
-                    modifier = LayoutFlexible(1f, true)
-                )
-
-                if (isTimeConfig && focusedState.value) {
-                    Button(onClick = {
-                        textProp.set("*")
-                        recompose()
-                    }) {
-                        Text("*")
-                    }
-
-                    WidthSpacer()
-
-                    Button(onClick = {
-                        textProp.set("0")
-                        recompose()
-                    }) {
-                        Text("0")
-                    }
                 }
             }
         }
@@ -258,7 +168,7 @@ private fun BottomBar(isAdding: Boolean) {
                 }
 
                 WidthSpacer(36.dp)
-                Recompose { recompose ->
+                Observe {
                     val text = if (UI.isPlaying.value) "Stop" else "Play"
                     val onClick = {
                         if (UI.isPlaying.value)

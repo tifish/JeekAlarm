@@ -13,6 +13,7 @@ import com.tinyfish.jeekalarm.schedule.ScheduleManager
 enum class ScreenType {
     MAIN,
     EDIT,
+    SETTINGS,
 }
 
 object UI {
