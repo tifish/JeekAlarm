@@ -1,7 +1,6 @@
 package com.tinyfish.jeekalarm.alarm
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.Composable
 import androidx.ui.core.Text
@@ -68,17 +67,19 @@ fun NotificationContent(notificationActivity: NotificationActivity, alarmIndexes
         }
 
         Row {
-            SimpleVectorButton(
-                vectorResource(if (UI.isPlaying.value) R.drawable.ic_pause else R.drawable.ic_play_arrow),
-                if (UI.isPlaying.value) "Pause" else "Play"
-            ) {
+            val text = if (UI.isPlaying.value) "Pause" else "Play"
+            val onClick = {
                 if (UI.isPlaying.value)
                     ScheduleManager.pausePlaying()
                 else
                     ScheduleManager.resumePlaying()
             }
+            if (UI.isPlaying.value)
+                SimpleVectorButton(vectorResource(R.drawable.ic_pause), text, onClick)
+            else
+                SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)
 
-            Spacer(LayoutWidth(36 .dp))
+            Spacer(LayoutWidth(36.dp))
 
             SimpleVectorButton(vectorResource(R.drawable.ic_close), "Dismiss") {
                 notificationActivity.finish()

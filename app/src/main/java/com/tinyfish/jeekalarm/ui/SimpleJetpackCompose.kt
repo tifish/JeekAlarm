@@ -7,11 +7,9 @@ import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.DrawBackground
-import androidx.ui.graphics.vector.DrawVector
+import androidx.ui.foundation.Icon
 import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.layout.*
-import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Switch
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.text.TextFieldValue
@@ -101,8 +99,7 @@ fun SimpleVectorButton(vectorAsset: VectorAsset, text: String = "", onClick: () 
                     height = vectorAsset.defaultHeight,
                     modifier = LayoutGravity.Center
                 ) {
-                    DrawBackground(color = MaterialTheme.colors().background)
-                    DrawVector(vectorAsset)
+                    Icon(vectorAsset)
                 }
 
                 if (text != "") {

@@ -258,14 +258,19 @@ private fun BottomBar(isAdding: Boolean) {
                 }
 
                 WidthSpacer(36.dp)
-                SimpleVectorButton(
-                    vectorResource(if (UI.isPlaying.value) R.drawable.ic_stop else R.drawable.ic_play_arrow),
-                    if (UI.isPlaying.value) "Stop" else "Play"
-                ) {
+                Recompose { recompose ->
+                    val text = if (UI.isPlaying.value) "Stop" else "Play"
+                    val onClick = {
+                        if (UI.isPlaying.value)
+                            ScheduleManager.stopPlaying()
+                        else
+                            editingSchedule.play()
+                    }
+
                     if (UI.isPlaying.value)
-                        ScheduleManager.stopPlaying()
+                        SimpleVectorButton(vectorResource(R.drawable.ic_stop), text, onClick)
                     else
-                        editingSchedule.play()
+                        SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)
                 }
             }
         }
