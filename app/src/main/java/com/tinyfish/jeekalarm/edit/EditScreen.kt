@@ -54,7 +54,7 @@ private fun Editor() {
         HeightSpacer()
         MyTextField("Name: ", editingSchedule::name)
         Column {
-            Use(uiTimeConfigChanged.value)
+            uiTimeConfigChanged.value
             MyTextField("Minute: ", editingSchedule::minuteConfig, true)
             MyTextField("Hour: ", editingSchedule::hourConfig, true)
             MyTextField("Day: ", editingSchedule::dayConfig, true)

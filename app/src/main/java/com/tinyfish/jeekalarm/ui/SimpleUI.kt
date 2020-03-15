@@ -19,10 +19,6 @@ import androidx.ui.unit.dp
 import kotlin.reflect.KMutableProperty0
 
 @Composable
-fun <T> Use(observeValue: T) {
-}
-
-@Composable
 fun SimpleCheckbox(
     text: String,
     booleanProp: KMutableProperty0<Boolean>,

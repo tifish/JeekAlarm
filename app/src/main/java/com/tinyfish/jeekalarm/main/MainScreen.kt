@@ -4,14 +4,12 @@ import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.ui.core.Text
 import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.Icon
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Switch
-import androidx.ui.material.TopAppBar
 import androidx.ui.material.ripple.Ripple
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
@@ -25,7 +23,6 @@ import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.ui.MyTopBar
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
-import com.tinyfish.jeekalarm.ui.Use
 import java.util.*
 
 @Composable
@@ -57,7 +54,7 @@ fun MainScreen() {
 private fun ScheduleList() {
     VerticalScroller {
         Column(LayoutPadding(20.dp)) {
-            Use(UI.scheduleChangeTrigger.value)
+            UI.scheduleChangeTrigger.value
 
             val now = Calendar.getInstance()
             for ((index, schedule) in ScheduleManager.scheduleList.withIndex()) {
