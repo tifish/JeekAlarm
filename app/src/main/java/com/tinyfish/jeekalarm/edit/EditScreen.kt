@@ -33,7 +33,7 @@ fun EditScreen(scheduleIndex: Int) {
     }
 
     Column {
-        TopBar()
+        MyTopBar(R.drawable.ic_edit, "Edit")
         Surface(
             color = MaterialTheme.colors().background,
             modifier = LayoutFlexible(1f, true)
@@ -42,17 +42,6 @@ fun EditScreen(scheduleIndex: Int) {
         }
         BottomBar(scheduleIndex == -1)
     }
-}
-
-@Composable
-private fun TopBar() {
-    TopAppBar(
-        title = {
-            Icon(vectorResource(R.drawable.ic_edit))
-            WidthSpacer()
-            Text(text = "Edit Schedule")
-        }
-    )
 }
 
 @Composable

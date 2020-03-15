@@ -1,14 +1,14 @@
 package com.tinyfish.jeekalarm.ui
 
+import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.compose.state
 import androidx.ui.core.Text
-import androidx.ui.layout.Container
-import androidx.ui.layout.LayoutHeight
-import androidx.ui.layout.LayoutWidth
-import androidx.ui.layout.Row
+import androidx.ui.foundation.Icon
+import androidx.ui.layout.*
 import androidx.ui.material.Button
+import androidx.ui.material.TopAppBar
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
@@ -95,4 +95,17 @@ fun MyTextField(
             }
         }
     }
+}
+
+@Composable
+fun MyTopBar(@DrawableRes iconID: Int, title: String) {
+    TopAppBar(
+        title = {
+            Row {
+                Icon(vectorResource(iconID), LayoutGravity.Center)
+                WidthSpacer()
+                Text(title)
+            }
+        }
+    )
 }

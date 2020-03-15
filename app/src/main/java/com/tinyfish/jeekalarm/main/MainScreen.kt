@@ -23,6 +23,7 @@ import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.settings.SettingsScreen
+import com.tinyfish.jeekalarm.ui.MyTopBar
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 import com.tinyfish.jeekalarm.ui.Use
 import java.util.*
@@ -41,7 +42,7 @@ fun MainUI() {
 @Composable
 fun MainScreen() {
     Column {
-        TopBar()
+        MyTopBar(R.drawable.ic_alarm, "JeekAlarm")
         Surface(
             color = MaterialTheme.colors().background,
             modifier = LayoutFlexible(1f, true)
@@ -50,17 +51,6 @@ fun MainScreen() {
         }
         BottomBar()
     }
-}
-
-@Composable
-private fun TopBar() {
-    TopAppBar(
-        title = {
-            Icon(vectorResource(R.drawable.ic_alarm))
-            WidthSpacer()
-            Text("JeekAlarm")
-        }
-    )
 }
 
 @Composable

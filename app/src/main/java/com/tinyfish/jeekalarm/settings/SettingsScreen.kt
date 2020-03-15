@@ -14,12 +14,13 @@ import com.tinyfish.jeekalarm.*
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.ui.MyFileSelect
+import com.tinyfish.jeekalarm.ui.MyTopBar
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 
 @Composable
 fun SettingsScreen() {
     Column {
-        TopBar()
+        MyTopBar(R.drawable.ic_settings, "Settings")
         Surface(
             color = MaterialTheme.colors().background,
             modifier = LayoutFlexible(1f, true)
@@ -28,17 +29,6 @@ fun SettingsScreen() {
         }
         BottomBar()
     }
-}
-
-@Composable
-private fun TopBar() {
-    TopAppBar(
-        title = {
-            Icon(vectorResource(R.drawable.ic_settings))
-            WidthSpacer()
-            Text(text = "Settings")
-        }
-    )
 }
 
 @Composable
