@@ -2,17 +2,15 @@ package com.tinyfish.jeekalarm.settings
 
 import androidx.compose.Composable
 import androidx.compose.Recompose
-import androidx.ui.core.Text
-import androidx.ui.foundation.Icon
-import androidx.ui.layout.*
+import androidx.ui.layout.Column
+import androidx.ui.layout.LayoutPadding
 import androidx.ui.material.MaterialTheme
-import androidx.ui.material.TopAppBar
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.*
-import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.edit.FileSelector
+import com.tinyfish.jeekalarm.ui.MyBottomBar
 import com.tinyfish.jeekalarm.ui.MyFileSelect
 import com.tinyfish.jeekalarm.ui.MyTopBar
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
@@ -69,13 +67,9 @@ private fun Editor() {
 
 @Composable
 private fun BottomBar() {
-    Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
-        Container(modifier = LayoutHeight(100.dp), expanded = true) {
-            Row(arrangement = Arrangement.Center) {
-                SimpleVectorButton(vectorResource(R.drawable.ic_done), "OK") {
-                    onSettingsScreenPressOK()
-                }
-            }
+    MyBottomBar {
+        SimpleVectorButton(vectorResource(R.drawable.ic_done), "OK") {
+            onSettingsScreenPressOK()
         }
     }
 }

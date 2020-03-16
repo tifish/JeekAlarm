@@ -21,6 +21,7 @@ import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.settings.SettingsScreen
+import com.tinyfish.jeekalarm.ui.MyBottomBar
 import com.tinyfish.jeekalarm.ui.MyTopBar
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 import java.util.*
@@ -119,29 +120,25 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
 @Composable
 private fun BottomBar() {
-    Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
-        Container(modifier = LayoutHeight(100.dp), expanded = true) {
-            Row(arrangement = Arrangement.Center) {
-                if (UI.isRemoving.value) {
-                    SimpleVectorButton(vectorResource(R.drawable.ic_done), "Done") {
-                        UI.isRemoving.value = false
-                    }
-                } else {
-                    SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
-                        App.editScheduleIndex = -1
-                        UI.screen.value = ScreenType.EDIT
-                    }
+    MyBottomBar {
+        if (UI.isRemoving.value) {
+            SimpleVectorButton(vectorResource(R.drawable.ic_done), "Done") {
+                UI.isRemoving.value = false
+            }
+        } else {
+            SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
+                App.editScheduleIndex = -1
+                UI.screen.value = ScreenType.EDIT
+            }
 
-                    WidthSpacer(36.dp)
-                    SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
-                        UI.isRemoving.value = true
-                    }
+            WidthSpacer(36.dp)
+            SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
+                UI.isRemoving.value = true
+            }
 
-                    WidthSpacer(24.dp)
-                    SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
-                        UI.screen.value = ScreenType.SETTINGS
-                    }
-                }
+            WidthSpacer(24.dp)
+            SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
+                UI.screen.value = ScreenType.SETTINGS
             }
         }
     }

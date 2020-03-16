@@ -8,7 +8,9 @@ import androidx.ui.core.Text
 import androidx.ui.foundation.Icon
 import androidx.ui.layout.*
 import androidx.ui.material.Button
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TopAppBar
+import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
@@ -108,4 +110,15 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
             }
         }
     )
+}
+
+@Composable
+fun MyBottomBar(buttons: @Composable() () -> Unit) {
+    Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
+        Container(modifier = LayoutHeight(100.dp), expanded = true) {
+            Row(arrangement = Arrangement.Center) {
+                buttons()
+            }
+        }
+    }
 }
