@@ -15,24 +15,24 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.*
+import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import com.tinyfish.jeekalarm.settings.SettingsScreen
-import com.tinyfish.jeekalarm.ui.MyBottomBar
-import com.tinyfish.jeekalarm.ui.MyTopBar
-import com.tinyfish.jeekalarm.ui.SimpleVectorButton
+import com.tinyfish.jeekalarm.ui.*
 import java.util.*
 
 @Composable
 fun MainUI() {
     MaterialTheme(colors = DarkColorPalette) {
-        when (UI.screen.value) {
+        when (App.screen.value) {
             ScreenType.MAIN -> MainScreen()
-            ScreenType.EDIT -> EditScreen(App.editScheduleIndex)
+            ScreenType.EDIT -> EditScreen()
             ScreenType.SETTINGS -> SettingsScreen()
+            ScreenType.NOTIFICATION -> NotificationScreen()
         }
     }
 }
@@ -55,7 +55,7 @@ fun MainScreen() {
 private fun ScheduleList() {
     VerticalScroller {
         Column(LayoutPadding(20.dp)) {
-            UI.scheduleChangeTrigger.value
+            App.scheduleChangeTrigger.value
 
             val now = Calendar.getInstance()
             for ((index, schedule) in ScheduleManager.scheduleList.withIndex()) {
@@ -70,7 +70,7 @@ private fun ScheduleList() {
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
-        if (!UI.isRemoving.value) {
+        if (!App.isRemoving.value) {
             Recompose { recompose ->
                 Container(modifier = LayoutGravity.Center) {
                     Switch(
@@ -89,13 +89,13 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         Ripple(bounded = true) {
             Clickable(onClick = {
-                if (!UI.isRemoving.value) {
+                if (!App.isRemoving.value) {
                     App.editScheduleIndex = index
-                    UI.screen.value = ScreenType.EDIT
+                    App.screen.value = ScreenType.EDIT
                 }
             }) {
                 Column(LayoutFlexible(1f, true)) {
-                    Text(schedule.name + if (index in UI.nextAlarmIndexes.value) " (Next alarm)" else "")
+                    Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
                     Text(
                         schedule.timeConfig,
                         style = TextStyle(color = Color.Gray)
@@ -108,7 +108,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }
         }
 
-        if (UI.isRemoving.value) {
+        if (App.isRemoving.value) {
             Spacer(LayoutWidth(20.dp))
             SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
                 ScheduleManager.scheduleList.removeAt(index)
@@ -121,24 +121,24 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        if (UI.isRemoving.value) {
+        if (App.isRemoving.value) {
             SimpleVectorButton(vectorResource(R.drawable.ic_done), "Done") {
-                UI.isRemoving.value = false
+                App.isRemoving.value = false
             }
         } else {
             SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
                 App.editScheduleIndex = -1
-                UI.screen.value = ScreenType.EDIT
+                App.screen.value = ScreenType.EDIT
             }
 
             WidthSpacer(36.dp)
             SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
-                UI.isRemoving.value = true
+                App.isRemoving.value = true
             }
 
             WidthSpacer(24.dp)
             SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
-                UI.screen.value = ScreenType.SETTINGS
+                App.screen.value = ScreenType.SETTINGS
             }
         }
     }

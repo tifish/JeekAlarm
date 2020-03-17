@@ -5,9 +5,9 @@ import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
 import com.beust.klaxon.Json
+import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.Config
 import com.tinyfish.jeekalarm.Music
-import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.Vibration
 import java.io.File
 import java.util.*
@@ -255,7 +255,7 @@ data class Schedule(
         if (vibration)
             Vibration.vibrate(vibrationCount)
 
-        UI.isPlaying.value = true
+        App.isPlaying.value = true
     }
 
     private fun playMusic() {

@@ -13,11 +13,28 @@ import androidx.ui.material.TopAppBar
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
+import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
 import com.tinyfish.jeekalarm.R
-import com.tinyfish.jeekalarm.WidthSpacer
 import kotlin.reflect.KMutableProperty0
+
+enum class ScreenType {
+    MAIN,
+    EDIT,
+    SETTINGS,
+    NOTIFICATION,
+}
+
+@Composable
+fun HeightSpacer(height: Dp = 10.dp) {
+    Spacer(LayoutHeight(height))
+}
+
+@Composable
+fun WidthSpacer(width: Dp = 10.dp) {
+    Spacer(LayoutWidth(width))
+}
 
 @Composable
 fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -> Unit) {

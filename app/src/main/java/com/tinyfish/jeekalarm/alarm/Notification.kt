@@ -9,7 +9,6 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.R
-import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.main.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 import java.util.*
@@ -81,11 +80,10 @@ object Notification {
             ScheduleManager.scheduleList[ScheduleManager.nextAlarmIndexes[0]].play()
         }
 
-        val openIntent = Intent(App.context, NotificationActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        val openIntent = Intent(App.context, NotificationClickReceiver::class.java).apply {
             putExtra("alarmIndexes", alarmIndexes.toIntArray())
         }
-        val openPendingIntent = PendingIntent.getActivity(App.context, 0, openIntent, 0)
+        val openPendingIntent = PendingIntent.getBroadcast(App.context, 0, openIntent, 0)
 
         val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
         val pausePendingIntent: PendingIntent =
@@ -107,7 +105,7 @@ object Notification {
             setContentIntent(openPendingIntent)
             addAction(
                 R.drawable.ic_pause,
-                if (UI.isPlaying.value) "Pause" else "Play",
+                if (App.isPlaying.value) "Pause" else "Play",
                 pausePendingIntent
             )
             addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)

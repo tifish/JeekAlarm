@@ -20,13 +20,13 @@ private lateinit var editingSchedule: Schedule
 private lateinit var uiTimeConfigChanged: MutableState<Int>
 
 @Composable
-fun EditScreen(scheduleIndex: Int) {
+fun EditScreen() {
     uiTimeConfigChanged = state { 0 }
 
-    if (scheduleIndex == -1) {
+    if (App.editScheduleIndex == -1) {
         editingSchedule = Schedule()
     } else {
-        originalSchedule = ScheduleManager.scheduleList[scheduleIndex]
+        originalSchedule = ScheduleManager.scheduleList[App.editScheduleIndex]
         editingSchedule = originalSchedule.copy()
     }
 
@@ -38,7 +38,7 @@ fun EditScreen(scheduleIndex: Int) {
         ) {
             Editor()
         }
-        BottomBar(scheduleIndex == -1)
+        BottomBar(App.editScheduleIndex == -1)
     }
 }
 
@@ -125,7 +125,7 @@ private fun BottomBar(isAdding: Boolean) {
     MyBottomBar {
         SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
             ScheduleManager.stopPlaying()
-            UI.screen.value = ScreenType.MAIN
+            App.screen.value = ScreenType.MAIN
         }
 
         WidthSpacer(36.dp)
@@ -143,7 +143,7 @@ private fun BottomBar(isAdding: Boolean) {
             ScheduleManager.saveConfig()
 
             ScheduleManager.stopPlaying()
-            UI.screen.value = ScreenType.MAIN
+            App.screen.value = ScreenType.MAIN
         }
 
         WidthSpacer(36.dp)
@@ -159,15 +159,15 @@ private fun BottomBar(isAdding: Boolean) {
 
         WidthSpacer(36.dp)
         Observe {
-            val text = if (UI.isPlaying.value) "Stop" else "Play"
+            val text = if (App.isPlaying.value) "Stop" else "Play"
             val onClick = {
-                if (UI.isPlaying.value)
+                if (App.isPlaying.value)
                     ScheduleManager.stopPlaying()
                 else
                     editingSchedule.play()
             }
 
-            if (UI.isPlaying.value)
+            if (App.isPlaying.value)
                 SimpleVectorButton(vectorResource(R.drawable.ic_stop), text, onClick)
             else
                 SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)

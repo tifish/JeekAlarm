@@ -6,11 +6,11 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
+import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.Permissions
-import com.tinyfish.jeekalarm.ScreenType
-import com.tinyfish.jeekalarm.UI
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.settings.onSettingsScreenPressOK
+import com.tinyfish.jeekalarm.ui.ScreenType
 
 class MainActivity : AppCompatActivity() {
     companion object {
@@ -26,22 +26,24 @@ class MainActivity : AppCompatActivity() {
         Permissions.checkExternalStoragePermission(this)
 
         setContent {
-            UI.init()
+            App.bindComposer()
 
             MainUI()
         }
     }
 
     override fun onDestroy() {
+        App.unbindComposer()
+
         super.onDestroy()
 
         instance = null
     }
 
     override fun onBackPressed() {
-        if (UI.screen.value == ScreenType.MAIN)
+        if (App.screen.value == ScreenType.MAIN)
             super.onBackPressed()
-        else if (UI.screen.value == ScreenType.SETTINGS)
+        else if (App.screen.value == ScreenType.SETTINGS)
             onSettingsScreenPressOK()
     }
 
@@ -58,4 +60,5 @@ class MainActivity : AppCompatActivity() {
 
         super.onActivityResult(requestCode, resultCode, resultData)
     }
+
 }

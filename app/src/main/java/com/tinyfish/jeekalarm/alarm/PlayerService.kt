@@ -6,7 +6,7 @@ import android.media.VolumeProvider
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.IBinder
-import com.tinyfish.jeekalarm.UI
+import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
 
 class PlayerService : Service() {
@@ -33,7 +33,7 @@ class PlayerService : Service() {
                 5
             ) {
                 override fun onAdjustVolume(direction: Int) {
-                    if (UI.isPlaying.value)
+                    if (App.isPlaying.value)
                         ScheduleManager.pausePlaying()
                     /*
                     -1 -- volume down

@@ -4,8 +4,9 @@ import android.app.Application
 import android.content.Context
 import android.util.Log
 import com.beust.klaxon.Klaxon
-import com.tinyfish.jeekalarm.alarm.Notification
 import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.ui.GlobalState
+import com.tinyfish.jeekalarm.ui.ScreenType
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,6 +22,30 @@ class App : Application() {
         }
 
         var editScheduleIndex = -1
+        var screenBeforeNotification = ScreenType.MAIN
+        val notificationAlarmIndexes = mutableListOf<Int>()
+
+        val screen = GlobalState(ScreenType.MAIN)
+        val nextAlarmIndexes = GlobalState(listOf<Int>())
+        val scheduleChangeTrigger = GlobalState(0)
+        val isPlaying = GlobalState(false)
+        val isRemoving = GlobalState(false)
+
+        fun bindComposer() {
+            screen.createState()
+            nextAlarmIndexes.createState()
+            scheduleChangeTrigger.createState()
+            isPlaying.createState()
+            isRemoving.createState()
+        }
+
+        fun unbindComposer() {
+            screen.destroyState()
+            nextAlarmIndexes.destroyState()
+            scheduleChangeTrigger.destroyState()
+            isPlaying.destroyState()
+            isRemoving.destroyState()
+        }
     }
 
     override fun onCreate() {
