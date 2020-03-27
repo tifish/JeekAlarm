@@ -1,10 +1,12 @@
-package com.tinyfish.jeekalarm
+package com.tinyfish.jeekalarm.start
 
 import android.app.Application
 import android.content.Context
-import android.util.Log
+import android.content.Intent
+import android.os.Build
 import com.beust.klaxon.Klaxon
-import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.ConfigHome
+import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.ui.GlobalState
 import com.tinyfish.jeekalarm.ui.ScreenType
 import java.text.SimpleDateFormat
@@ -46,24 +48,32 @@ class App : Application() {
             isPlaying.destroyState()
             isRemoving.destroyState()
         }
+
+        fun startService() {
+            val startIntent = Intent(context, StartService::class.java).apply {
+                action = "Start"
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                context.startForegroundService(startIntent)
+            else
+                context.startService(startIntent)
+        }
+
+        fun stopService() {
+            val startIntent = Intent(context, StartService::class.java).apply {
+                action = "Stop"
+            }
+            context.startService(startIntent)
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
 
-        Log.d("App", "onCreate")
-
         context = applicationContext
-        Config.load()
-        ScheduleManager.loadConfig()
-        ScheduleManager.setNextAlarm()
-
-        //startService(Intent(this, PlayerService::class.java))
-    }
-
-    override fun onTerminate() {
-        super.onTerminate()
-        //stopService(Intent(this, com.tinyfish.jeekalarm.alarm.PlayerService::class.java))
+        ConfigHome.load()
+        ScheduleHome.loadConfig()
+        ScheduleHome.setNextAlarm()
     }
 
 }

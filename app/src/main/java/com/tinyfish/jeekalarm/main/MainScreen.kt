@@ -15,12 +15,12 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.App
+import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
-import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.ui.*
 import java.util.*
@@ -58,7 +58,7 @@ private fun ScheduleList() {
             App.scheduleChangeTrigger.value
 
             val now = Calendar.getInstance()
-            for ((index, schedule) in ScheduleManager.scheduleList.withIndex()) {
+            for ((index, schedule) in ScheduleHome.scheduleList.withIndex()) {
                 HeightSpacer()
                 ScheduleItem(index, schedule, now)
                 Divider(color = Color.DarkGray)
@@ -77,7 +77,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                         checked = schedule.enabled,
                         onCheckedChange = {
                             schedule.enabled = it
-                            ScheduleManager.saveConfig()
+                            ScheduleHome.saveConfig()
                             recompose()
                         }
                     )
@@ -111,8 +111,8 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
         if (App.isRemoving.value) {
             Spacer(LayoutWidth(20.dp))
             SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
-                ScheduleManager.scheduleList.removeAt(index)
-                ScheduleManager.saveConfig()
+                ScheduleHome.scheduleList.removeAt(index)
+                ScheduleHome.saveConfig()
             }
         }
     }

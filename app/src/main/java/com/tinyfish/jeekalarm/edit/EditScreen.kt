@@ -10,7 +10,8 @@ import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.*
 import com.tinyfish.jeekalarm.schedule.Schedule
-import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ui.*
 import java.util.*
 
@@ -26,7 +27,7 @@ fun EditScreen() {
     if (App.editScheduleIndex == -1) {
         editingSchedule = Schedule()
     } else {
-        originalSchedule = ScheduleManager.scheduleList[App.editScheduleIndex]
+        originalSchedule = ScheduleHome.scheduleList[App.editScheduleIndex]
         editingSchedule = originalSchedule.copy()
     }
 
@@ -124,7 +125,7 @@ private fun Editor() {
 private fun BottomBar(isAdding: Boolean) {
     MyBottomBar {
         SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
-            ScheduleManager.stopPlaying()
+            ScheduleHome.stopPlaying()
             App.screen.value = ScreenType.MAIN
         }
 
@@ -135,14 +136,14 @@ private fun BottomBar(isAdding: Boolean) {
         ) {
             if (isAdding) {
                 editingSchedule.timeConfigChanged()
-                ScheduleManager.scheduleList.add(editingSchedule)
+                ScheduleHome.scheduleList.add(editingSchedule)
             } else {
                 editingSchedule.copyTo(originalSchedule)
                 originalSchedule.timeConfigChanged()
             }
-            ScheduleManager.saveConfig()
+            ScheduleHome.saveConfig()
 
-            ScheduleManager.stopPlaying()
+            ScheduleHome.stopPlaying()
             App.screen.value = ScreenType.MAIN
         }
 
@@ -162,7 +163,7 @@ private fun BottomBar(isAdding: Boolean) {
             val text = if (App.isPlaying.value) "Stop" else "Play"
             val onClick = {
                 if (App.isPlaying.value)
-                    ScheduleManager.stopPlaying()
+                    ScheduleHome.stopPlaying()
                 else
                     editingSchedule.play()
             }

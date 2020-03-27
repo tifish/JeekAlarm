@@ -4,9 +4,10 @@ import android.media.AudioAttributes
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
+import com.tinyfish.jeekalarm.start.App
 import java.io.File
 
-object Music {
+object MusicHome {
     private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
 
     fun play(musicPath: String, loop: Boolean = true): MediaPlayer? {

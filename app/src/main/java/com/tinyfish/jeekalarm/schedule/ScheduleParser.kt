@@ -1,7 +1,7 @@
 package com.tinyfish.jeekalarm.schedule
 
 import com.beust.klaxon.KlaxonException
-import com.tinyfish.jeekalarm.App
+import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.io.IOException
 import java.util.*

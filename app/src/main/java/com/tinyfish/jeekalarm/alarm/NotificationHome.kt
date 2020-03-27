@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.alarm
 
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -7,13 +8,13 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import com.tinyfish.jeekalarm.App
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.main.MainActivity
-import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.start.App
 import java.util.*
 
-object Notification {
+object NotificationHome {
     private val notificationManager: NotificationManager by lazy {
         App.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
@@ -35,7 +36,13 @@ object Notification {
         notificationManager.createNotificationChannel(channel)
     }
 
+    const val InformationId = 2
+
     fun showInformation() {
+        notificationManager.notify(InformationId, getInformationNotification())
+    }
+
+    fun getInformationNotification(): Notification {
         initOnce()
 
         val intent = Intent(App.context, MainActivity::class.java).apply {
@@ -44,31 +51,32 @@ object Notification {
         val pendingIntent = PendingIntent.getActivity(App.context, 0, intent, 0)
 
         var infoText = ""
-        if (ScheduleManager.nextAlarmIndexes.size > 0) {
-            val alarmNames = getAlarmNames(ScheduleManager.nextAlarmIndexes)
-            val schedule = ScheduleManager.scheduleList[ScheduleManager.nextAlarmIndexes[0]]
+        if (ScheduleHome.nextAlarmIndexes.size > 0) {
+            val alarmNames = getAlarmNames(ScheduleHome.nextAlarmIndexes)
+            val schedule = ScheduleHome.scheduleList[ScheduleHome.nextAlarmIndexes[0]]
             val nextAlarmDateString =
                 App.format(schedule.getNextTriggerTime(Calendar.getInstance()))
             infoText = "Next: ${alarmNames.joinToString("; ")} $nextAlarmDateString"
         }
 
-        val notification =
-            NotificationCompat.Builder(App.context, "Information").run {
-                setContentTitle("JeekAlarm standby:")
-                setContentText(infoText)
-                setOngoing(true)
-                setAutoCancel(false)
-                priority = NotificationCompat.PRIORITY_LOW
-                setCategory(NotificationCompat.CATEGORY_STATUS)
-                setSmallIcon(R.drawable.ic_launcher_foreground)
-                setContentIntent(pendingIntent)
-                build()
-            }
-
-        notificationManager.notify(1, notification)
+        return NotificationCompat.Builder(App.context, "Information").run {
+            setContentTitle("JeekAlarm standby:")
+            setContentText(infoText)
+            setOngoing(true)
+            setAutoCancel(false)
+            priority = NotificationCompat.PRIORITY_LOW
+            setCategory(NotificationCompat.CATEGORY_STATUS)
+            setSmallIcon(R.drawable.ic_launcher_foreground)
+            setContentIntent(pendingIntent)
+            build()
+        }
     }
 
-    var lastAlarmIndexes = mutableListOf<Int>()
+    fun cancelInformation() {
+        //notificationManager.cancel(InformationId)
+    }
+
+    private var lastAlarmIndexes = mutableListOf<Int>()
 
     fun showAlarm(alarmIndexes: List<Int>, isUpdating: Boolean = false) {
         initOnce()
@@ -77,7 +85,7 @@ object Notification {
             lastAlarmIndexes.clear()
             lastAlarmIndexes.addAll(alarmIndexes)
 
-            ScheduleManager.scheduleList[ScheduleManager.nextAlarmIndexes[0]].play()
+            ScheduleHome.scheduleList[ScheduleHome.nextAlarmIndexes[0]].play()
         }
 
         val openIntent = Intent(App.context, NotificationClickReceiver::class.java).apply {
@@ -116,17 +124,17 @@ object Notification {
 
         if (!isUpdating) {
             var modified = false
-            for (alarmIndex in ScheduleManager.nextAlarmIndexes) {
-                val schedule = ScheduleManager.scheduleList[alarmIndex]
+            for (alarmIndex in ScheduleHome.nextAlarmIndexes) {
+                val schedule = ScheduleHome.scheduleList[alarmIndex]
                 if (schedule.onlyOnce) {
                     schedule.enabled = false
                     modified = true
                 }
             }
             if (modified)
-                ScheduleManager.saveConfig()
+                ScheduleHome.saveConfig()
             else
-                ScheduleManager.setNextAlarm()
+                ScheduleHome.setNextAlarm()
         }
     }
 
@@ -137,7 +145,7 @@ object Notification {
     private fun getAlarmNames(alarmIndexes: List<Int>): List<String> {
         val alarmNames = mutableListOf<String>()
         for (alarmIndex in alarmIndexes) {
-            alarmNames.add(ScheduleManager.scheduleList[alarmIndex].name)
+            alarmNames.add(ScheduleHome.scheduleList[alarmIndex].name)
         }
         return alarmNames
     }

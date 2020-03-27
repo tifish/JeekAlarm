@@ -6,8 +6,8 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
-import com.tinyfish.jeekalarm.App
-import com.tinyfish.jeekalarm.Permissions
+import com.tinyfish.jeekalarm.start.App
+import com.tinyfish.jeekalarm.PermissionsHome
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.settings.onSettingsScreenPressOK
 import com.tinyfish.jeekalarm.ui.ScreenType
@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity() {
 
         instance = this
 
-        Permissions.checkExternalStoragePermission(this)
+        PermissionsHome.checkExternalStoragePermission(this)
 
         setContent {
             App.bindComposer()

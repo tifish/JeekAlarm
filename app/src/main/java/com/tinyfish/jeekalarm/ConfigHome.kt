@@ -1,8 +1,9 @@
 package com.tinyfish.jeekalarm
 
+import com.tinyfish.jeekalarm.start.App
 import java.io.File
 
-object Config {
+object ConfigHome {
     var data = ConfigData()
 
     data class ConfigData(

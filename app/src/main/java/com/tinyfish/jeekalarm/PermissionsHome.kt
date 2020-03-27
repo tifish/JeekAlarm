@@ -9,8 +9,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 
-
-object Permissions {
+object PermissionsHome {
     private const val REQUEST_EXTERNAL_PERMISSION_CODE = 666
 
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)

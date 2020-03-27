@@ -10,12 +10,12 @@ import androidx.ui.material.MaterialTheme
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.App
-import com.tinyfish.jeekalarm.Config
+import com.tinyfish.jeekalarm.start.App
+import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
-import com.tinyfish.jeekalarm.alarm.Notification
+import com.tinyfish.jeekalarm.alarm.NotificationHome
 import com.tinyfish.jeekalarm.edit.FileSelector
-import com.tinyfish.jeekalarm.schedule.ScheduleManager
+import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.ui.*
 
 @Composable
@@ -36,15 +36,15 @@ fun SettingsScreen() {
 private fun Editor() {
     Column(LayoutPadding(20.dp)) {
         Recompose { recomposeFileSelect ->
-            MyFileSelect("Music File:", Config.data.defaultMusicFile,
+            MyFileSelect("Music File:", ConfigHome.data.defaultMusicFile,
                 onSelect = {
                     FileSelector.openMusicFile {
-                        Config.data.defaultMusicFile = it?.path?.substringAfter(':')!!
+                        ConfigHome.data.defaultMusicFile = it?.path?.substringAfter(':')!!
                         recomposeFileSelect()
                     }
                 },
                 onClear = {
-                    Config.data.defaultMusicFile = ""
+                    ConfigHome.data.defaultMusicFile = ""
                     recomposeFileSelect()
                 }
             )
@@ -52,15 +52,15 @@ private fun Editor() {
 
         HeightSpacer()
         Recompose { recomposeFileSelect ->
-            MyFileSelect("Music Folder:", Config.data.defaultMusicFolder,
+            MyFileSelect("Music Folder:", ConfigHome.data.defaultMusicFolder,
                 onSelect = {
                     FileSelector.openFolder {
-                        Config.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
+                        ConfigHome.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
                         recomposeFileSelect()
                     }
                 },
                 onClear = {
-                    Config.data.defaultMusicFolder = ""
+                    ConfigHome.data.defaultMusicFolder = ""
                     recomposeFileSelect()
                 }
             )
@@ -69,7 +69,7 @@ private fun Editor() {
         HeightSpacer()
 
         Button(onClick = {
-            Notification.showAlarm(ScheduleManager.nextAlarmIndexes)
+            NotificationHome.showAlarm(ScheduleHome.nextAlarmIndexes)
         }) {
             Text("Test Next Alarm")
         }
@@ -86,6 +86,6 @@ private fun BottomBar() {
 }
 
 fun onSettingsScreenPressOK() {
-    Config.save()
+    ConfigHome.save()
     App.screen.value = ScreenType.MAIN
 }

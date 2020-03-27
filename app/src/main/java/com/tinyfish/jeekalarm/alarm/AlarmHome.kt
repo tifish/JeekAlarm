@@ -5,10 +5,10 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.tinyfish.jeekalarm.App
+import com.tinyfish.jeekalarm.start.App
 import java.util.*
 
-object Alarm {
+object AlarmHome {
     private var alarmManager: AlarmManager? = null
     private var alarmIntent: PendingIntent? = null
 

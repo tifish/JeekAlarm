@@ -4,8 +4,9 @@ import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator;
+import com.tinyfish.jeekalarm.start.App
 
-object Vibration {
+object VibrationHome {
     private val vibrator: Vibrator by lazy {
         App.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
     }
