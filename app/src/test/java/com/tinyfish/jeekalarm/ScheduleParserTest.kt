@@ -1,13 +1,13 @@
 package com.tinyfish.jeekalarm
 
-import com.tinyfish.jeekalarm.schedule.Schedule
+import com.tinyfish.jeekalarm.schedule.ScheduleParser
 import org.junit.Assert
 import org.junit.Test
 
 class ScheduleParserTest {
     @Test
     fun parseLine1() {
-        val cronSchedule = Schedule("name * * * * * {}")
+        val cronSchedule = ScheduleParser.parseTextLine("name * * * * * {}")!!
         Assert.assertEquals("name", cronSchedule.name)
         Assert.assertEquals((0..59).toList(), cronSchedule.minutes)
         Assert.assertEquals((0..23).toList(), cronSchedule.hours)
@@ -18,7 +18,7 @@ class ScheduleParserTest {
 
     @Test
     fun parseLine2() {
-        val cronSchedule = Schedule("name 50 23 1 4 1 {}")
+        val cronSchedule = ScheduleParser.parseTextLine("name 50 23 1 4 1 {}")!!
         Assert.assertEquals("name", cronSchedule.name)
         Assert.assertEquals(listOf(50), cronSchedule.minutes)
         Assert.assertEquals(listOf(23), cronSchedule.hours)
@@ -29,7 +29,7 @@ class ScheduleParserTest {
 
     @Test
     fun parseLine3() {
-        val cronSchedule = Schedule("name 40 23 30 4,5 2,3 {}")
+        val cronSchedule = ScheduleParser.parseTextLine("name 40 23 30 4,5 2,3 {}")!!
         Assert.assertEquals("name", cronSchedule.name)
         Assert.assertEquals(listOf(40), cronSchedule.minutes)
         Assert.assertEquals(listOf(23), cronSchedule.hours)
@@ -40,7 +40,7 @@ class ScheduleParserTest {
 
     @Test
     fun parseLine4() {
-        val cronSchedule = Schedule("name 40 23 30 4-6 2-4 {}")
+        val cronSchedule = ScheduleParser.parseTextLine("name 40 23 30 4-6 2-4 {}")!!
         Assert.assertEquals("name", cronSchedule.name)
         Assert.assertEquals(listOf(40), cronSchedule.minutes)
         Assert.assertEquals(listOf(23), cronSchedule.hours)

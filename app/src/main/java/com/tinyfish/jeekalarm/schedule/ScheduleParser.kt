@@ -7,7 +7,7 @@ import java.io.IOException
 import java.util.*
 
 internal object ScheduleParser {
-    fun parseLine(line: String): Schedule? {
+    fun parseJsonLine(line: String): Schedule? {
         return try {
             App.json.parse<Schedule>(line).also {
                 it?.timeConfigChanged()
@@ -15,6 +15,18 @@ internal object ScheduleParser {
         } catch (e: KlaxonException) {
             null
         }
+    }
+
+    fun parseTextLine(line: String): Schedule? {
+        val parts = line.split(' ')
+        return Schedule(
+            name = parts[0],
+            minuteConfig = parts[1],
+            hourConfig = parts[2],
+            dayConfig = parts[3],
+            monthConfig = parts[4],
+            weekDayConfig = parts[5]
+        )
     }
 
     fun parseTimeConfig(schedule: Schedule) {
@@ -46,16 +58,18 @@ internal object ScheduleParser {
     }
 
     private fun normalizeMonths(months: MutableList<Int>) {
-        // Month is 0-based
+        // Crontab's month is 1-based
+        // Calendar's month is 0-based
         for (i in months.indices) {
             months[i] = months[i] - 1
         }
     }
 
     private fun normalizeWeekDays(weekDays: MutableList<Int>) {
-        // Sunday: 1, Monday: 2
+        // Crontab's weekday: 0-6, 0 is Sunday
+        // Calendar's weekday: Sunday: 1, Monday: 2
         for (i in weekDays.indices) {
-            weekDays[i] = (weekDays[i] + 1) % 7
+            weekDays[i] = weekDays[i] + 1
         }
     }
 
@@ -68,7 +82,7 @@ internal object ScheduleParser {
         configFile.forEachLine() {
             val line = it.trim()
             if (line.isNotEmpty()) {
-                val schedule = parseLine(line)
+                val schedule = parseJsonLine(line)
                 if (schedule != null) {
                     result.add(schedule)
                 }

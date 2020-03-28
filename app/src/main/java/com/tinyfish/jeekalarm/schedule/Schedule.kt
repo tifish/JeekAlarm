@@ -5,10 +5,10 @@ import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
 import com.beust.klaxon.Json
-import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.MusicHome
 import com.tinyfish.jeekalarm.VibrationHome
+import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.util.*
 import kotlin.random.Random
@@ -83,6 +83,10 @@ data class Schedule(
 
     @Json(ignored = true)
     var weekDays = mutableListOf<Int>()
+
+    init {
+        timeConfigChanged()
+    }
 
     fun getNextTriggerTime(calendar: Calendar? = null): Calendar? {
         if (!isValid)
