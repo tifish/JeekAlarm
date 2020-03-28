@@ -66,10 +66,10 @@ internal object ScheduleParser {
     }
 
     private fun normalizeWeekDays(weekDays: MutableList<Int>) {
-        // Crontab's weekday: 0-6, 0 is Sunday
+        // Crontab's weekday: 0-7, 0 and 7 are both Sunday
         // Calendar's weekday: Sunday: 1, Monday: 2
         for (i in weekDays.indices) {
-            weekDays[i] = weekDays[i] + 1
+            weekDays[i] = (weekDays[i] % 7) + 1
         }
     }
 
@@ -142,9 +142,5 @@ internal object ScheduleParser {
             normalizeWeekDays(result)
 
         result.sort()
-    }
-
-    fun toLine(schedule: Schedule): String {
-        return App.json.toJsonString(schedule)
     }
 }
