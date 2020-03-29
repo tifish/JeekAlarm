@@ -36,7 +36,8 @@ object NotificationHome {
         notificationManager.createNotificationChannel(channel)
     }
 
-    const val InformationId = 2
+    const val InformationId = 1
+    const val AlarmId = 2
 
     fun showInformation() {
         notificationManager.notify(InformationId, getInformationNotification())
@@ -70,10 +71,6 @@ object NotificationHome {
             setContentIntent(pendingIntent)
             build()
         }
-    }
-
-    fun cancelInformation() {
-        //notificationManager.cancel(InformationId)
     }
 
     private var lastAlarmIndexes = mutableListOf<Int>()
@@ -120,7 +117,7 @@ object NotificationHome {
             build()
         }
 
-        notificationManager.notify(2, notification)
+        notificationManager.notify(AlarmId, notification)
 
         if (!isUpdating) {
             var modified = false
@@ -151,7 +148,7 @@ object NotificationHome {
     }
 
     fun cancelAlarm() {
-        notificationManager.cancel(2)
+        notificationManager.cancel(AlarmId)
     }
 
 }
