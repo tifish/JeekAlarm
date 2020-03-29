@@ -70,4 +70,16 @@ class ScheduleParserTest {
         Assert.assertEquals(listOf(3, 4, 5), cronSchedule.months)
         Assert.assertEquals(listOf(1, 2, 3), cronSchedule.weekDays)
     }
+
+    @Test
+    fun parseLineInterval() {
+        val cronSchedule = ScheduleParser.parseTextLine("name */10 1 1 1 1 {}")!!
+        Assert.assertEquals("name", cronSchedule.name)
+        Assert.assertEquals(listOf(0, 10, 20, 30, 40, 50), cronSchedule.minutes)
+        Assert.assertEquals(listOf(1), cronSchedule.hours)
+        Assert.assertEquals(listOf(1), cronSchedule.days)
+        Assert.assertEquals(listOf(0), cronSchedule.months)
+        Assert.assertEquals(listOf(2), cronSchedule.weekDays)
+    }
+
 }

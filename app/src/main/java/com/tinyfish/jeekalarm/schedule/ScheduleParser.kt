@@ -31,29 +31,29 @@ internal object ScheduleParser {
 
     fun parseTimeConfig(schedule: Schedule) {
         parseIndexes(
+            Calendar.MINUTE,
             schedule.minuteConfig,
-            schedule.minutes,
-            Calendar.MINUTE
+            schedule.minutes
         )
         parseIndexes(
+            Calendar.HOUR_OF_DAY,
             schedule.hourConfig,
-            schedule.hours,
-            Calendar.HOUR_OF_DAY
+            schedule.hours
         )
         parseIndexes(
+            Calendar.DAY_OF_MONTH,
             schedule.dayConfig,
-            schedule.days,
-            Calendar.DAY_OF_MONTH
+            schedule.days
         )
         parseIndexes(
+            Calendar.MONTH,
             schedule.monthConfig,
-            schedule.months,
-            Calendar.MONTH
+            schedule.months
         )
         parseIndexes(
+            Calendar.DAY_OF_WEEK,
             schedule.weekDayConfig,
-            schedule.weekDays,
-            Calendar.DAY_OF_WEEK
+            schedule.weekDays
         )
     }
 
@@ -104,41 +104,49 @@ internal object ScheduleParser {
     }
 
     private fun parseIndexes(
+        indexType: Int,
         content: String,
-        result: MutableList<Int>,
-        timePart: Int
+        result: MutableList<Int>
     ) {
         // content format:
-        // 1-3,5,6
+        // 1-3,5,6 or */5
         result.clear()
         val calendar = Calendar.getInstance()
 
-        for (part in content.split(",")) {
-            when {
-                part == "*" -> {
-                    for (i in calendar.getMinimum(timePart)..calendar.getMaximum(timePart)) {
-                        result.add(i)
+        if (content.startsWith("*/")) {
+            val interval = content.substring(2).toInt()
+            for (i in calendar.getMinimum(indexType)..calendar.getMaximum(indexType) step interval) {
+                result.add(i)
+            }
+            return
+        } else {
+            for (part in content.split(",")) {
+                when {
+                    part == "*" -> {
+                        for (i in calendar.getMinimum(indexType)..calendar.getMaximum(indexType)) {
+                            result.add(i)
+                        }
+                        return
                     }
-                    return
-                }
-                part.contains("-") -> {
-                    val beginEnd = part.split("-")
-                    assert(beginEnd.size == 2)
-                    val begin = beginEnd[0].toInt()
-                    val end = beginEnd[1].toInt()
-                    for (i in begin..end) {
-                        result.add(i)
+                    part.contains("-") -> {
+                        val beginEnd = part.split("-")
+                        assert(beginEnd.size == 2)
+                        val begin = beginEnd[0].toInt()
+                        val end = beginEnd[1].toInt()
+                        for (i in begin..end) {
+                            result.add(i)
+                        }
                     }
-                }
-                else -> {
-                    result.add(part.toInt())
+                    else -> {
+                        result.add(part.toInt())
+                    }
                 }
             }
         }
 
-        if (timePart == Calendar.MONTH)
+        if (indexType == Calendar.MONTH)
             normalizeMonths(result)
-        else if (timePart == Calendar.DAY_OF_WEEK)
+        else if (indexType == Calendar.DAY_OF_WEEK)
             normalizeWeekDays(result)
 
         result.sort()
