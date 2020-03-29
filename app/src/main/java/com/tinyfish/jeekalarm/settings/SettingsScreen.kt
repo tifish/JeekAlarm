@@ -37,10 +37,11 @@ private fun Editor() {
     Column(LayoutPadding(20.dp)) {
         Recompose { recompose ->
             MyCheckbox(
-                hint = "Dark theme (need restart)",
+                hint = "Dark theme",
                 value = ConfigHome.data.theme == "Dark"
             ) {
                 ConfigHome.data.theme = if (it) "Dark" else "Light"
+                App.setThemeFromConfig()
                 recompose()
             }
         }

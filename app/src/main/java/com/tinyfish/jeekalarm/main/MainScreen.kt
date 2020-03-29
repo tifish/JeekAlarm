@@ -28,13 +28,7 @@ import java.util.*
 
 @Composable
 fun MainUI() {
-    val themeColors =
-        when (ConfigHome.data.theme) {
-            "Dark" -> DarkColorPalette
-            "Light" -> LightColorPalette
-            else -> LightColorPalette
-        }
-    MaterialTheme(colors = themeColors) {
+    MaterialTheme(colors = App.themeColors.value) {
         when (App.screen.value) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen()

@@ -30,9 +30,9 @@ class App : Application() {
         var screenBeforeNotification = ScreenType.MAIN
         val notificationAlarmIndexes = mutableListOf<Int>()
 
-        val theme = GlobalState<ColorPalette>(DarkColorPalette)
+        val themeColors = GlobalState<ColorPalette>(DarkColorPalette)
         fun setThemeFromConfig() {
-            theme.value =
+            themeColors.value =
                 when (ConfigHome.data.theme) {
                     "Dark" -> DarkColorPalette
                     "Light" -> LightColorPalette
@@ -47,6 +47,7 @@ class App : Application() {
         val removingIndex = GlobalState(-1)
 
         fun bindComposer() {
+            themeColors.createState()
             screen.createState()
             nextAlarmIndexes.createState()
             scheduleChangeTrigger.createState()
@@ -55,6 +56,7 @@ class App : Application() {
         }
 
         fun unbindComposer() {
+            themeColors.destroyState()
             screen.destroyState()
             nextAlarmIndexes.destroyState()
             scheduleChangeTrigger.destroyState()
@@ -85,7 +87,7 @@ class App : Application() {
 
         context = applicationContext
         ConfigHome.load()
-
+        setThemeFromConfig()
         ScheduleHome.loadConfig()
         ScheduleHome.setNextAlarm()
     }
