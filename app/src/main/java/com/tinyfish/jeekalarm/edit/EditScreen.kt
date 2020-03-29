@@ -8,28 +8,28 @@ import androidx.ui.material.MaterialTheme
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.*
+import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ui.*
 import java.util.*
 
-private lateinit var originalSchedule: Schedule
 private lateinit var editingSchedule: Schedule
-
+private var isAdding = false
 private lateinit var uiTimeConfigChanged: MutableState<Int>
 
 @Composable
 fun EditScreen() {
     uiTimeConfigChanged = state { 0 }
 
-    if (App.editScheduleIndex == -1) {
-        editingSchedule = Schedule()
-    } else {
-        originalSchedule = ScheduleHome.scheduleList[App.editScheduleIndex]
-        editingSchedule = originalSchedule.copy()
-    }
+    isAdding = App.editScheduleIndex == -1
+    editingSchedule =
+        if (isAdding)
+            Schedule()
+        else
+            ScheduleHome.scheduleList[App.editScheduleIndex]
+
 
     Column {
         MyTopBar(R.drawable.ic_edit, "Edit")
@@ -39,7 +39,7 @@ fun EditScreen() {
         ) {
             Editor()
         }
-        BottomBar(App.editScheduleIndex == -1)
+        BottomBar()
     }
 }
 
@@ -122,29 +122,13 @@ private fun Editor() {
 }
 
 @Composable
-private fun BottomBar(isAdding: Boolean) {
+private fun BottomBar() {
     MyBottomBar {
-        SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
-            ScheduleHome.stopPlaying()
-            App.screen.value = ScreenType.MAIN
-        }
-
-        WidthSpacer(36.dp)
         SimpleVectorButton(
             vectorResource(if (isAdding) R.drawable.ic_add else R.drawable.ic_done),
-            if (isAdding) "Add" else "Save"
+            if (isAdding) "Add" else "Back"
         ) {
-            if (isAdding) {
-                editingSchedule.timeConfigChanged()
-                ScheduleHome.scheduleList.add(editingSchedule)
-            } else {
-                editingSchedule.copyTo(originalSchedule)
-                originalSchedule.timeConfigChanged()
-            }
-            ScheduleHome.saveConfig()
-
-            ScheduleHome.stopPlaying()
-            App.screen.value = ScreenType.MAIN
+            onEditScreenPressBack()
         }
 
         WidthSpacer(36.dp)
@@ -174,4 +158,14 @@ private fun BottomBar(isAdding: Boolean) {
                 SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)
         }
     }
+}
+
+fun onEditScreenPressBack() {
+    if (isAdding)
+        ScheduleHome.scheduleList.add(editingSchedule)
+    editingSchedule.timeConfigChanged()
+    ScheduleHome.saveConfig()
+
+    ScheduleHome.stopPlaying()
+    App.screen.value = ScreenType.MAIN
 }

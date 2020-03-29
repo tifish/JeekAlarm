@@ -90,13 +90,13 @@ private fun Editor() {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        SimpleVectorButton(vectorResource(R.drawable.ic_done), "OK") {
-            onSettingsScreenPressOK()
+        SimpleVectorButton(vectorResource(R.drawable.ic_back), "Back") {
+            onSettingsScreenPressBack()
         }
     }
 }
 
-fun onSettingsScreenPressOK() {
+fun onSettingsScreenPressBack() {
     ConfigHome.save()
     App.screen.value = ScreenType.MAIN
 }

@@ -6,10 +6,11 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.ui.core.setContent
-import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.PermissionsHome
 import com.tinyfish.jeekalarm.edit.FileSelector
-import com.tinyfish.jeekalarm.settings.onSettingsScreenPressOK
+import com.tinyfish.jeekalarm.edit.onEditScreenPressBack
+import com.tinyfish.jeekalarm.settings.onSettingsScreenPressBack
+import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ui.ScreenType
 
 class MainActivity : AppCompatActivity() {
@@ -43,8 +44,10 @@ class MainActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (App.screen.value == ScreenType.MAIN)
             super.onBackPressed()
+        else if (App.screen.value == ScreenType.EDIT)
+            onEditScreenPressBack()
         else if (App.screen.value == ScreenType.SETTINGS)
-            onSettingsScreenPressOK()
+            onSettingsScreenPressBack()
     }
 
     override fun onActivityResult(
