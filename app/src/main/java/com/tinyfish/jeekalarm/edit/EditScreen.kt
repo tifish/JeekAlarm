@@ -32,7 +32,7 @@ fun EditScreen() {
 
 
     Column {
-        MyTopBar(R.drawable.ic_edit, "Edit")
+        MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit")
         Surface(
             color = MaterialTheme.colors().background,
             modifier = LayoutFlexible(1f, true)
@@ -125,8 +125,7 @@ private fun Editor() {
 private fun BottomBar() {
     MyBottomBar {
         SimpleVectorButton(
-            vectorResource(if (isAdding) R.drawable.ic_add else R.drawable.ic_done),
-            if (isAdding) "Add" else "Back"
+            vectorResource(R.drawable.ic_back), "Back"
         ) {
             onEditScreenPressBack()
         }
