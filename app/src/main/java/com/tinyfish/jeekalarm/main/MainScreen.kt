@@ -15,19 +15,26 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.start.App
+import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.settings.SettingsScreen
+import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ui.*
 import java.util.*
 
 @Composable
 fun MainUI() {
-    MaterialTheme(colors = DarkColorPalette) {
+    val themeColors =
+        when (ConfigHome.data.theme) {
+            "Dark" -> DarkColorPalette
+            "Light" -> LightColorPalette
+            else -> LightColorPalette
+        }
+    MaterialTheme(colors = themeColors) {
         when (App.screen.value) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen()

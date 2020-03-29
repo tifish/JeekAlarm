@@ -10,12 +10,12 @@ import androidx.ui.material.MaterialTheme
 import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationHome
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.ui.*
 
 @Composable
@@ -35,6 +35,16 @@ fun SettingsScreen() {
 @Composable
 private fun Editor() {
     Column(LayoutPadding(20.dp)) {
+        Recompose { recompose ->
+            MyCheckbox(
+                hint = "Dark theme (need restart)",
+                value = ConfigHome.data.theme == "Dark"
+            ) {
+                ConfigHome.data.theme = if (it) "Dark" else "Light"
+                recompose()
+            }
+        }
+
         Recompose { recomposeFileSelect ->
             MyFileSelect("Music File:", ConfigHome.data.defaultMusicFile,
                 onSelect = {

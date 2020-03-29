@@ -23,7 +23,7 @@ import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun SimpleCheckbox(
-    text: String,
+    hint: String,
     booleanProp: KMutableProperty0<Boolean>,
     textStyle: TextStyle? = null,
     onCheckedChange: (Boolean) -> Unit = {},
@@ -46,9 +46,39 @@ fun SimpleCheckbox(
                 booleanProp.set(!booleanProp.get())
                 recompose()
             }) {
-                Text(text, style = textStyle, modifier = textModifier)
+                Text(hint, style = textStyle, modifier = textModifier)
             }
         }
+    }
+}
+
+@Composable
+fun SimpleCheckbox(
+    hint: String,
+    value: Boolean,
+    textStyle: TextStyle? = null,
+    onCheckedChange: (Boolean) -> Unit = {},
+    textModifier: Modifier = Modifier.None
+) {
+    Row {
+        // Recompose { recompose ->
+        Switch(
+            checked = value,
+            onCheckedChange = {
+                onCheckedChange(it)
+                // recompose()
+            }
+        )
+
+        Spacer(LayoutWidth(10.dp))
+
+        Clickable(onClick = {
+            onCheckedChange(!value)
+            // recompose()
+        }) {
+            Text(hint, style = textStyle, modifier = textModifier)
+        }
+        // }
     }
 }
 

@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm
 
+import androidx.ui.material.ColorPalette
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 
@@ -8,7 +9,8 @@ object ConfigHome {
 
     data class ConfigData(
         var defaultMusicFile: String = "",
-        var defaultMusicFolder: String = ""
+        var defaultMusicFolder: String = "",
+        var theme: String = "Dark"
     )
 
     private val configFile: File by lazy {

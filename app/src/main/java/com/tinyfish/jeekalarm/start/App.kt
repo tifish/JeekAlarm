@@ -4,10 +4,13 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.ui.material.ColorPalette
 import com.beust.klaxon.Klaxon
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.ui.DarkColorPalette
 import com.tinyfish.jeekalarm.ui.GlobalState
+import com.tinyfish.jeekalarm.ui.LightColorPalette
 import com.tinyfish.jeekalarm.ui.ScreenType
 import java.text.SimpleDateFormat
 import java.util.*
@@ -26,6 +29,16 @@ class App : Application() {
         var editScheduleIndex = -1
         var screenBeforeNotification = ScreenType.MAIN
         val notificationAlarmIndexes = mutableListOf<Int>()
+
+        val theme = GlobalState<ColorPalette>(DarkColorPalette)
+        fun setThemeFromConfig() {
+            theme.value =
+                when (ConfigHome.data.theme) {
+                    "Dark" -> DarkColorPalette
+                    "Light" -> LightColorPalette
+                    else -> LightColorPalette
+                }
+        }
 
         val screen = GlobalState(ScreenType.MAIN)
         val nextAlarmIndexes = GlobalState(listOf<Int>())
@@ -72,6 +85,7 @@ class App : Application() {
 
         context = applicationContext
         ConfigHome.load()
+
         ScheduleHome.loadConfig()
         ScheduleHome.setNextAlarm()
     }

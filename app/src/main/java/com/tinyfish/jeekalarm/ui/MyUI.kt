@@ -58,14 +58,30 @@ fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -
 
 @Composable
 fun MyCheckbox(
-    text: String,
+    hint: String,
     booleanProp: KMutableProperty0<Boolean>,
     textStyle: TextStyle? = null,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
     SimpleCheckbox(
-        text = text,
+        hint = hint,
         booleanProp = booleanProp,
+        textStyle = textStyle,
+        onCheckedChange = onCheckedChange,
+        textModifier = LayoutHeight(36.dp) + LayoutWidth(200.dp)
+    )
+}
+
+@Composable
+fun MyCheckbox(
+    hint: String,
+    value: Boolean,
+    textStyle: TextStyle? = null,
+    onCheckedChange: (Boolean) -> Unit = {}
+) {
+    SimpleCheckbox(
+        hint = hint,
+        value = value,
         textStyle = textStyle,
         onCheckedChange = onCheckedChange,
         textModifier = LayoutHeight(36.dp) + LayoutWidth(200.dp)

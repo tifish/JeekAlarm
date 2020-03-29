@@ -64,7 +64,7 @@ private fun Editor() {
         Recompose { recompose ->
             HeightSpacer()
             MyCheckbox(
-                text = "Play Music:",
+                hint = "Play Music:",
                 booleanProp = editingSchedule::playMusic,
                 onCheckedChange = { recompose() })
 
