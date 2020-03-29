@@ -44,14 +44,14 @@ class App : Application() {
         val nextAlarmIndexes = GlobalState(listOf<Int>())
         val scheduleChangeTrigger = GlobalState(0)
         val isPlaying = GlobalState(false)
-        val isRemoving = GlobalState(false)
+        val removingIndex = GlobalState(-1)
 
         fun bindComposer() {
             screen.createState()
             nextAlarmIndexes.createState()
             scheduleChangeTrigger.createState()
             isPlaying.createState()
-            isRemoving.createState()
+            removingIndex.createState()
         }
 
         fun unbindComposer() {
@@ -59,7 +59,7 @@ class App : Application() {
             nextAlarmIndexes.destroyState()
             scheduleChangeTrigger.destroyState()
             isPlaying.destroyState()
-            isRemoving.destroyState()
+            removingIndex.destroyState()
         }
 
         fun startService() {

@@ -77,18 +77,16 @@ private fun ScheduleList() {
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
-        if (!App.isRemoving.value) {
-            Recompose { recompose ->
-                Container(modifier = LayoutGravity.Center) {
-                    Switch(
-                        checked = schedule.enabled,
-                        onCheckedChange = {
-                            schedule.enabled = it
-                            ScheduleHome.saveConfig()
-                            recompose()
-                        }
-                    )
-                }
+        Recompose { recompose ->
+            Container(modifier = LayoutGravity.Center) {
+                Switch(
+                    checked = schedule.enabled,
+                    onCheckedChange = {
+                        schedule.enabled = it
+                        ScheduleHome.saveConfig()
+                        recompose()
+                    }
+                )
             }
         }
 
@@ -96,7 +94,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         Ripple(bounded = true) {
             Clickable(onClick = {
-                if (!App.isRemoving.value) {
+                if (App.removingIndex.value == -1) {
                     App.editScheduleIndex = index
                     App.screen.value = ScreenType.EDIT
                 }
@@ -115,11 +113,20 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }
         }
 
-        if (App.isRemoving.value) {
-            Spacer(LayoutWidth(20.dp))
-            SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
+        if (App.removingIndex.value == -1) {
+            SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
+                App.removingIndex.value = index
+            }
+        } else if (App.removingIndex.value == index) {
+            SimpleVectorButton(vectorResource(R.drawable.ic_done), "Sure") {
+                App.removingIndex.value = -1
                 ScheduleHome.scheduleList.removeAt(index)
                 ScheduleHome.saveConfig()
+            }
+
+            Spacer(LayoutWidth(20.dp))
+            SimpleVectorButton(vectorResource(R.drawable.ic_back), "Cancel") {
+                App.removingIndex.value = -1
             }
         }
     }
@@ -128,25 +135,14 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        if (App.isRemoving.value) {
-            SimpleVectorButton(vectorResource(R.drawable.ic_done), "Done") {
-                App.isRemoving.value = false
-            }
-        } else {
-            SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
-                App.editScheduleIndex = -1
-                App.screen.value = ScreenType.EDIT
-            }
+        SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
+            App.editScheduleIndex = -1
+            App.screen.value = ScreenType.EDIT
+        }
 
-            WidthSpacer(36.dp)
-            SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
-                App.isRemoving.value = true
-            }
-
-            WidthSpacer(24.dp)
-            SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
-                App.screen.value = ScreenType.SETTINGS
-            }
+        WidthSpacer(24.dp)
+        SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
+            App.screen.value = ScreenType.SETTINGS
         }
     }
 }
