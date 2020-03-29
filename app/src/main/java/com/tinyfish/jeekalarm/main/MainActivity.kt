@@ -42,12 +42,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (App.screen.value == ScreenType.MAIN)
-            super.onBackPressed()
-        else if (App.screen.value == ScreenType.EDIT)
+        if (App.screen.value == ScreenType.MAIN) {
+            if (App.removingIndex.value > -1)
+                App.removingIndex.value = -1
+            else
+                super.onBackPressed()
+        } else if (App.screen.value == ScreenType.EDIT) {
             onEditScreenPressBack()
-        else if (App.screen.value == ScreenType.SETTINGS)
+        } else if (App.screen.value == ScreenType.SETTINGS) {
             onSettingsScreenPressBack()
+        }
     }
 
     override fun onActivityResult(

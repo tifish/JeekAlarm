@@ -15,7 +15,6 @@ import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
-import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
@@ -107,20 +106,23 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }
         }
 
-        if (App.removingIndex.value == -1) {
-            SimpleVectorButton(vectorResource(R.drawable.ic_remove), "Remove") {
-                App.removingIndex.value = index
-            }
-        } else if (App.removingIndex.value == index) {
-            SimpleVectorButton(vectorResource(R.drawable.ic_done), "Sure") {
-                App.removingIndex.value = -1
-                ScheduleHome.scheduleList.removeAt(index)
-                ScheduleHome.saveConfig()
-            }
+        Row(LayoutGravity.Center) {
+            if (App.removingIndex.value == -1) {
+                SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
+                    App.removingIndex.value = index
+                }
+                WidthSpacer()
+            } else if (App.removingIndex.value == index) {
+                SimpleVectorButton(vectorResource(R.drawable.ic_done), "Sure") {
+                    App.removingIndex.value = -1
+                    ScheduleHome.scheduleList.removeAt(index)
+                    ScheduleHome.saveConfig()
+                }
 
-            Spacer(LayoutWidth(20.dp))
-            SimpleVectorButton(vectorResource(R.drawable.ic_back), "Cancel") {
-                App.removingIndex.value = -1
+                Spacer(LayoutWidth(20.dp))
+                SimpleVectorButton(vectorResource(R.drawable.ic_back), "Cancel") {
+                    App.removingIndex.value = -1
+                }
             }
         }
     }
