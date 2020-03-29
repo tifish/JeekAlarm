@@ -51,14 +51,14 @@ private fun Editor() {
         MyCheckbox("Only Once", editingSchedule::onlyOnce)
 
         HeightSpacer()
-        MyTextField("Name: ", editingSchedule::name)
+        MyCronTimeTextField("Name: ", editingSchedule::name)
         Column {
             uiTimeConfigChanged.value
-            MyTextField("Minute: ", editingSchedule::minuteConfig, true)
-            MyTextField("Hour: ", editingSchedule::hourConfig, true)
-            MyTextField("Day: ", editingSchedule::dayConfig, true)
-            MyTextField("Month: ", editingSchedule::monthConfig, true)
-            MyTextField("WeekDay: ", editingSchedule::weekDayConfig, true)
+            MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true)
+            MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true)
+            MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true)
+            MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true)
+            MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true)
         }
 
         Recompose { recompose ->

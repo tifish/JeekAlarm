@@ -2,19 +2,22 @@ package com.tinyfish.jeekalarm.ui
 
 import androidx.compose.Composable
 import androidx.compose.Recompose
-import androidx.compose.state
+import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
 import androidx.ui.foundation.Clickable
 import androidx.ui.foundation.Icon
+import androidx.ui.graphics.Color
+import androidx.ui.graphics.Shape
 import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.layout.*
+import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Switch
 import androidx.ui.material.ripple.Ripple
-import androidx.ui.text.TextFieldValue
-import androidx.ui.text.TextRange
+import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
+import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
 import kotlin.reflect.KMutableProperty0
 
@@ -64,29 +67,38 @@ fun SimpleTextField(
     Row(modifier) {
         Text(hint, hintModifier, style = hintStyle)
 
-        var textRange by state { TextRange(0, 0) }
+        // var textRange by state { TextRange(0, 0) }
 
-        TextField(
-            modifier = textModifier,
-            value = TextFieldValue(textProp.get(), textRange),
-            onValueChange = { textProp.set(it.text); textRange = it.selection },
-            onFocus = {
-                textRange = TextRange(0, textProp.get().length)
+        Recompose { recompose ->
+            TextField(
+                modifier = textModifier,
+                value = textProp.get(),
+                onValueChange = {
+                    textProp.set(it)
+                    recompose()
+                },
+                onFocus = {
+                    // textRange = TextRange(0, textProp.get().length)
 
-                onFocus()
-            },
-            onBlur = {
-                textRange = TextRange(0, 0)
+                    onFocus()
+                },
+                onBlur = {
+                    // textRange = TextRange(0, 0)
 
-                onBlur()
-            },
-            textStyle = textStyle
-        )
+                    onBlur()
+                },
+                textStyle = textStyle
+            )
+        }
     }
 }
 
 @Composable
-fun SimpleVectorButton(vectorAsset: VectorAsset, text: String = "", onClick: () -> Unit) {
+fun SimpleVectorButton(
+    vectorAsset: VectorAsset,
+    text: String = "",
+    onClick: () -> Unit
+) {
     Ripple(bounded = false) {
         Clickable(onClick = onClick) {
             Column {
@@ -101,6 +113,28 @@ fun SimpleVectorButton(vectorAsset: VectorAsset, text: String = "", onClick: () 
                 if (text != "") {
                     Spacer(modifier = LayoutHeight(vectorAsset.defaultHeight / 8))
                     Text(text = text, modifier = LayoutGravity.Center)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SimpleTextButton(
+    text: String = "",
+    width: Dp? = null,
+    height: Dp? = null,
+    shape: Shape = MaterialTheme.shapes().button,
+    backgroundColor: Color = MaterialTheme.colors().primary,
+    onClick: () -> Unit
+) {
+    Container(width = width, height = height) {
+        Surface(shape = shape, color = backgroundColor) {
+            Ripple(bounded = false) {
+                Clickable(onClick = onClick) {
+                    Align(Alignment.Center) {
+                        Text(text = text)
+                    }
                 }
             }
         }

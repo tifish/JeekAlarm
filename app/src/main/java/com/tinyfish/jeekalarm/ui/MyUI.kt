@@ -6,8 +6,8 @@ import androidx.compose.Recompose
 import androidx.compose.state
 import androidx.ui.core.Text
 import androidx.ui.foundation.Icon
+import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.layout.*
-import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.TopAppBar
 import androidx.ui.material.surface.Surface
@@ -73,47 +73,76 @@ fun MyCheckbox(
 }
 
 @Composable
-fun MyTextField(
+fun MyCronTimeTextField(
     hint: String,
     textProp: KMutableProperty0<String>,
     isTimeConfig: Boolean = false
 ) {
-    Container(LayoutHeight(36.dp)) {
-        Row {
-            val focusedState = state { false }
+    Row(LayoutHeight(36.dp)) {
+        val focusedState = state { false }
 
-            Recompose { recompose ->
-                SimpleTextField(
-                    hint = hint,
-                    textProp = textProp,
-                    hintModifier = LayoutWidth(80.dp),
-                    onFocus = { focusedState.value = true },
-                    onBlur = { focusedState.value = false },
-                    textModifier = LayoutWidth(160.dp),
-                    textStyle = TextStyle(fontSize = (20.sp)),
-                    modifier = LayoutFlexible(1f, true)
-                )
+        Recompose { recompose ->
+            SimpleTextField(
+                hint = hint,
+                textProp = textProp,
+                hintModifier = LayoutWidth(80.dp),
+                onFocus = { focusedState.value = true },
+                onBlur = { focusedState.value = false },
+                textModifier = LayoutWidth(160.dp),
+                textStyle = TextStyle(fontSize = (20.sp)),
+                modifier = LayoutFlexible(1f, true)
+            )
 
-                if (isTimeConfig && focusedState.value) {
-                    Button(onClick = {
-                        textProp.set("*")
-                        recompose()
-                    }) {
-                        Text("*")
-                    }
+            if (isTimeConfig && focusedState.value) {
+                MyTextButton("*") {
+                    textProp.set("*")
+                    recompose()
+                }
 
-                    WidthSpacer()
+                WidthSpacer()
 
-                    Button(onClick = {
-                        textProp.set("0")
-                        recompose()
-                    }) {
-                        Text("0")
-                    }
+                MyTextButton("0") {
+                    textProp.set("0")
+                    recompose()
+                }
+
+                WidthSpacer()
+
+                MyTextButton("1-3") {
+                    textProp.set("1-3")
+                    recompose()
+                }
+
+                WidthSpacer()
+
+                MyTextButton("1,3") {
+                    textProp.set("1,3")
+                    recompose()
+                }
+
+                WidthSpacer()
+
+                MyTextButton("*/3") {
+                    textProp.set("*/3")
+                    recompose()
                 }
             }
         }
     }
+}
+
+@Composable
+fun MyTextButton(
+    text: String = "",
+    onClick: () -> Unit
+) {
+    SimpleTextButton(
+        text = text,
+        width = 30.dp,
+        height = 30.dp,
+        shape = CircleShape,
+        onClick = onClick
+    )
 }
 
 @Composable
