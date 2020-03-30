@@ -124,10 +124,15 @@ private fun Editor() {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        SimpleVectorButton(
-            vectorResource(R.drawable.ic_back), "Back"
-        ) {
+        SimpleVectorButton(vectorResource(R.drawable.ic_back), if (isAdding) "Add" else "Back") {
             onEditScreenPressBack()
+        }
+
+        if (isAdding) {
+            WidthSpacer(36.dp)
+            SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
+                App.screen.value = ScreenType.MAIN
+            }
         }
 
         WidthSpacer(36.dp)

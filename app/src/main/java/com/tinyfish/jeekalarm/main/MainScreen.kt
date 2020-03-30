@@ -113,7 +113,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 }
                 WidthSpacer()
             } else if (App.removingIndex.value == index) {
-                SimpleVectorButton(vectorResource(R.drawable.ic_done), "Sure") {
+                SimpleVectorButton(vectorResource(R.drawable.ic_done), "Remove") {
                     App.removingIndex.value = -1
                     ScheduleHome.scheduleList.removeAt(index)
                     ScheduleHome.saveConfig()
