@@ -28,7 +28,7 @@ object LightColorPalette : ColorPalette {
     override var background = Color.White // Scaffold's content background
     override var surface = Color.Gray // Surface, Switch off
     override var error = Color.Red
-    override var onPrimary = Color.Black // text on primary
+    override var onPrimary = Color.White // text on primary
     override var onSecondary = Color.Black
     override var onBackground = Color.Black
     override var onSurface = Color.Black // text on Surface, Switch off background
