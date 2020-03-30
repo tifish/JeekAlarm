@@ -2,6 +2,7 @@ package com.tinyfish.jeekalarm.edit
 
 import androidx.compose.*
 import androidx.ui.core.Text
+import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.Column
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.material.MaterialTheme
@@ -45,81 +46,84 @@ fun EditScreen() {
 
 @Composable
 private fun Editor() {
-    Column(LayoutPadding(20.dp)) {
-        MyCheckbox("Enabled", editingSchedule::enabled)
-        HeightSpacer()
-        MyCheckbox("Only Once", editingSchedule::onlyOnce)
-
-        HeightSpacer()
-        MyCronTimeTextField("Name: ", editingSchedule::name)
-        Column {
-            uiTimeConfigChanged.value
-            MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true)
-            MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true)
-            MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true)
-            MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true)
-            MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true)
-        }
-
-        Recompose { recompose ->
+    VerticalScroller {
+        Column(LayoutPadding(20.dp)) {
+            MyCheckbox("Enabled", editingSchedule::enabled)
             HeightSpacer()
-            MyCheckbox(
-                hint = "Play Music:",
-                booleanProp = editingSchedule::playMusic,
-                onCheckedChange = { recompose() })
+            MyCheckbox("Only Once", editingSchedule::onlyOnce)
 
-            if (editingSchedule.playMusic) {
-                HeightSpacer()
-                Recompose { recomposeFileSelect ->
-                    MyFileSelect("Music File:", editingSchedule.musicFile,
-                        onSelect = {
-                            FileSelector.openMusicFile {
-                                editingSchedule.musicFile = it?.path?.substringAfter(':')!!
-                                recomposeFileSelect()
-                            }
-                        },
-                        onClear = {
-                            editingSchedule.musicFile = ""
-                            recomposeFileSelect()
-                        }
-                    )
-                }
-
-                HeightSpacer()
-                Recompose { recomposeFileSelect ->
-                    MyFileSelect("Music Folder:", editingSchedule.musicFolder,
-                        onSelect = {
-                            FileSelector.openFolder {
-                                editingSchedule.musicFolder = it?.path?.substringAfter(':')!!
-                                recomposeFileSelect()
-                            }
-                        },
-                        onClear = {
-                            editingSchedule.musicFolder = ""
-                            recomposeFileSelect()
-                        }
-                    )
-                }
+            HeightSpacer()
+            MyCronTimeTextField("Name: ", editingSchedule::name)
+            Column {
+                uiTimeConfigChanged.value
+                MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true)
+                MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true)
+                MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true)
+                MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true)
+                MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true)
             }
 
-            Recompose { recomposeVibration ->
+            Recompose { recompose ->
                 HeightSpacer()
                 MyCheckbox(
-                    "Vibration",
-                    editingSchedule::vibration,
-                    onCheckedChange = { recomposeVibration() })
+                    hint = "Play Music:",
+                    booleanProp = editingSchedule::playMusic,
+                    onCheckedChange = { recompose() })
 
-                if (editingSchedule.vibration) {
+                if (editingSchedule.playMusic) {
                     HeightSpacer()
-                    Text(
-                        editingSchedule.vibrationCount.toString(),
-                        modifier = LayoutPadding(start = 20.dp)
-                    )
+                    Recompose { recomposeFileSelect ->
+                        MyFileSelect("Music File:", editingSchedule.musicFile,
+                            onSelect = {
+                                FileSelector.openMusicFile {
+                                    editingSchedule.musicFile = it?.path?.substringAfter(':')!!
+                                    recomposeFileSelect()
+                                }
+                            },
+                            onClear = {
+                                editingSchedule.musicFile = ""
+                                recomposeFileSelect()
+                            }
+                        )
+                    }
+
+                    HeightSpacer()
+                    Recompose { recomposeFileSelect ->
+                        MyFileSelect("Music Folder:", editingSchedule.musicFolder,
+                            onSelect = {
+                                FileSelector.openFolder {
+                                    editingSchedule.musicFolder = it?.path?.substringAfter(':')!!
+                                    recomposeFileSelect()
+                                }
+                            },
+                            onClear = {
+                                editingSchedule.musicFolder = ""
+                                recomposeFileSelect()
+                            }
+                        )
+                    }
+                }
+
+                Recompose { recomposeVibration ->
+                    HeightSpacer()
+                    MyCheckbox(
+                        "Vibration",
+                        editingSchedule::vibration,
+                        onCheckedChange = { recomposeVibration() })
+
+                    if (editingSchedule.vibration) {
+                        HeightSpacer()
+                        Text(
+                            editingSchedule.vibrationCount.toString(),
+                            modifier = LayoutPadding(start = 20.dp)
+                        )
+                    }
                 }
             }
         }
     }
 }
+
 
 @Composable
 private fun BottomBar() {

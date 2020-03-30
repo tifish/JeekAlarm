@@ -177,7 +177,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
 @Composable
 fun MyBottomBar(buttons: @Composable() () -> Unit) {
     Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
-        Container(modifier = LayoutHeight(100.dp), expanded = true) {
+        Container(modifier = LayoutHeight(80.dp), expanded = true) {
             Row(arrangement = Arrangement.Center) {
                 buttons()
             }
