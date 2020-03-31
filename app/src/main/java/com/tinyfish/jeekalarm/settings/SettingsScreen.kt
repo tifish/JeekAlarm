@@ -36,16 +36,18 @@ fun SettingsScreen() {
 private fun Editor() {
     Column(LayoutPadding(20.dp)) {
         Recompose { recompose ->
-            MyCheckbox(
-                hint = "Dark theme",
+            MySwitch(
+                hint = "Dark",
                 value = ConfigHome.data.theme == "Dark"
             ) {
                 ConfigHome.data.theme = if (it) "Dark" else "Light"
+                ConfigHome.save()
                 App.setThemeFromConfig()
                 recompose()
             }
         }
 
+        HeightSpacer()
         Recompose { recomposeFileSelect ->
             MyFileSelect("Music File:", ConfigHome.data.defaultMusicFile,
                 onSelect = {

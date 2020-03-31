@@ -148,7 +148,7 @@ private fun BottomBar() {
                 App.editScheduleIndex = -1
                 App.screen.value = ScreenType.EDIT
             }
-            WidthSpacer(24.dp)
+            ToolButtonWidthSpacer()
         }
 
         SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {

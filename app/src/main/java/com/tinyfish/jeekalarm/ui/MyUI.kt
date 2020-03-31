@@ -16,7 +16,9 @@ import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
+import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.start.App
 import kotlin.reflect.KMutableProperty0
 
 enum class ScreenType {
@@ -34,6 +36,11 @@ fun HeightSpacer(height: Dp = 10.dp) {
 @Composable
 fun WidthSpacer(width: Dp = 10.dp) {
     Spacer(LayoutWidth(width))
+}
+
+@Composable
+fun ToolButtonWidthSpacer() {
+    WidthSpacer(36.dp)
 }
 
 @Composable
@@ -57,13 +64,13 @@ fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -
 }
 
 @Composable
-fun MyCheckbox(
+fun MySwitch(
     hint: String,
     booleanProp: KMutableProperty0<Boolean>,
     textStyle: TextStyle? = null,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    SimpleCheckbox(
+    SimpleSwitch(
         hint = hint,
         booleanProp = booleanProp,
         textStyle = textStyle,
@@ -73,13 +80,13 @@ fun MyCheckbox(
 }
 
 @Composable
-fun MyCheckbox(
+fun MySwitch(
     hint: String,
     value: Boolean,
     textStyle: TextStyle? = null,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    SimpleCheckbox(
+    SimpleSwitch(
         hint = hint,
         value = value,
         textStyle = textStyle,

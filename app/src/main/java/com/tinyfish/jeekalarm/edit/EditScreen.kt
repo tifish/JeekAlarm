@@ -48,9 +48,9 @@ fun EditScreen() {
 private fun Editor() {
     VerticalScroller {
         Column(LayoutPadding(20.dp)) {
-            MyCheckbox("Enabled", editingSchedule::enabled)
+            MySwitch("Enabled", editingSchedule::enabled)
             HeightSpacer()
-            MyCheckbox("Only Once", editingSchedule::onlyOnce)
+            MySwitch("Only Once", editingSchedule::onlyOnce)
 
             HeightSpacer()
             MyCronTimeTextField("Name: ", editingSchedule::name)
@@ -65,7 +65,7 @@ private fun Editor() {
 
             Recompose { recompose ->
                 HeightSpacer()
-                MyCheckbox(
+                MySwitch(
                     hint = "Play Music:",
                     booleanProp = editingSchedule::playMusic,
                     onCheckedChange = { recompose() })
@@ -106,7 +106,7 @@ private fun Editor() {
 
                 Recompose { recomposeVibration ->
                     HeightSpacer()
-                    MyCheckbox(
+                    MySwitch(
                         "Vibration",
                         editingSchedule::vibration,
                         onCheckedChange = { recomposeVibration() })
@@ -133,13 +133,13 @@ private fun BottomBar() {
         }
 
         if (isAdding) {
-            WidthSpacer(36.dp)
+            ToolButtonWidthSpacer()
             SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
                 App.screen.value = ScreenType.MAIN
             }
         }
 
-        WidthSpacer(36.dp)
+        ToolButtonWidthSpacer()
         SimpleVectorButton(vectorResource(R.drawable.ic_access_time), "Now") {
             Calendar.getInstance().apply {
                 editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
@@ -150,7 +150,7 @@ private fun BottomBar() {
             }
         }
 
-        WidthSpacer(36.dp)
+        ToolButtonWidthSpacer()
         Observe {
             val text = if (App.isPlaying.value) "Stop" else "Play"
             val onClick = {
