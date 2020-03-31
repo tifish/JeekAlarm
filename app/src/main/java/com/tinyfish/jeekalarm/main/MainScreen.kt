@@ -53,15 +53,25 @@ fun MainScreen() {
 
 @Composable
 private fun ScheduleList() {
-    VerticalScroller {
-        Column(LayoutPadding(20.dp)) {
-            App.scheduleChangeTrigger.value
+    App.scheduleChangeTrigger.value
 
-            val now = Calendar.getInstance()
-            for ((index, schedule) in ScheduleHome.scheduleList.withIndex()) {
-                HeightSpacer()
-                ScheduleItem(index, schedule, now)
-                Divider(color = Color.DarkGray)
+    if (ScheduleHome.scheduleList.size == 0) {
+        Center {
+            SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
+                App.editScheduleIndex = -1
+                App.screen.value = ScreenType.EDIT
+            }
+        }
+    } else {
+        VerticalScroller {
+            Column(LayoutPadding(20.dp)) {
+
+                val now = Calendar.getInstance()
+                for ((index, schedule) in ScheduleHome.scheduleList.withIndex()) {
+                    HeightSpacer()
+                    ScheduleItem(index, schedule, now)
+                    Divider(color = Color.DarkGray)
+                }
             }
         }
     }
@@ -131,12 +141,16 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
-            App.editScheduleIndex = -1
-            App.screen.value = ScreenType.EDIT
+        App.scheduleChangeTrigger.value
+
+        if (ScheduleHome.scheduleList.size > 0) {
+            SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
+                App.editScheduleIndex = -1
+                App.screen.value = ScreenType.EDIT
+            }
+            WidthSpacer(24.dp)
         }
 
-        WidthSpacer(24.dp)
         SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
             App.screen.value = ScreenType.SETTINGS
         }
