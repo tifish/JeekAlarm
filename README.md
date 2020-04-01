@@ -1,4 +1,4 @@
-![](https://github.com/tifish/JeekAlarm/blob/master/app/src/main/res/mipmap-hdpi/ic_launcher_round.png)
+# ![](https://github.com/tifish/JeekAlarm/blob/master/app/src/main/res/mipmap-mdpi/ic_launcher_round.png)JeekAlarm
 
 * Alarm app using crontab format.
 * The UI is built with jetpack compose.
