@@ -4,7 +4,6 @@ import androidx.compose.*
 import androidx.ui.core.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.Column
-import androidx.ui.layout.LayoutHeight
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
@@ -55,12 +54,17 @@ private fun Editor() {
 
             HeightSpacer()
             MyCronTimeTextField("Name: ", editingSchedule::name)
-            Column {
+            Column(LayoutPadding(start = 20.dp)) {
                 uiTimeConfigChanged.value
+                HeightSpacer()
                 MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true)
+                HeightSpacer()
                 MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true)
+                HeightSpacer()
                 MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true)
+                HeightSpacer()
                 MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true)
+                HeightSpacer()
                 MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true)
             }
 
@@ -72,36 +76,39 @@ private fun Editor() {
                     onCheckedChange = { recompose() })
 
                 if (editingSchedule.playMusic) {
-                    HeightSpacer()
-                    Recompose { recomposeFileSelect ->
-                        MyFileSelect("Music File:", editingSchedule.musicFile,
-                            onSelect = {
-                                FileSelector.openMusicFile {
-                                    editingSchedule.musicFile = it?.path?.substringAfter(':')!!
+                    Column(LayoutPadding(start = 20.dp)) {
+                        HeightSpacer()
+                        Recompose { recomposeFileSelect ->
+                            MyFileSelect("Music File:", editingSchedule.musicFile,
+                                onSelect = {
+                                    FileSelector.openMusicFile {
+                                        editingSchedule.musicFile = it?.path?.substringAfter(':')!!
+                                        recomposeFileSelect()
+                                    }
+                                },
+                                onClear = {
+                                    editingSchedule.musicFile = ""
                                     recomposeFileSelect()
                                 }
-                            },
-                            onClear = {
-                                editingSchedule.musicFile = ""
-                                recomposeFileSelect()
-                            }
-                        )
-                    }
+                            )
+                        }
 
-                    HeightSpacer()
-                    Recompose { recomposeFileSelect ->
-                        MyFileSelect("Music Folder:", editingSchedule.musicFolder,
-                            onSelect = {
-                                FileSelector.openFolder {
-                                    editingSchedule.musicFolder = it?.path?.substringAfter(':')!!
+                        HeightSpacer()
+                        Recompose { recomposeFileSelect ->
+                            MyFileSelect("Music Folder:", editingSchedule.musicFolder,
+                                onSelect = {
+                                    FileSelector.openFolder {
+                                        editingSchedule.musicFolder =
+                                            it?.path?.substringAfter(':')!!
+                                        recomposeFileSelect()
+                                    }
+                                },
+                                onClear = {
+                                    editingSchedule.musicFolder = ""
                                     recomposeFileSelect()
                                 }
-                            },
-                            onClear = {
-                                editingSchedule.musicFolder = ""
-                                recomposeFileSelect()
-                            }
-                        )
+                            )
+                        }
                     }
                 }
 

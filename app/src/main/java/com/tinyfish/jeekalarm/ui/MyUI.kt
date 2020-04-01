@@ -101,7 +101,7 @@ fun MyCronTimeTextField(
     textProp: KMutableProperty0<String>,
     isTimeConfig: Boolean = false
 ) {
-    Row(LayoutHeight(36.dp)) {
+    Row {
         val focusedState = state { false }
 
         Recompose { recompose ->
