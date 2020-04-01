@@ -9,9 +9,9 @@ import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Surface
 import androidx.ui.material.Switch
 import androidx.ui.material.ripple.Ripple
-import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
@@ -43,7 +43,7 @@ fun MainScreen() {
         MyTopBar(R.drawable.ic_alarm, "JeekAlarm")
         Surface(
             color = MaterialTheme.colors().background,
-            modifier = LayoutFlexible(1f, true)
+            modifier = LayoutWeight(1f, true)
         ) {
             ScheduleList()
         }
@@ -102,7 +102,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     App.screen.value = ScreenType.EDIT
                 }
             }) {
-                Column(LayoutFlexible(1f, true)) {
+                Column(LayoutWeight(1f, true)) {
                     Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
                     Text(
                         schedule.timeConfig,

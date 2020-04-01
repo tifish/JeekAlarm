@@ -2,7 +2,6 @@ package com.tinyfish.jeekalarm.ui
 
 import androidx.compose.Composable
 import androidx.compose.Recompose
-import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
 import androidx.ui.core.Text
 import androidx.ui.core.TextField
@@ -13,9 +12,9 @@ import androidx.ui.graphics.Shape
 import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Surface
 import androidx.ui.material.Switch
 import androidx.ui.material.ripple.Ripple
-import androidx.ui.material.surface.Surface
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
@@ -25,7 +24,7 @@ import kotlin.reflect.KMutableProperty0
 fun SimpleSwitch(
     hint: String,
     booleanProp: KMutableProperty0<Boolean>,
-    textStyle: TextStyle? = null,
+    textStyle: TextStyle = TextStyle.Default,
     onCheckedChange: (Boolean) -> Unit = {},
     textModifier: Modifier = Modifier.None
 ) {
@@ -56,7 +55,7 @@ fun SimpleSwitch(
 fun SimpleSwitch(
     hint: String,
     value: Boolean,
-    textStyle: TextStyle? = null,
+    textStyle: TextStyle = TextStyle.Default,
     onCheckedChange: (Boolean) -> Unit = {},
     textModifier: Modifier = Modifier.None
 ) {
@@ -108,9 +107,9 @@ fun SimpleTextField(
     onBlur: () -> Unit = {},
     modifier: Modifier = Modifier.None,
     hintModifier: Modifier = Modifier.None,
-    hintStyle: TextStyle? = null,
+    hintStyle: TextStyle = TextStyle.Default,
     textModifier: Modifier = Modifier.None,
-    textStyle: TextStyle? = null
+    textStyle: TextStyle = TextStyle.Default
 ) {
     Row(modifier) {
         Text(hint, hintModifier, style = hintStyle)
@@ -176,13 +175,11 @@ fun SimpleTextButton(
     backgroundColor: Color = MaterialTheme.colors().primary,
     onClick: () -> Unit
 ) {
-    Container(width = width, height = height) {
-        Surface(shape = shape, color = backgroundColor) {
+    Surface(shape = shape, color = backgroundColor) {
+        Container(width = width, height = height) {
             Ripple(bounded = false) {
                 Clickable(onClick = onClick) {
-                    Align(Alignment.Center) {
-                        Text(text = text)
-                    }
+                    Text(text = text, modifier = LayoutAlign.Center)
                 }
             }
         }

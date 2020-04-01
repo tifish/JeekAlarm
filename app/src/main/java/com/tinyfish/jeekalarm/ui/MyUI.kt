@@ -9,8 +9,8 @@ import androidx.ui.foundation.Icon
 import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.Surface
 import androidx.ui.material.TopAppBar
-import androidx.ui.material.surface.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
@@ -47,7 +47,7 @@ fun ToolButtonWidthSpacer() {
 fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -> Unit) {
     Row {
         Text(hint, LayoutWidth(100.dp))
-        Text(text, LayoutFlexible(1f, true))
+        Text(text, LayoutWeight(1f, true))
 
         SimpleVectorButton(
             vectorResource(R.drawable.ic_location_searching),
@@ -67,7 +67,7 @@ fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -
 fun MySwitch(
     hint: String,
     booleanProp: KMutableProperty0<Boolean>,
-    textStyle: TextStyle? = null,
+    textStyle: TextStyle = TextStyle.Default,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
     SimpleSwitch(
@@ -83,7 +83,7 @@ fun MySwitch(
 fun MySwitch(
     hint: String,
     value: Boolean,
-    textStyle: TextStyle? = null,
+    textStyle: TextStyle = TextStyle.Default,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
     SimpleSwitch(
@@ -113,7 +113,7 @@ fun MyCronTimeTextField(
                 onBlur = { focusedState.value = false },
                 textModifier = LayoutWidth(160.dp),
                 textStyle = TextStyle(fontSize = (20.sp)),
-                modifier = LayoutFlexible(1f, true)
+                modifier = LayoutWeight(1f, true)
             )
 
             if (isTimeConfig && focusedState.value) {

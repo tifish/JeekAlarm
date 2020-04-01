@@ -4,9 +4,10 @@ import androidx.compose.*
 import androidx.ui.core.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.Column
+import androidx.ui.layout.LayoutHeight
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.material.MaterialTheme
-import androidx.ui.material.surface.Surface
+import androidx.ui.material.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.R
@@ -36,7 +37,7 @@ fun EditScreen() {
         MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit")
         Surface(
             color = MaterialTheme.colors().background,
-            modifier = LayoutFlexible(1f, true)
+            modifier = LayoutWeight(1f, true)
         ) {
             Editor()
         }

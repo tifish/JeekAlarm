@@ -4,10 +4,11 @@ import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.ui.core.Text
 import androidx.ui.layout.Column
+import androidx.ui.layout.LayoutHeight
 import androidx.ui.layout.LayoutPadding
 import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
-import androidx.ui.material.surface.Surface
+import androidx.ui.material.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigHome
@@ -24,7 +25,7 @@ fun SettingsScreen() {
         MyTopBar(R.drawable.ic_settings, "Settings")
         Surface(
             color = MaterialTheme.colors().background,
-            modifier = LayoutFlexible(1f, true)
+            modifier = LayoutWeight(1f, true)
         ) {
             Editor()
         }
