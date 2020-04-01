@@ -9,9 +9,10 @@ import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
-import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.start.App
+import com.tinyfish.jeekalarm.ui.HeightSpacer
 import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 
 @Composable
@@ -33,13 +34,15 @@ fun NotificationContent() {
         for (alarmIndex in App.notificationAlarmIndexes) {
             val schedule = ScheduleHome.scheduleList[alarmIndex]
 
-            Text(schedule.name, style = textStyle)
-            Text(schedule.timeConfig, style = textStyle)
+            Text(schedule.name, style = textStyle, modifier = LayoutGravity.Center)
+            Text(schedule.timeConfig, style = textStyle, modifier = LayoutGravity.Center)
 
             Spacer(LayoutHeight(16.dp))
         }
 
-        Row {
+        HeightSpacer(36.dp)
+
+        Row(modifier = LayoutGravity.Center) {
             val text = if (App.isPlaying.value) "Pause" else "Play"
             val onClick = {
                 if (App.isPlaying.value)
