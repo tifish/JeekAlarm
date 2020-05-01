@@ -2,10 +2,10 @@ package com.tinyfish.jeekalarm.settings
 
 import androidx.compose.Composable
 import androidx.compose.Recompose
-import androidx.ui.core.Text
+import androidx.ui.core.Modifier
+import androidx.ui.foundation.Text
 import androidx.ui.layout.Column
-import androidx.ui.layout.LayoutHeight
-import androidx.ui.layout.LayoutPadding
+import androidx.ui.layout.padding
 import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
@@ -24,8 +24,8 @@ fun SettingsScreen() {
     Column {
         MyTopBar(R.drawable.ic_settings, "Settings")
         Surface(
-            color = MaterialTheme.colors().background,
-            modifier = LayoutWeight(1f, true)
+            color = MaterialTheme.colors.background,
+            modifier = Modifier.weight(1f, true)
         ) {
             Editor()
         }
@@ -35,7 +35,7 @@ fun SettingsScreen() {
 
 @Composable
 private fun Editor() {
-    Column(LayoutPadding(20.dp)) {
+    Column(Modifier.padding(20.dp)) {
         Recompose { recompose ->
             MySwitch(
                 hint = "Dark",

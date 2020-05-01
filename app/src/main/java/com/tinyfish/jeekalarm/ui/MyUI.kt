@@ -4,8 +4,10 @@ import androidx.annotation.DrawableRes
 import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.compose.state
-import androidx.ui.core.Text
+import androidx.ui.core.Alignment
+import androidx.ui.core.Modifier
 import androidx.ui.foundation.Icon
+import androidx.ui.foundation.Text
 import androidx.ui.foundation.shape.corner.CircleShape
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
@@ -16,9 +18,7 @@ import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
 import androidx.ui.unit.sp
-import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
-import com.tinyfish.jeekalarm.start.App
 import kotlin.reflect.KMutableProperty0
 
 enum class ScreenType {
@@ -30,12 +30,12 @@ enum class ScreenType {
 
 @Composable
 fun HeightSpacer(height: Dp = 10.dp) {
-    Spacer(LayoutHeight(height))
+    Spacer(Modifier.preferredHeight(height))
 }
 
 @Composable
 fun WidthSpacer(width: Dp = 10.dp) {
-    Spacer(LayoutWidth(width))
+    Spacer(Modifier.preferredWidth(width))
 }
 
 @Composable
@@ -46,8 +46,9 @@ fun ToolButtonWidthSpacer() {
 @Composable
 fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -> Unit) {
     Row {
-        Text(hint, LayoutWidth(100.dp))
-        Text(text, LayoutWeight(1f, true))
+        Text(hint)
+        WidthSpacer()
+        Text(text, Modifier.weight(1f, true))
 
         SimpleVectorButton(
             vectorResource(R.drawable.ic_location_searching),
@@ -75,7 +76,7 @@ fun MySwitch(
         booleanProp = booleanProp,
         textStyle = textStyle,
         onCheckedChange = onCheckedChange,
-        textModifier = LayoutHeight(36.dp) + LayoutWidth(200.dp)
+        textModifier = Modifier.size(200.dp, 36.dp)
     )
 }
 
@@ -91,7 +92,7 @@ fun MySwitch(
         value = value,
         textStyle = textStyle,
         onCheckedChange = onCheckedChange,
-        textModifier = LayoutHeight(36.dp) + LayoutWidth(200.dp)
+        textModifier = Modifier.size(200.dp, 36.dp)
     )
 }
 
@@ -108,12 +109,12 @@ fun MyCronTimeTextField(
             SimpleTextField(
                 hint = hint,
                 textProp = textProp,
-                hintModifier = LayoutWidth(80.dp),
+                hintModifier = Modifier.preferredWidth(80.dp),
                 onFocus = { focusedState.value = true },
                 onBlur = { focusedState.value = false },
-                textModifier = LayoutWidth(160.dp),
+                textModifier = Modifier.preferredWidth(160.dp),
                 textStyle = TextStyle(fontSize = (20.sp)),
-                modifier = LayoutWeight(1f, true)
+                modifier = Modifier.weight(1f, true)
             )
 
             if (isTimeConfig && focusedState.value) {
@@ -173,7 +174,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
     TopAppBar(
         title = {
             Row {
-                Icon(vectorResource(iconID), LayoutGravity.Center)
+                Icon(vectorResource(iconID), Modifier.gravity(Alignment.CenterVertically))
                 WidthSpacer()
                 Text(title)
             }
@@ -183,11 +184,9 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
 
 @Composable
 fun MyBottomBar(buttons: @Composable() () -> Unit) {
-    Surface(elevation = 2.dp, color = MaterialTheme.colors().background) {
-        Container(modifier = LayoutHeight(80.dp), expanded = true) {
-            Row(arrangement = Arrangement.Center) {
-                buttons()
-            }
+    Surface(Modifier.fillMaxWidth(), elevation = 2.dp, color = MaterialTheme.colors.background) {
+        Row(Modifier.preferredHeight(80.dp), Arrangement.Center) {
+            buttons()
         }
     }
 }

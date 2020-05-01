@@ -1,10 +1,11 @@
 package com.tinyfish.jeekalarm.edit
 
 import androidx.compose.*
-import androidx.ui.core.Text
+import androidx.ui.core.Modifier
+import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.layout.Column
-import androidx.ui.layout.LayoutPadding
+import androidx.ui.layout.padding
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
 import androidx.ui.res.vectorResource
@@ -35,8 +36,8 @@ fun EditScreen() {
     Column {
         MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit")
         Surface(
-            color = MaterialTheme.colors().background,
-            modifier = LayoutWeight(1f, true)
+            color = MaterialTheme.colors.background,
+            modifier = Modifier.weight(1f, true)
         ) {
             Editor()
         }
@@ -47,14 +48,14 @@ fun EditScreen() {
 @Composable
 private fun Editor() {
     VerticalScroller {
-        Column(LayoutPadding(20.dp)) {
+        Column(Modifier.padding(20.dp)) {
             MySwitch("Enabled", editingSchedule::enabled)
             HeightSpacer()
             MySwitch("Only Once", editingSchedule::onlyOnce)
 
             HeightSpacer()
             MyCronTimeTextField("Name: ", editingSchedule::name)
-            Column(LayoutPadding(start = 20.dp)) {
+            Column(Modifier.padding(start = 20.dp)) {
                 uiTimeConfigChanged.value
                 HeightSpacer()
                 MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true)
@@ -76,7 +77,7 @@ private fun Editor() {
                     onCheckedChange = { recompose() })
 
                 if (editingSchedule.playMusic) {
-                    Column(LayoutPadding(start = 20.dp)) {
+                    Column(Modifier.padding(start = 20.dp)) {
                         HeightSpacer()
                         Recompose { recomposeFileSelect ->
                             MyFileSelect("Music File:", editingSchedule.musicFile,
@@ -123,7 +124,7 @@ private fun Editor() {
                         HeightSpacer()
                         Text(
                             editingSchedule.vibrationCount.toString(),
-                            modifier = LayoutPadding(start = 20.dp)
+                            modifier = Modifier.padding(start = 20.dp)
                         )
                     }
                 }

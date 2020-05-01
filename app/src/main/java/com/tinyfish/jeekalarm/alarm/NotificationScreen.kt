@@ -1,7 +1,10 @@
 package com.tinyfish.jeekalarm.alarm
 
 import androidx.compose.Composable
-import androidx.ui.core.Text
+import androidx.ui.core.Alignment
+import androidx.ui.core.Modifier
+import androidx.ui.foundation.Box
+import androidx.ui.foundation.Text
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
@@ -19,8 +22,8 @@ import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 fun NotificationScreen() {
     ScheduleHome.pausePlaying()
 
-    Surface(color = MaterialTheme.colors().background) {
-        Center {
+    Surface(color = MaterialTheme.colors.background) {
+        Box(Modifier.wrapContentSize()) {
             NotificationContent()
         }
     }
@@ -34,15 +37,23 @@ fun NotificationContent() {
         for (alarmIndex in App.notificationAlarmIndexes) {
             val schedule = ScheduleHome.scheduleList[alarmIndex]
 
-            Text(schedule.name, style = textStyle, modifier = LayoutGravity.Center)
-            Text(schedule.timeConfig, style = textStyle, modifier = LayoutGravity.Center)
+            Text(
+                schedule.name,
+                style = textStyle,
+                modifier = Modifier.gravity(Alignment.CenterHorizontally)
+            )
+            Text(
+                schedule.timeConfig,
+                style = textStyle,
+                modifier = Modifier.gravity(Alignment.CenterHorizontally)
+            )
 
             Spacer(LayoutHeight(16.dp))
         }
 
         HeightSpacer(36.dp)
 
-        Row(modifier = LayoutGravity.Center) {
+        Row(modifier = Modifier.gravity(Alignment.CenterHorizontally)) {
             val text = if (App.isPlaying.value) "Pause" else "Play"
             val onClick = {
                 if (App.isPlaying.value)
@@ -55,7 +66,7 @@ fun NotificationContent() {
             else
                 SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)
 
-            Spacer(LayoutWidth(36.dp))
+            Spacer(Modifier.preferredWidth(36.dp))
 
             SimpleVectorButton(vectorResource(R.drawable.ic_close), "Dismiss") {
                 App.screen.value = App.screenBeforeNotification

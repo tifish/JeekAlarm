@@ -2,8 +2,11 @@ package com.tinyfish.jeekalarm.main
 
 import androidx.compose.Composable
 import androidx.compose.Recompose
-import androidx.ui.core.Text
+import androidx.ui.core.Alignment
+import androidx.ui.core.Modifier
+import androidx.ui.foundation.Box
 import androidx.ui.foundation.Clickable
+import androidx.ui.foundation.Text
 import androidx.ui.foundation.VerticalScroller
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
@@ -11,7 +14,7 @@ import androidx.ui.material.Divider
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
 import androidx.ui.material.Switch
-import androidx.ui.material.ripple.Ripple
+import androidx.ui.material.ripple.ripple
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
@@ -42,8 +45,8 @@ fun MainScreen() {
     Column {
         MyTopBar(R.drawable.ic_alarm, "JeekAlarm")
         Surface(
-            color = MaterialTheme.colors().background,
-            modifier = LayoutWeight(1f, true)
+            Modifier.weight(1f, true),
+            color = MaterialTheme.colors.background
         ) {
             ScheduleList()
         }
@@ -56,7 +59,7 @@ private fun ScheduleList() {
     App.scheduleChangeTrigger.value
 
     if (ScheduleHome.scheduleList.size == 0) {
-        Center {
+        Box(Modifier.wrapContentSize()) {
             SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
                 App.editScheduleIndex = -1
                 App.screen.value = ScreenType.EDIT
@@ -64,8 +67,7 @@ private fun ScheduleList() {
         }
     } else {
         VerticalScroller {
-            Column(LayoutPadding(20.dp)) {
-
+            Column(Modifier.padding(20.dp)) {
                 val now = Calendar.getInstance()
                 for ((index, schedule) in ScheduleHome.scheduleList.withIndex()) {
                     HeightSpacer()
@@ -81,7 +83,7 @@ private fun ScheduleList() {
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
         Recompose { recompose ->
-            Container(modifier = LayoutGravity.Center) {
+            Box(modifier = Modifier.gravity(Alignment.CenterVertically)) {
                 Switch(
                     checked = schedule.enabled,
                     onCheckedChange = {
@@ -93,30 +95,31 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             }
         }
 
-        Spacer(LayoutWidth(20.dp))
+        Spacer(Modifier.preferredWidth(20.dp))
 
-        Ripple(bounded = true) {
-            Clickable(onClick = {
+        Clickable(
+            {
                 if (App.removingIndex.value == -1) {
                     App.editScheduleIndex = index
                     App.screen.value = ScreenType.EDIT
                 }
-            }) {
-                Column(LayoutWeight(1f, true)) {
-                    Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
-                    Text(
-                        schedule.timeConfig,
-                        style = TextStyle(color = Color.Gray)
-                    )
-                    Text(
-                        App.format(schedule.getNextTriggerTime(now)),
-                        style = TextStyle(color = Color.Gray)
-                    )
-                }
+            },
+            Modifier.ripple(true)
+        ) {
+            Column(Modifier.weight(1f, true)) {
+                Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
+                Text(
+                    schedule.timeConfig,
+                    style = TextStyle(color = Color.Gray)
+                )
+                Text(
+                    App.format(schedule.getNextTriggerTime(now)),
+                    style = TextStyle(color = Color.Gray)
+                )
             }
         }
 
-        Row(LayoutGravity.Center) {
+        Row(Modifier.gravity(Alignment.CenterVertically)) {
             if (App.removingIndex.value == -1) {
                 SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
                     App.removingIndex.value = index
@@ -129,7 +132,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     ScheduleHome.saveConfig()
                 }
 
-                Spacer(LayoutWidth(20.dp))
+                Spacer(Modifier.preferredWidth(20.dp))
                 SimpleVectorButton(vectorResource(R.drawable.ic_back), "Cancel") {
                     App.removingIndex.value = -1
                 }

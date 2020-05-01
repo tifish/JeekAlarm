@@ -2,11 +2,10 @@ package com.tinyfish.jeekalarm.ui
 
 import androidx.compose.Composable
 import androidx.compose.Recompose
+import androidx.compose.state
+import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
-import androidx.ui.core.Text
-import androidx.ui.core.TextField
-import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.Icon
+import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
 import androidx.ui.graphics.Shape
 import androidx.ui.graphics.vector.VectorAsset
@@ -14,7 +13,8 @@ import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
 import androidx.ui.material.Switch
-import androidx.ui.material.ripple.Ripple
+import androidx.ui.material.ripple.ripple
+import androidx.ui.text.TextRange
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
 import androidx.ui.unit.dp
@@ -26,7 +26,7 @@ fun SimpleSwitch(
     booleanProp: KMutableProperty0<Boolean>,
     textStyle: TextStyle = TextStyle.Default,
     onCheckedChange: (Boolean) -> Unit = {},
-    textModifier: Modifier = Modifier.None
+    textModifier: Modifier = Modifier.Companion
 ) {
     Row {
         Recompose { recompose ->
@@ -39,7 +39,7 @@ fun SimpleSwitch(
                 }
             )
 
-            Spacer(LayoutWidth(10.dp))
+            Spacer(Modifier.preferredWidth(10.dp))
 
             Clickable(onClick = {
                 booleanProp.set(!booleanProp.get())
@@ -57,7 +57,7 @@ fun SimpleSwitch(
     value: Boolean,
     textStyle: TextStyle = TextStyle.Default,
     onCheckedChange: (Boolean) -> Unit = {},
-    textModifier: Modifier = Modifier.None
+    textModifier: Modifier = Modifier.Companion
 ) {
     Row {
         Switch(
@@ -68,7 +68,7 @@ fun SimpleSwitch(
             }
         )
 
-        Spacer(LayoutWidth(10.dp))
+        Spacer(Modifier.preferredWidth(10.dp))
 
         Clickable(onClick = {
             onCheckedChange(!value)
@@ -93,8 +93,8 @@ fun SimpleSwitchOnText(
         )
 
         if (hint != "") {
-            Spacer(modifier = LayoutHeight(3.dp))
-            Text(text = hint, modifier = LayoutGravity.Center)
+            Spacer(modifier = Modifier.preferredHeight(3.dp))
+            Text(text = hint, modifier = Modifier.wrapContentSize(Alignment.Center))
         }
     }
 }
@@ -105,23 +105,24 @@ fun SimpleTextField(
     textProp: KMutableProperty0<String>,
     onFocus: () -> Unit = {},
     onBlur: () -> Unit = {},
-    modifier: Modifier = Modifier.None,
-    hintModifier: Modifier = Modifier.None,
+    modifier: Modifier = Modifier.Companion,
+    hintModifier: Modifier = Modifier.Companion,
     hintStyle: TextStyle = TextStyle.Default,
-    textModifier: Modifier = Modifier.None,
+    textModifier: Modifier = Modifier.Companion,
     textStyle: TextStyle = TextStyle.Default
 ) {
     Row(modifier) {
         Text(hint, hintModifier, style = hintStyle)
 
-        // var textRange by state { TextRange(0, 0) }
+        val textRange = state { TextRange(0, 0) }
 
         Recompose { recompose ->
             TextField(
                 modifier = textModifier,
-                value = textProp.get(),
+                value = TextFieldValue(textProp.get(), textRange.value),
                 onValueChange = {
-                    textProp.set(it)
+                    textProp.set(it.text)
+                    textRange.value = it.selection
                     recompose()
                 },
                 onFocus = {
@@ -146,21 +147,18 @@ fun SimpleVectorButton(
     text: String = "",
     onClick: () -> Unit
 ) {
-    Ripple(bounded = false) {
-        Clickable(onClick = onClick) {
-            Column {
-                Container(
-                    width = vectorAsset.defaultWidth,
-                    height = vectorAsset.defaultHeight,
-                    modifier = LayoutGravity.Center
-                ) {
-                    Icon(vectorAsset)
-                }
+    Clickable(onClick, Modifier.ripple(false)) {
+        Column {
+            Box(
+                Modifier.gravity(Alignment.CenterHorizontally)
+                    .preferredSize(vectorAsset.defaultWidth, vectorAsset.defaultHeight)
+            ) {
+                Icon(vectorAsset)
+            }
 
-                if (text != "") {
-                    Spacer(modifier = LayoutHeight(vectorAsset.defaultHeight / 8))
-                    Text(text = text, modifier = LayoutGravity.Center)
-                }
+            if (text != "") {
+                Spacer(Modifier.preferredHeight(vectorAsset.defaultHeight / 8))
+                Text(text, Modifier.gravity(Alignment.CenterHorizontally))
             }
         }
     }
@@ -169,19 +167,15 @@ fun SimpleVectorButton(
 @Composable
 fun SimpleTextButton(
     text: String = "",
-    width: Dp? = null,
-    height: Dp? = null,
-    shape: Shape = MaterialTheme.shapes().button,
-    backgroundColor: Color = MaterialTheme.colors().primary,
+    width: Dp,
+    height: Dp,
+    shape: Shape = MaterialTheme.shapes.small,
+    backgroundColor: Color = MaterialTheme.colors.primary,
     onClick: () -> Unit
 ) {
     Surface(shape = shape, color = backgroundColor) {
-        Container(width = width, height = height) {
-            Ripple(bounded = false) {
-                Clickable(onClick = onClick) {
-                    Text(text = text, modifier = LayoutAlign.Center)
-                }
-            }
+        Clickable(onClick, Modifier.ripple(false).preferredSize(width, height)) {
+            Text(text, Modifier.wrapContentSize(Alignment.Center))
         }
     }
 }
