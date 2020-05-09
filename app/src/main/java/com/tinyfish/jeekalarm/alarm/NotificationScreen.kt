@@ -22,7 +22,7 @@ import com.tinyfish.jeekalarm.ui.SimpleVectorButton
 fun NotificationScreen() {
     ScheduleHome.pausePlaying()
 
-    Surface(color = MaterialTheme.colors.background) {
+    Surface(Modifier.fillMaxSize(), color = MaterialTheme.colors.background) {
         Box(Modifier.wrapContentSize()) {
             NotificationContent()
         }
