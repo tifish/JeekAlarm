@@ -6,13 +6,22 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Build
+import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
+import androidx.core.graphics.drawable.toBitmap
+import androidx.ui.graphics.Canvas
+import androidx.ui.graphics.Color
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.main.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
 import java.util.*
+
 
 object NotificationHome {
     private val notificationManager: NotificationManager by lazy {
@@ -60,6 +69,9 @@ object NotificationHome {
             infoText = "Next: ${alarmNames.joinToString("; ")} $nextAlarmDateString"
         }
 
+        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
+            ?.toBitmap()
+
         return NotificationCompat.Builder(App.context, "Information").run {
             setContentTitle("JeekAlarm standby:")
             setContentText(infoText)
@@ -68,6 +80,7 @@ object NotificationHome {
             priority = NotificationCompat.PRIORITY_LOW
             setCategory(NotificationCompat.CATEGORY_STATUS)
             setSmallIcon(R.drawable.ic_launcher_foreground)
+            setLargeIcon(bitmap)
             setContentIntent(pendingIntent)
             build()
         }
@@ -98,6 +111,8 @@ object NotificationHome {
         val dismissPendingIntent: PendingIntent =
             PendingIntent.getBroadcast(App.context, 0, dismissIntent, 0)
 
+        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
+            ?.toBitmap()
         val alarmNames = getAlarmNames(alarmIndexes)
         val notification = NotificationCompat.Builder(App.context, "Alarm").run {
             setContentTitle("JeekAlarm triggered:")
@@ -107,6 +122,7 @@ object NotificationHome {
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(NotificationCompat.CATEGORY_ALARM)
             setSmallIcon(R.drawable.ic_launcher_foreground)
+            setLargeIcon(bitmap)
             setContentIntent(openPendingIntent)
             addAction(
                 R.drawable.ic_pause,
