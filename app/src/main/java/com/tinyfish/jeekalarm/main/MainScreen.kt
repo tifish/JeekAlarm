@@ -45,7 +45,7 @@ fun MainScreen() {
     Column {
         MyTopBar(R.drawable.ic_alarm, "JeekAlarm")
         Surface(
-            Modifier.weight(1f, true),
+            Modifier.weight(1f, true).fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
             ScheduleList()
