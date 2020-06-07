@@ -41,12 +41,14 @@ fun SimpleSwitch(
 
             Spacer(Modifier.preferredWidth(10.dp))
 
-            Clickable(onClick = {
-                booleanProp.set(!booleanProp.get())
-                recompose()
-            }) {
-                Text(hint, style = textStyle, modifier = textModifier)
-            }
+            Text(
+                hint, style = textStyle, modifier = textModifier.clickable(
+                    indication = null,
+                    onClick = {
+                        booleanProp.set(!booleanProp.get())
+                        recompose()
+                    })
+            )
         }
     }
 }
@@ -70,11 +72,13 @@ fun SimpleSwitch(
 
         Spacer(Modifier.preferredWidth(10.dp))
 
-        Clickable(onClick = {
-            onCheckedChange(!value)
-        }) {
-            Text(hint, style = textStyle, modifier = textModifier)
-        }
+        Text(
+            hint, style = textStyle, modifier = textModifier.clickable(
+                indication = null,
+                onClick = {
+                    onCheckedChange(!value)
+                })
+        )
     }
 }
 
@@ -125,15 +129,11 @@ fun SimpleTextField(
                     textRange.value = it.selection
                     recompose()
                 },
-                onFocus = {
-                    // textRange = TextRange(0, textProp.get().length)
-
-                    onFocus()
-                },
-                onBlur = {
-                    // textRange = TextRange(0, 0)
-
-                    onBlur()
+                onFocusChange = {
+                    if (it)
+                        onFocus()
+                    else
+                        onBlur()
                 },
                 textStyle = textStyle
             )
@@ -147,19 +147,17 @@ fun SimpleVectorButton(
     text: String = "",
     onClick: () -> Unit
 ) {
-    Clickable(onClick, Modifier.ripple(false)) {
-        Column {
-            Box(
-                Modifier.gravity(Alignment.CenterHorizontally)
-                    .preferredSize(vectorAsset.defaultWidth, vectorAsset.defaultHeight)
-            ) {
-                Icon(vectorAsset)
-            }
+    Column(Modifier.clickable(onClick = onClick)) {
+        Box(
+            Modifier.gravity(Alignment.CenterHorizontally)
+                .preferredSize(vectorAsset.defaultWidth, vectorAsset.defaultHeight)
+        ) {
+            Icon(vectorAsset)
+        }
 
-            if (text != "") {
-                Spacer(Modifier.preferredHeight(vectorAsset.defaultHeight / 8))
-                Text(text, Modifier.gravity(Alignment.CenterHorizontally))
-            }
+        if (text != "") {
+            Spacer(Modifier.preferredHeight(vectorAsset.defaultHeight / 8))
+            Text(text, Modifier.gravity(Alignment.CenterHorizontally))
         }
     }
 }
@@ -173,9 +171,11 @@ fun SimpleTextButton(
     backgroundColor: Color = MaterialTheme.colors.primary,
     onClick: () -> Unit
 ) {
-    Surface(shape = shape, color = backgroundColor) {
-        Clickable(onClick, Modifier.ripple(false).preferredSize(width, height)) {
-            Text(text, Modifier.wrapContentSize(Alignment.Center))
-        }
+    Surface(
+        Modifier.clickable(onClick = onClick).preferredSize(width, height),
+        shape = shape,
+        color = backgroundColor
+    ) {
+        Text(text, Modifier.wrapContentSize(Alignment.Center))
     }
 }

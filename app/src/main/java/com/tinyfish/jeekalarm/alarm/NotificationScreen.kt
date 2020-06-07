@@ -48,7 +48,7 @@ fun NotificationContent() {
                 modifier = Modifier.gravity(Alignment.CenterHorizontally)
             )
 
-            Spacer(LayoutHeight(16.dp))
+            Spacer(Modifier.height(16.dp))
         }
 
         HeightSpacer(36.dp)
