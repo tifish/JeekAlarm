@@ -69,7 +69,8 @@ private fun ScheduleList() {
         VerticalScroller {
             Column(Modifier.padding(20.dp)) {
                 val now = Calendar.getInstance()
-                for ((index, schedule) in ScheduleHome.scheduleList.withIndex()) {
+                for (index in ScheduleHome.scheduleList.indices) {
+                    val schedule = ScheduleHome.scheduleList[index]
                     HeightSpacer()
                     ScheduleItem(index, schedule, now)
                     Divider(color = Color.DarkGray)

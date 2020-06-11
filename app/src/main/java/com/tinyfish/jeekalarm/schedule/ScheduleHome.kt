@@ -46,7 +46,8 @@ object ScheduleHome {
         var minTriggerTime = Calendar.getInstance().apply { set(9999, 12, 30) }
         val minScheduleIndexes = mutableListOf<Int>()
 
-        for ((index, schedule) in scheduleList.withIndex()) {
+        for (index in scheduleList.indices) {
+            val schedule = scheduleList[index]
             if (!schedule.enabled || !schedule.isValid)
                 continue
 
