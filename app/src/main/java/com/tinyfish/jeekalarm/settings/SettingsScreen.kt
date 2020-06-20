@@ -8,6 +8,7 @@ import androidx.ui.layout.Column
 import androidx.ui.layout.padding
 import androidx.ui.material.Button
 import androidx.ui.material.MaterialTheme
+import androidx.ui.material.RadioGroup
 import androidx.ui.material.Surface
 import androidx.ui.res.vectorResource
 import androidx.ui.unit.dp
@@ -37,15 +38,18 @@ fun SettingsScreen() {
 private fun Editor() {
     Column(Modifier.padding(20.dp)) {
         Recompose { recompose ->
-            MySwitch(
-                hint = "Dark",
-                value = ConfigHome.data.theme == "Dark"
-            ) {
-                ConfigHome.data.theme = if (it) "Dark" else "Light"
-                ConfigHome.save()
-                App.setThemeFromConfig()
-                recompose()
-            }
+            Text("Theme:")
+            RadioGroup(
+                options = listOf("Auto", "Dark", "Light"),
+                selectedOption = ConfigHome.data.theme,
+                onSelectedChange = {
+                    ConfigHome.data.theme = it
+                    ConfigHome.save()
+                    App.themeColorsChangeTrigger.value++
+                    recompose()
+                },
+                modifier = Modifier.padding(start = 20.dp)
+            )
         }
 
         HeightSpacer()

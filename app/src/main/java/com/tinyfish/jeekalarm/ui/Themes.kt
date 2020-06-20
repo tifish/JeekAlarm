@@ -6,7 +6,7 @@ import androidx.ui.material.ColorPalette
 object DarkColorPalette : ColorPalette {
     override var primary = Color(0xFF039BE5) // TopAppBar, BottomAppBar, Button
     override var primaryVariant = Color.Magenta
-    override var secondary = Color.Magenta
+    override var secondary = Color(0xFF039BE5) // Radio button
     override var secondaryVariant = Color(0xFF039BE5) // Switch on
     override var background = Color.Black // Scaffold's content background
     override var surface = Color.White // Surface, Switch off
@@ -22,7 +22,7 @@ object DarkColorPalette : ColorPalette {
 object LightColorPalette : ColorPalette {
     override var primary = Color(0xFF039BE5) // TopAppBar, BottomAppBar, Button
     override var primaryVariant = Color.Magenta
-    override var secondary = Color.Magenta
+    override var secondary = Color(0xFF039BE5) // Radio button
     override var secondaryVariant = Color(0xFF039BE5) // Switch on
     override var background = Color.White // Scaffold's content background
     override var surface = Color.Gray // Surface, Switch off

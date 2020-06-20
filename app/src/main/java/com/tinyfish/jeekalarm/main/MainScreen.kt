@@ -7,14 +7,11 @@ import androidx.ui.core.Modifier
 import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
-import androidx.ui.material.Divider
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.Surface
-import androidx.ui.material.Switch
-import androidx.ui.material.ripple.ripple
+import androidx.ui.material.*
 import androidx.ui.res.vectorResource
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.dp
+import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
@@ -27,13 +24,25 @@ import java.util.*
 
 @Composable
 fun MainUI() {
-    MaterialTheme(colors = App.themeColors.value) {
+    App.themeColorsChangeTrigger.value
+
+    MaterialTheme(colors = GetThemeFromConfig()) {
         when (App.screen.value) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen()
             ScreenType.SETTINGS -> SettingsScreen()
             ScreenType.NOTIFICATION -> NotificationScreen()
         }
+    }
+}
+
+@Composable
+fun GetThemeFromConfig(): ColorPalette {
+    return when (ConfigHome.data.theme) {
+        "Auto" -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
+        "Dark" -> DarkColorPalette
+        "Light" -> LightColorPalette
+        else -> LightColorPalette
     }
 }
 

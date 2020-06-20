@@ -4,13 +4,10 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.ui.material.ColorPalette
 import com.beust.klaxon.Klaxon
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
-import com.tinyfish.jeekalarm.ui.DarkColorPalette
 import com.tinyfish.jeekalarm.ui.GlobalState
-import com.tinyfish.jeekalarm.ui.LightColorPalette
 import com.tinyfish.jeekalarm.ui.ScreenType
 import java.text.SimpleDateFormat
 import java.util.*
@@ -30,15 +27,7 @@ class App : Application() {
         var screenBeforeNotification = ScreenType.MAIN
         val notificationAlarmIndexes = mutableListOf<Int>()
 
-        val themeColors = GlobalState<ColorPalette>(DarkColorPalette)
-        fun setThemeFromConfig() {
-            themeColors.value =
-                when (ConfigHome.data.theme) {
-                    "Dark" -> DarkColorPalette
-                    "Light" -> LightColorPalette
-                    else -> LightColorPalette
-                }
-        }
+        val themeColorsChangeTrigger = GlobalState<Int>(0)
 
         val screen = GlobalState(ScreenType.MAIN)
         val nextAlarmIndexes = GlobalState(listOf<Int>())
@@ -47,7 +36,7 @@ class App : Application() {
         val removingIndex = GlobalState(-1)
 
         fun bindComposer() {
-            themeColors.createState()
+            themeColorsChangeTrigger.createState()
             screen.createState()
             nextAlarmIndexes.createState()
             scheduleChangeTrigger.createState()
@@ -56,7 +45,7 @@ class App : Application() {
         }
 
         fun unbindComposer() {
-            themeColors.destroyState()
+            themeColorsChangeTrigger.destroyState()
             screen.destroyState()
             nextAlarmIndexes.destroyState()
             scheduleChangeTrigger.destroyState()
@@ -87,7 +76,6 @@ class App : Application() {
 
         context = applicationContext
         ConfigHome.load()
-        setThemeFromConfig()
         ScheduleHome.loadConfig()
         ScheduleHome.setNextAlarm()
     }
