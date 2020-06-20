@@ -4,10 +4,7 @@ import androidx.compose.Composable
 import androidx.compose.Recompose
 import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
-import androidx.ui.foundation.Box
-import androidx.ui.foundation.Clickable
-import androidx.ui.foundation.Text
-import androidx.ui.foundation.VerticalScroller
+import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
 import androidx.ui.layout.*
 import androidx.ui.material.Divider
@@ -98,26 +95,21 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         Spacer(Modifier.preferredWidth(20.dp))
 
-        Clickable(
-            {
-                if (App.removingIndex.value == -1) {
-                    App.editScheduleIndex = index
-                    App.screen.value = ScreenType.EDIT
-                }
-            },
-            Modifier.ripple(true)
-        ) {
-            Column(Modifier.weight(1f, true)) {
-                Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
-                Text(
-                    schedule.timeConfig,
-                    style = TextStyle(color = Color.Gray)
-                )
-                Text(
-                    App.format(schedule.getNextTriggerTime(now)),
-                    style = TextStyle(color = Color.Gray)
-                )
+        Column(Modifier.weight(1f, true).clickable(onClick = {
+            if (App.removingIndex.value == -1) {
+                App.editScheduleIndex = index
+                App.screen.value = ScreenType.EDIT
             }
+        })) {
+            Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
+            Text(
+                schedule.timeConfig,
+                style = TextStyle(color = Color.Gray)
+            )
+            Text(
+                App.format(schedule.getNextTriggerTime(now)),
+                style = TextStyle(color = Color.Gray)
+            )
         }
 
         Row(Modifier.gravity(Alignment.CenterVertically)) {
