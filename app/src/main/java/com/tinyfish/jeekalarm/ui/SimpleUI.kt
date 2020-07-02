@@ -7,13 +7,13 @@ import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.*
 import androidx.ui.graphics.Color
+import androidx.ui.graphics.ImageAsset
 import androidx.ui.graphics.Shape
 import androidx.ui.graphics.vector.VectorAsset
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
 import androidx.ui.material.Switch
-import androidx.ui.material.ripple.ripple
 import androidx.ui.text.TextRange
 import androidx.ui.text.TextStyle
 import androidx.ui.unit.Dp
@@ -66,7 +66,6 @@ fun SimpleSwitch(
             checked = value,
             onCheckedChange = {
                 onCheckedChange(it)
-                // recompose()
             }
         )
 
@@ -157,6 +156,29 @@ fun SimpleVectorButton(
 
         if (text != "") {
             Spacer(Modifier.preferredHeight(vectorAsset.defaultHeight / 8))
+            Text(text, Modifier.gravity(Alignment.CenterHorizontally))
+        }
+    }
+}
+
+@Composable
+fun SimpleImageButton(
+    imageAsset: ImageAsset,
+    text: String = "",
+    imageSize: Dp? = null,
+    onClick: () -> Unit
+) {
+    Column(
+        Modifier.clickable(onClick = onClick),
+        horizontalGravity = Alignment.CenterHorizontally
+    ) {
+        val imageModifier =
+            if (imageSize != null) Modifier.preferredSize(imageSize) else Modifier
+        Image(imageAsset, imageModifier)
+
+        if (text != "") {
+            if (imageSize != null)
+                Spacer(Modifier.preferredHeight(2.dp))
             Text(text, Modifier.gravity(Alignment.CenterHorizontally))
         }
     }
