@@ -2,7 +2,6 @@ package com.tinyfish.jeekalarm.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
-import androidx.compose.Recompose
 import androidx.compose.state
 import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
@@ -170,6 +169,14 @@ fun MyTextButton(
 }
 
 @Composable
+fun MyTopBar(title: @Composable() () -> Unit) {
+    TopAppBar(
+        title = title,
+        backgroundColor = MaterialTheme.colors.primary
+    )
+}
+
+@Composable
 fun MyTopBar(@DrawableRes iconID: Int, title: String) {
     TopAppBar(
         title = {
@@ -178,14 +185,15 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
                 WidthSpacer()
                 Text(title)
             }
-        }
+        },
+        backgroundColor = MaterialTheme.colors.primary
     )
 }
 
 @Composable
 fun MyBottomBar(buttons: @Composable() () -> Unit) {
     Surface(Modifier.fillMaxWidth(), elevation = 2.dp, color = MaterialTheme.colors.background) {
-        Row(Modifier.preferredHeight(80.dp), Arrangement.Center) {
+        Row(Modifier.preferredHeight(80.dp), Arrangement.Center, Alignment.CenterVertically) {
             buttons()
         }
     }

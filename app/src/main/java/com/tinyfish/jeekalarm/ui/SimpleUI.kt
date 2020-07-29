@@ -1,7 +1,7 @@
 package com.tinyfish.jeekalarm.ui
 
 import androidx.compose.Composable
-import androidx.compose.Recompose
+import androidx.compose.invalidate
 import androidx.compose.state
 import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
@@ -10,6 +10,7 @@ import androidx.ui.graphics.Color
 import androidx.ui.graphics.ImageAsset
 import androidx.ui.graphics.Shape
 import androidx.ui.graphics.vector.VectorAsset
+import androidx.ui.input.TextFieldValue
 import androidx.ui.layout.*
 import androidx.ui.material.MaterialTheme
 import androidx.ui.material.Surface
@@ -21,14 +22,18 @@ import androidx.ui.unit.dp
 import kotlin.reflect.KMutableProperty0
 
 @Composable
+fun Recompose(body: @Composable() (recompose: () -> Unit) -> Unit) = body(invalidate)
+
+@Composable
 fun SimpleSwitch(
     hint: String,
     booleanProp: KMutableProperty0<Boolean>,
     textStyle: TextStyle = TextStyle.Default,
-    onCheckedChange: (Boolean) -> Unit = {},
-    textModifier: Modifier = Modifier.Companion
+    modifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier,
+    onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Row {
+    Row(modifier) {
         Recompose { recompose ->
             Switch(
                 checked = booleanProp.get(),
@@ -58,10 +63,11 @@ fun SimpleSwitch(
     hint: String,
     value: Boolean,
     textStyle: TextStyle = TextStyle.Default,
-    onCheckedChange: (Boolean) -> Unit = {},
-    textModifier: Modifier = Modifier.Companion
+    modifier: Modifier = Modifier,
+    textModifier: Modifier = Modifier,
+    onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Row {
+    Row(modifier) {
         Switch(
             checked = value,
             onCheckedChange = {
@@ -85,9 +91,10 @@ fun SimpleSwitch(
 fun SimpleSwitchOnText(
     hint: String,
     value: Boolean,
+    modifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Column {
+    Column(modifier) {
         Switch(
             checked = value,
             onCheckedChange = {
@@ -108,10 +115,10 @@ fun SimpleTextField(
     textProp: KMutableProperty0<String>,
     onFocus: () -> Unit = {},
     onBlur: () -> Unit = {},
-    modifier: Modifier = Modifier.Companion,
-    hintModifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
+    hintModifier: Modifier = Modifier,
     hintStyle: TextStyle = TextStyle.Default,
-    textModifier: Modifier = Modifier.Companion,
+    textModifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle.Default
 ) {
     Row(modifier) {
@@ -146,17 +153,24 @@ fun SimpleVectorButton(
     text: String = "",
     onClick: () -> Unit
 ) {
-    Column(Modifier.clickable(onClick = onClick)) {
-        Box(
-            Modifier.gravity(Alignment.CenterHorizontally)
-                .preferredSize(vectorAsset.defaultWidth, vectorAsset.defaultHeight)
-        ) {
+    SimpleVectorButton(vectorAsset, text, Modifier, onClick)
+}
+
+@Composable
+fun SimpleVectorButton(
+    vectorAsset: VectorAsset,
+    text: String = "",
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Column(modifier.clickable(onClick = onClick), Arrangement.Center, Alignment.CenterHorizontally) {
+        Box {
             Icon(vectorAsset)
         }
 
         if (text != "") {
             Spacer(Modifier.preferredHeight(vectorAsset.defaultHeight / 8))
-            Text(text, Modifier.gravity(Alignment.CenterHorizontally))
+            Text(text)
         }
     }
 }
@@ -166,10 +180,11 @@ fun SimpleImageButton(
     imageAsset: ImageAsset,
     text: String = "",
     imageSize: Dp? = null,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Column(
-        Modifier.clickable(onClick = onClick),
+        modifier.clickable(onClick = onClick),
         horizontalGravity = Alignment.CenterHorizontally
     ) {
         val imageModifier =
@@ -191,10 +206,11 @@ fun SimpleTextButton(
     height: Dp,
     shape: Shape = MaterialTheme.shapes.small,
     backgroundColor: Color = MaterialTheme.colors.primary,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Surface(
-        Modifier.clickable(onClick = onClick).preferredSize(width, height),
+        modifier.clickable(onClick = onClick).preferredSize(width, height),
         shape = shape,
         color = backgroundColor
     ) {
