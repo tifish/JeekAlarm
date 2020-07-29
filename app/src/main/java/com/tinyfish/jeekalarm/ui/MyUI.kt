@@ -99,7 +99,8 @@ fun MySwitch(
 fun MyCronTimeTextField(
     hint: String,
     textProp: KMutableProperty0<String>,
-    isTimeConfig: Boolean = false
+    isTimeConfig: Boolean = false,
+    onChange: () -> Unit = {}
 ) {
     Row {
         val focusedState = state { false }
@@ -113,41 +114,57 @@ fun MyCronTimeTextField(
                 onBlur = { focusedState.value = false },
                 textModifier = Modifier.preferredWidth(160.dp),
                 textStyle = TextStyle(fontSize = (20.sp)),
-                modifier = Modifier.weight(1f, true)
+                modifier = Modifier.weight(1f, true),
+                onChange = onChange
             )
 
             if (isTimeConfig && focusedState.value) {
                 MyTextButton("*") {
-                    textProp.set("*")
-                    recompose()
+                    if (textProp.get() != "*") {
+                        textProp.set("*")
+                        onChange()
+                        recompose()
+                    }
                 }
 
                 WidthSpacer()
 
                 MyTextButton("0") {
-                    textProp.set("0")
-                    recompose()
+                    if (textProp.get() != "0") {
+                        textProp.set("0")
+                        onChange()
+                        recompose()
+                    }
                 }
 
                 WidthSpacer()
 
                 MyTextButton("1-3") {
-                    textProp.set("1-3")
-                    recompose()
+                    if (textProp.get() != "1-3") {
+                        textProp.set("1-3")
+                        onChange()
+                        recompose()
+                    }
                 }
 
                 WidthSpacer()
 
                 MyTextButton("1,3") {
-                    textProp.set("1,3")
-                    recompose()
+                    if (textProp.get() != "1,3") {
+                        textProp.set("1,3")
+                        onChange()
+                        recompose()
+                    }
                 }
 
                 WidthSpacer()
 
                 MyTextButton("*/3") {
-                    textProp.set("*/3")
-                    recompose()
+                    if (textProp.get() != "*/3") {
+                        textProp.set("*/3")
+                        onChange()
+                        recompose()
+                    }
                 }
             }
         }

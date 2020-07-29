@@ -25,6 +25,9 @@ import kotlin.reflect.KMutableProperty0
 fun Recompose(body: @Composable() (recompose: () -> Unit) -> Unit) = body(invalidate)
 
 @Composable
+fun Observe(body: @Composable() () -> Unit) = body()
+
+@Composable
 fun SimpleSwitch(
     hint: String,
     booleanProp: KMutableProperty0<Boolean>,
@@ -119,7 +122,8 @@ fun SimpleTextField(
     hintModifier: Modifier = Modifier,
     hintStyle: TextStyle = TextStyle.Default,
     textModifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle.Default
+    textStyle: TextStyle = TextStyle.Default,
+    onChange: () -> Unit = {}
 ) {
     Row(modifier) {
         Text(hint, hintModifier, style = hintStyle)
@@ -131,7 +135,10 @@ fun SimpleTextField(
                 modifier = textModifier,
                 value = TextFieldValue(textProp.get(), textRange.value),
                 onValueChange = {
-                    textProp.set(it.text)
+                    if (textProp.get() != it.text) {
+                        textProp.set(it.text)
+                        onChange()
+                    }
                     textRange.value = it.selection
                     recompose()
                 },

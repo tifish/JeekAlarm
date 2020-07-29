@@ -34,6 +34,7 @@ class App : Application() {
         val scheduleChangeTrigger = GlobalState(0)
         val isPlaying = GlobalState(false)
         val removingIndex = GlobalState(-1)
+        val editEnabledChangeTrigger = GlobalState(0)
 
         fun bindComposer() {
             themeColorsChangeTrigger.createState()
@@ -42,6 +43,7 @@ class App : Application() {
             scheduleChangeTrigger.createState()
             isPlaying.createState()
             removingIndex.createState()
+            editEnabledChangeTrigger.createState()
         }
 
         fun unbindComposer() {
@@ -51,6 +53,7 @@ class App : Application() {
             scheduleChangeTrigger.destroyState()
             isPlaying.destroyState()
             removingIndex.destroyState()
+            editEnabledChangeTrigger.destroyState()
         }
 
         fun startService() {

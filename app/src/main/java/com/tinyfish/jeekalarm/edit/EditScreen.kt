@@ -2,7 +2,6 @@ package com.tinyfish.jeekalarm.edit
 
 import androidx.compose.Composable
 import androidx.compose.MutableState
-import androidx.compose.Observe
 import androidx.compose.state
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.Text
@@ -52,24 +51,34 @@ fun EditScreen() {
 private fun Editor() {
     VerticalScroller {
         Column(Modifier.padding(20.dp)) {
-            MySwitch("Enabled", editingSchedule::enabled)
+            Observe {
+                App.editEnabledChangeTrigger.value
+                MySwitch("Enabled", editingSchedule::enabled)
+            }
             HeightSpacer()
             MySwitch("Only Once", editingSchedule::onlyOnce)
 
+            val onChange = {
+                if (!editingSchedule.enabled) {
+                    editingSchedule.enabled = true
+                    App.editEnabledChangeTrigger.value++
+                }
+            }
+
             HeightSpacer()
-            MyCronTimeTextField("Name: ", editingSchedule::name)
+            MyCronTimeTextField("Name: ", editingSchedule::name, false, onChange)
             Column(Modifier.padding(start = 20.dp)) {
                 uiTimeConfigChanged.value
                 HeightSpacer()
-                MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true)
+                MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true, onChange)
                 HeightSpacer()
-                MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true)
+                MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true, onChange)
                 HeightSpacer()
-                MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true)
+                MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true, onChange)
                 HeightSpacer()
-                MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true)
+                MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true, onChange)
                 HeightSpacer()
-                MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true)
+                MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true, onChange)
             }
 
             Recompose { recompose ->
