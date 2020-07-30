@@ -11,7 +11,7 @@ import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.edit.onEditScreenPressBack
 import com.tinyfish.jeekalarm.settings.onSettingsScreenPressBack
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.ui.ScreenType
+import com.tinyfish.jeekalarm.start.ScreenType
 
 class MainActivity : AppCompatActivity() {
     companion object {

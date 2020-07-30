@@ -1,4 +1,4 @@
-package com.tinyfish.jeekalarm.ui
+package com.tinyfish.ui
 
 import androidx.ui.foundation.shape.corner.RoundedCornerShape
 import androidx.ui.material.Shapes

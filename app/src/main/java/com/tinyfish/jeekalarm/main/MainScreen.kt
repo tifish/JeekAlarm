@@ -1,7 +1,6 @@
 package com.tinyfish.jeekalarm.main
 
 import androidx.compose.Composable
-import androidx.compose.Recompose
 import androidx.ui.core.Alignment
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.*
@@ -19,7 +18,8 @@ import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.ui.*
+import com.tinyfish.jeekalarm.start.ScreenType
+import com.tinyfish.ui.*
 import java.util.*
 
 @Composable
@@ -66,7 +66,10 @@ private fun ScheduleList() {
 
     if (ScheduleHome.scheduleList.size == 0) {
         Box(Modifier.wrapContentSize()) {
-            SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
+            SimpleVectorButton(
+                vectorResource(R.drawable.ic_add),
+                "Add"
+            ) {
                 App.editScheduleIndex = -1
                 App.screen.value = ScreenType.EDIT
             }
@@ -128,14 +131,20 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 }
                 WidthSpacer()
             } else if (App.removingIndex.value == index) {
-                SimpleVectorButton(vectorResource(R.drawable.ic_done), "Remove") {
+                SimpleVectorButton(
+                    vectorResource(R.drawable.ic_done),
+                    "Remove"
+                ) {
                     App.removingIndex.value = -1
                     ScheduleHome.scheduleList.removeAt(index)
                     ScheduleHome.saveConfig()
                 }
 
                 Spacer(Modifier.preferredWidth(20.dp))
-                SimpleVectorButton(vectorResource(R.drawable.ic_back), "Cancel") {
+                SimpleVectorButton(
+                    vectorResource(R.drawable.ic_back),
+                    "Cancel"
+                ) {
                     App.removingIndex.value = -1
                 }
             }
@@ -149,14 +158,20 @@ private fun BottomBar() {
         App.scheduleChangeTrigger.value
 
         if (ScheduleHome.scheduleList.size > 0) {
-            SimpleVectorButton(vectorResource(R.drawable.ic_add), "Add") {
+            SimpleVectorButton(
+                vectorResource(R.drawable.ic_add),
+                "Add"
+            ) {
                 App.editScheduleIndex = -1
                 App.screen.value = ScreenType.EDIT
             }
             ToolButtonWidthSpacer()
         }
 
-        SimpleVectorButton(vectorResource(R.drawable.ic_settings), "Settings") {
+        SimpleVectorButton(
+            vectorResource(R.drawable.ic_settings),
+            "Settings"
+        ) {
             App.screen.value = ScreenType.SETTINGS
         }
     }

@@ -15,8 +15,8 @@ import androidx.ui.unit.sp
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.ui.HeightSpacer
-import com.tinyfish.jeekalarm.ui.SimpleVectorButton
+import com.tinyfish.ui.HeightSpacer
+import com.tinyfish.ui.SimpleVectorButton
 
 @Composable
 fun NotificationScreen() {
@@ -62,13 +62,24 @@ fun NotificationContent() {
                     ScheduleHome.resumePlaying()
             }
             if (App.isPlaying.value)
-                SimpleVectorButton(vectorResource(R.drawable.ic_pause), text, onClick)
+                SimpleVectorButton(
+                    vectorResource(R.drawable.ic_pause),
+                    text,
+                    onClick
+                )
             else
-                SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)
+                SimpleVectorButton(
+                    vectorResource(R.drawable.ic_play_arrow),
+                    text,
+                    onClick
+                )
 
             Spacer(Modifier.preferredWidth(36.dp))
 
-            SimpleVectorButton(vectorResource(R.drawable.ic_close), "Dismiss") {
+            SimpleVectorButton(
+                vectorResource(R.drawable.ic_close),
+                "Dismiss"
+            ) {
                 App.screen.value = App.screenBeforeNotification
                 App.notificationAlarmIndexes.clear()
             }

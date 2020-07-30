@@ -1,7 +1,6 @@
 package com.tinyfish.jeekalarm.settings
 
 import androidx.compose.Composable
-import androidx.compose.Recompose
 import androidx.ui.core.Modifier
 import androidx.ui.foundation.Text
 import androidx.ui.layout.Column
@@ -18,7 +17,8 @@ import com.tinyfish.jeekalarm.alarm.NotificationHome
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.ui.*
+import com.tinyfish.jeekalarm.start.ScreenType
+import com.tinyfish.ui.*
 
 @Composable
 fun SettingsScreen() {
@@ -54,7 +54,8 @@ private fun Editor() {
 
         HeightSpacer()
         Recompose { recomposeFileSelect ->
-            MyFileSelect("Music File:", ConfigHome.data.defaultMusicFile,
+            MyFileSelect("Music File:",
+                ConfigHome.data.defaultMusicFile,
                 onSelect = {
                     FileSelector.openMusicFile {
                         ConfigHome.data.defaultMusicFile = it?.path?.substringAfter(':')!!
@@ -70,7 +71,8 @@ private fun Editor() {
 
         HeightSpacer()
         Recompose { recomposeFileSelect ->
-            MyFileSelect("Music Folder:", ConfigHome.data.defaultMusicFolder,
+            MyFileSelect("Music Folder:",
+                ConfigHome.data.defaultMusicFolder,
                 onSelect = {
                     FileSelector.openFolder {
                         ConfigHome.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
@@ -97,7 +99,10 @@ private fun Editor() {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        SimpleVectorButton(vectorResource(R.drawable.ic_back), "Back") {
+        SimpleVectorButton(
+            vectorResource(R.drawable.ic_back),
+            "Back"
+        ) {
             onSettingsScreenPressBack()
         }
     }

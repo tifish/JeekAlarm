@@ -7,11 +7,16 @@ import android.os.Build
 import com.beust.klaxon.Klaxon
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
-import com.tinyfish.jeekalarm.ui.GlobalState
-import com.tinyfish.jeekalarm.ui.ScreenType
+import com.tinyfish.ui.GlobalState
 import java.text.SimpleDateFormat
 import java.util.*
 
+enum class ScreenType {
+    MAIN,
+    EDIT,
+    SETTINGS,
+    NOTIFICATION,
+}
 
 class App : Application() {
     companion object {

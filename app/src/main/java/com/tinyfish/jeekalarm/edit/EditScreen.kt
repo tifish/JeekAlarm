@@ -16,7 +16,8 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.ui.*
+import com.tinyfish.jeekalarm.start.ScreenType
+import com.tinyfish.ui.*
 import java.util.*
 
 private lateinit var editingSchedule: Schedule
@@ -36,7 +37,10 @@ fun EditScreen() {
 
 
     Column {
-        MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit")
+        MyTopBar(
+            R.drawable.ic_edit,
+            if (isAdding) "Add" else "Edit"
+        )
         Surface(
             color = MaterialTheme.colors.background,
             modifier = Modifier.weight(1f, true)
@@ -66,19 +70,49 @@ private fun Editor() {
             }
 
             HeightSpacer()
-            MyCronTimeTextField("Name: ", editingSchedule::name, false, onChange)
+            MyCronTimeTextField(
+                "Name: ",
+                editingSchedule::name,
+                false,
+                onChange
+            )
             Column(Modifier.padding(start = 20.dp)) {
                 uiTimeConfigChanged.value
                 HeightSpacer()
-                MyCronTimeTextField("Minute: ", editingSchedule::minuteConfig, true, onChange)
+                MyCronTimeTextField(
+                    "Minute: ",
+                    editingSchedule::minuteConfig,
+                    true,
+                    onChange
+                )
                 HeightSpacer()
-                MyCronTimeTextField("Hour: ", editingSchedule::hourConfig, true, onChange)
+                MyCronTimeTextField(
+                    "Hour: ",
+                    editingSchedule::hourConfig,
+                    true,
+                    onChange
+                )
                 HeightSpacer()
-                MyCronTimeTextField("Day: ", editingSchedule::dayConfig, true, onChange)
+                MyCronTimeTextField(
+                    "Day: ",
+                    editingSchedule::dayConfig,
+                    true,
+                    onChange
+                )
                 HeightSpacer()
-                MyCronTimeTextField("Month: ", editingSchedule::monthConfig, true, onChange)
+                MyCronTimeTextField(
+                    "Month: ",
+                    editingSchedule::monthConfig,
+                    true,
+                    onChange
+                )
                 HeightSpacer()
-                MyCronTimeTextField("WeekDay: ", editingSchedule::weekDayConfig, true, onChange)
+                MyCronTimeTextField(
+                    "WeekDay: ",
+                    editingSchedule::weekDayConfig,
+                    true,
+                    onChange
+                )
             }
 
             Recompose { recompose ->
@@ -92,7 +126,8 @@ private fun Editor() {
                     Column(Modifier.padding(start = 20.dp)) {
                         HeightSpacer()
                         Recompose { recomposeFileSelect ->
-                            MyFileSelect("Music File:", editingSchedule.musicFile,
+                            MyFileSelect("Music File:",
+                                editingSchedule.musicFile,
                                 onSelect = {
                                     FileSelector.openMusicFile {
                                         editingSchedule.musicFile = it?.path?.substringAfter(':')!!
@@ -108,7 +143,8 @@ private fun Editor() {
 
                         HeightSpacer()
                         Recompose { recomposeFileSelect ->
-                            MyFileSelect("Music Folder:", editingSchedule.musicFolder,
+                            MyFileSelect("Music Folder:",
+                                editingSchedule.musicFolder,
                                 onSelect = {
                                     FileSelector.openFolder {
                                         editingSchedule.musicFolder =
@@ -149,19 +185,28 @@ private fun Editor() {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        SimpleVectorButton(vectorResource(R.drawable.ic_back), if (isAdding) "Add" else "Back") {
+        SimpleVectorButton(
+            vectorResource(R.drawable.ic_back),
+            if (isAdding) "Add" else "Back"
+        ) {
             onEditScreenPressBack()
         }
 
         if (isAdding) {
             ToolButtonWidthSpacer()
-            SimpleVectorButton(vectorResource(R.drawable.ic_cancel), "Cancel") {
+            SimpleVectorButton(
+                vectorResource(R.drawable.ic_cancel),
+                "Cancel"
+            ) {
                 App.screen.value = ScreenType.MAIN
             }
         }
 
         ToolButtonWidthSpacer()
-        SimpleVectorButton(vectorResource(R.drawable.ic_access_time), "Now") {
+        SimpleVectorButton(
+            vectorResource(R.drawable.ic_access_time),
+            "Now"
+        ) {
             Calendar.getInstance().apply {
                 editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
                 editingSchedule.hourConfig = get(Calendar.HOUR).toString()
@@ -182,9 +227,17 @@ private fun BottomBar() {
             }
 
             if (App.isPlaying.value)
-                SimpleVectorButton(vectorResource(R.drawable.ic_stop), text, onClick)
+                SimpleVectorButton(
+                    vectorResource(R.drawable.ic_stop),
+                    text,
+                    onClick
+                )
             else
-                SimpleVectorButton(vectorResource(R.drawable.ic_play_arrow), text, onClick)
+                SimpleVectorButton(
+                    vectorResource(R.drawable.ic_play_arrow),
+                    text,
+                    onClick
+                )
         }
     }
 }

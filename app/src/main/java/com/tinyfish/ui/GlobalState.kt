@@ -1,4 +1,4 @@
-package com.tinyfish.jeekalarm.ui
+package com.tinyfish.ui
 
 import androidx.compose.MutableState
 import androidx.compose.mutableStateOf

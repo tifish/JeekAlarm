@@ -1,4 +1,4 @@
-package com.tinyfish.jeekalarm.ui
+package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.Composable
@@ -19,13 +19,6 @@ import androidx.ui.unit.dp
 import androidx.ui.unit.sp
 import com.tinyfish.jeekalarm.R
 import kotlin.reflect.KMutableProperty0
-
-enum class ScreenType {
-    MAIN,
-    EDIT,
-    SETTINGS,
-    NOTIFICATION,
-}
 
 @Composable
 fun HeightSpacer(height: Dp = 10.dp) {

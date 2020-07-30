@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.main.MainActivity
-import com.tinyfish.jeekalarm.ui.ScreenType
+import com.tinyfish.jeekalarm.start.ScreenType
 
 class NotificationClickReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
