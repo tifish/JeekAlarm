@@ -209,7 +209,7 @@ private fun BottomBar() {
         ) {
             Calendar.getInstance().apply {
                 editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
-                editingSchedule.hourConfig = get(Calendar.HOUR).toString()
+                editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
                 editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
                 editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
                 uiTimeConfigChanged.value++
