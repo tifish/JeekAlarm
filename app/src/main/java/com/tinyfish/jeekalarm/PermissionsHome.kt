@@ -1,7 +1,6 @@
 package com.tinyfish.jeekalarm
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.pm.PackageManager
 import android.os.Build
@@ -15,14 +14,11 @@ object PermissionsHome {
     @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
     val PERMISSIONS_EXTERNAL_STORAGE = arrayOf(
         READ_EXTERNAL_STORAGE,
-        WRITE_EXTERNAL_STORAGE
     )
 
     fun checkExternalStoragePermission(activity: Activity?): Boolean {
         val readStoragePermissionState = ContextCompat.checkSelfPermission(activity!!, READ_EXTERNAL_STORAGE)
-        val writeStoragePermissionState = ContextCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE)
-        val externalStoragePermissionGranted = readStoragePermissionState == PackageManager.PERMISSION_GRANTED &&
-                writeStoragePermissionState == PackageManager.PERMISSION_GRANTED
+        val externalStoragePermissionGranted = readStoragePermissionState == PackageManager.PERMISSION_GRANTED
         if (!externalStoragePermissionGranted) {
             requestPermissions(activity, PERMISSIONS_EXTERNAL_STORAGE, REQUEST_EXTERNAL_PERMISSION_CODE)
         }

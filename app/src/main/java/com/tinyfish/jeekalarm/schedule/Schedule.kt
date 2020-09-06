@@ -4,7 +4,6 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
-import com.beust.klaxon.Json
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.MusicHome
 import com.tinyfish.jeekalarm.VibrationHome
@@ -12,7 +11,6 @@ import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.util.*
 import kotlin.random.Random
-
 
 // A single cron schedule
 data class Schedule(
@@ -62,26 +60,26 @@ data class Schedule(
         }
     }
 
-    @Json(ignored = true)
+    @Transient
     var timeConfig: String = ""
         private set
 
-    @Json(ignored = true)
+    @Transient
     var isValid: Boolean = false
 
-    @Json(ignored = true)
+    @Transient
     var minutes = mutableListOf<Int>()
 
-    @Json(ignored = true)
+    @Transient
     var hours = mutableListOf<Int>()
 
-    @Json(ignored = true)
+    @Transient
     var days = mutableListOf<Int>()
 
-    @Json(ignored = true)
+    @Transient
     var months = mutableListOf<Int>()
 
-    @Json(ignored = true)
+    @Transient
     var weekDays = mutableListOf<Int>()
 
     init {

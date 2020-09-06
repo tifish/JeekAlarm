@@ -1,16 +1,17 @@
 package com.tinyfish.jeekalarm.settings
 
-import androidx.compose.Composable
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Text
-import androidx.ui.layout.Column
-import androidx.ui.layout.padding
-import androidx.ui.material.Button
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.RadioGroup
-import androidx.ui.material.Surface
-import androidx.ui.res.vectorResource
-import androidx.ui.unit.dp
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationHome
@@ -39,17 +40,18 @@ private fun Editor() {
     Column(Modifier.padding(20.dp)) {
         Recompose { recompose ->
             Text("Theme:")
-            RadioGroup(
-                options = listOf("Auto", "Dark", "Light"),
-                selectedOption = ConfigHome.data.theme,
-                onSelectedChange = {
-                    ConfigHome.data.theme = it
-                    ConfigHome.save()
-                    App.themeColorsChangeTrigger.value++
-                    recompose()
-                },
-                modifier = Modifier.padding(start = 20.dp)
-            )
+            Row(modifier = Modifier.padding(start = 20.dp)) {
+                val options = listOf("Auto", "Dark", "Light")
+                options.forEach {
+                    RadioButton(selected = ConfigHome.data.theme == it, onClick = {
+                        ConfigHome.data.theme = it
+                        ConfigHome.save()
+                        App.themeColorsChangeTrigger.value++
+                        recompose()
+                    })
+                    Text(it)
+                }
+            }
         }
 
         HeightSpacer()
@@ -99,8 +101,9 @@ private fun Editor() {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
+        val backResId = R.drawable.ic_back
         SimpleVectorButton(
-            vectorResource(R.drawable.ic_back),
+            vectorResource(backResId),
             "Back"
         ) {
             onSettingsScreenPressBack()

@@ -5,7 +5,9 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.ui.core.setContent
+import androidx.compose.foundation.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.setContent
 import com.tinyfish.jeekalarm.PermissionsHome
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.edit.onEditScreenPressBack

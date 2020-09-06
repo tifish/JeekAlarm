@@ -1,22 +1,25 @@
 package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
-import androidx.compose.Composable
-import androidx.compose.state
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Icon
-import androidx.ui.foundation.Text
-import androidx.ui.foundation.shape.corner.CircleShape
-import androidx.ui.layout.*
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.Surface
-import androidx.ui.material.TopAppBar
-import androidx.ui.res.vectorResource
-import androidx.ui.text.TextStyle
-import androidx.ui.unit.Dp
-import androidx.ui.unit.dp
-import androidx.ui.unit.sp
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Icon
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.material.TopAppBar
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.state
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.tinyfish.jeekalarm.R
 import kotlin.reflect.KMutableProperty0
 
@@ -96,13 +99,12 @@ fun MyCronTimeTextField(
     onChange: () -> Unit = {}
 ) {
     Row {
-        val focusedState = state { false }
+        val focusedState = remember { mutableStateOf(false) }
 
         Recompose { recompose ->
             SimpleTextField(
                 hint = hint,
                 textProp = textProp,
-                hintModifier = Modifier.preferredWidth(80.dp),
                 onFocus = { focusedState.value = true },
                 onBlur = { focusedState.value = false },
                 textModifier = Modifier.preferredWidth(160.dp),

@@ -11,7 +11,7 @@ import java.util.*
 object ScheduleHome {
     var scheduleList = mutableListOf<Schedule>()
     private val configFile: File by lazy {
-        File(App.context.getExternalFilesDir(null), "schedule.cron")
+        File(App.context.filesDir, "schedule.cron")
     }
 
     fun loadConfig() {

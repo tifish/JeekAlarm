@@ -1,6 +1,6 @@
 package com.tinyfish.ui
 
-import androidx.ui.graphics.Color
+import androidx.compose.ui.graphics.Color
 
 object MaterialColor {
     val Red50 = Color(0xFFFFEBEE)

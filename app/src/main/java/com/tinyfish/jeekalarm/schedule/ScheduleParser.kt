@@ -1,18 +1,20 @@
 package com.tinyfish.jeekalarm.schedule
 
-import com.beust.klaxon.KlaxonException
+import com.squareup.moshi.JsonAdapter
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.io.IOException
 import java.util.*
 
 internal object ScheduleParser {
+    private val scheduleMoshiAdapter: JsonAdapter<Schedule> = App.moshi.adapter(Schedule::class.java)
+
     fun parseJsonLine(line: String): Schedule? {
         return try {
-            App.json.parse<Schedule>(line).also {
+            scheduleMoshiAdapter.fromJson(line).also {
                 it?.timeConfigChanged()
             }
-        } catch (e: KlaxonException) {
+        } catch (e: Exception) {
             null
         }
     }
@@ -97,7 +99,7 @@ internal object ScheduleParser {
             configFile.createNewFile()
         configFile.bufferedWriter().use {
             for (schedule in schedules) {
-                it.write(App.json.toJsonString(schedule))
+                it.write(scheduleMoshiAdapter.toJson(schedule))
                 it.newLine()
             }
         }

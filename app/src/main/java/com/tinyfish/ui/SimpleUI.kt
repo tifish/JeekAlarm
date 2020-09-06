@@ -1,31 +1,29 @@
 package com.tinyfish.ui
 
-import androidx.compose.Composable
-import androidx.compose.invalidate
-import androidx.compose.state
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.*
-import androidx.ui.graphics.Color
-import androidx.ui.graphics.ImageAsset
-import androidx.ui.graphics.Shape
-import androidx.ui.graphics.vector.VectorAsset
-import androidx.ui.input.TextFieldValue
-import androidx.ui.layout.*
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.Surface
-import androidx.ui.material.Switch
-import androidx.ui.text.TextRange
-import androidx.ui.text.TextStyle
-import androidx.ui.unit.Dp
-import androidx.ui.unit.dp
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageAsset
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
 import kotlin.reflect.KMutableProperty0
 
 @Composable
-fun Recompose(body: @Composable() (recompose: () -> Unit) -> Unit) = body(invalidate)
+fun Recompose(body: @Composable (recompose: () -> Unit) -> Unit) = body(invalidate)
 
 @Composable
-fun Observe(body: @Composable() () -> Unit) = body()
+fun Observe(body: @Composable () -> Unit) = body()
 
 @Composable
 fun SimpleSwitch(
@@ -119,35 +117,27 @@ fun SimpleTextField(
     onFocus: () -> Unit = {},
     onBlur: () -> Unit = {},
     modifier: Modifier = Modifier,
-    hintModifier: Modifier = Modifier,
-    hintStyle: TextStyle = TextStyle.Default,
     textModifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle.Default,
     onChange: () -> Unit = {}
 ) {
     Row(modifier) {
-        Text(hint, hintModifier, style = hintStyle)
 
-        val textRange = state { TextRange(0, 0) }
+        val textValue = remember { mutableStateOf(TextFieldValue(textProp.get())) }
 
         Recompose { recompose ->
-            TextField(
+            OutlinedTextField(
                 modifier = textModifier,
-                value = TextFieldValue(textProp.get(), textRange.value),
+                value = textValue.value,
                 onValueChange = {
                     if (textProp.get() != it.text) {
                         textProp.set(it.text)
                         onChange()
                     }
-                    textRange.value = it.selection
+                    textValue.value = it
                     recompose()
                 },
-                onFocusChange = {
-                    if (it)
-                        onFocus()
-                    else
-                        onBlur()
-                },
+                label = { Text(hint) },
                 textStyle = textStyle
             )
         }

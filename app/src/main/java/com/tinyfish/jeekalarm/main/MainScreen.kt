@@ -1,15 +1,15 @@
 package com.tinyfish.jeekalarm.main
 
-import androidx.compose.Composable
-import androidx.ui.core.Alignment
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.*
-import androidx.ui.graphics.Color
-import androidx.ui.layout.*
-import androidx.ui.material.*
-import androidx.ui.res.vectorResource
-import androidx.ui.text.TextStyle
-import androidx.ui.unit.dp
+import androidx.compose.foundation.*
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
@@ -37,7 +37,7 @@ fun MainUI() {
 }
 
 @Composable
-fun GetThemeFromConfig(): ColorPalette {
+fun GetThemeFromConfig(): Colors {
     return when (ConfigHome.data.theme) {
         "Auto" -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
         "Dark" -> DarkColorPalette
@@ -75,15 +75,13 @@ private fun ScheduleList() {
             }
         }
     } else {
-        VerticalScroller {
-            Column(Modifier.padding(20.dp)) {
-                val now = Calendar.getInstance()
-                for (index in ScheduleHome.scheduleList.indices) {
-                    val schedule = ScheduleHome.scheduleList[index]
-                    HeightSpacer()
-                    ScheduleItem(index, schedule, now)
-                    Divider(color = Color.DarkGray)
-                }
+        ScrollableColumn(Modifier.padding(20.dp)) {
+            val now = Calendar.getInstance()
+            for (index in ScheduleHome.scheduleList.indices) {
+                val schedule = ScheduleHome.scheduleList[index]
+                HeightSpacer()
+                ScheduleItem(index, schedule, now)
+                Divider(color = Color.DarkGray)
             }
         }
     }

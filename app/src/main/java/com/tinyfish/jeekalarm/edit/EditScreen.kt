@@ -1,17 +1,15 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.Composable
-import androidx.compose.MutableState
-import androidx.compose.state
-import androidx.ui.core.Modifier
-import androidx.ui.foundation.Text
-import androidx.ui.foundation.VerticalScroller
-import androidx.ui.layout.Column
-import androidx.ui.layout.padding
-import androidx.ui.material.MaterialTheme
-import androidx.ui.material.Surface
-import androidx.ui.res.vectorResource
-import androidx.ui.unit.dp
+import androidx.compose.foundation.ScrollableColumn
+import androidx.compose.foundation.Text
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Surface
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
@@ -26,7 +24,7 @@ private lateinit var uiTimeConfigChanged: MutableState<Int>
 
 @Composable
 fun EditScreen() {
-    uiTimeConfigChanged = state { 0 }
+    uiTimeConfigChanged =  remember { mutableStateOf(0) }
 
     isAdding = App.editScheduleIndex == -1
     editingSchedule =
@@ -53,137 +51,134 @@ fun EditScreen() {
 
 @Composable
 private fun Editor() {
-    VerticalScroller {
-        Column(Modifier.padding(20.dp)) {
-            Observe {
-                App.editEnabledChangeTrigger.value
-                MySwitch("Enabled", editingSchedule::enabled)
-            }
-            HeightSpacer()
-            MySwitch("Only Once", editingSchedule::onlyOnce)
+    ScrollableColumn(Modifier.padding(20.dp)) {
+        Observe {
+            App.editEnabledChangeTrigger.value
+            MySwitch("Enabled", editingSchedule::enabled)
+        }
+        HeightSpacer()
+        MySwitch("Only Once", editingSchedule::onlyOnce)
 
-            val onChange = {
-                if (!editingSchedule.enabled) {
-                    editingSchedule.enabled = true
-                    App.editEnabledChangeTrigger.value++
-                }
+        val onChange = {
+            if (!editingSchedule.enabled) {
+                editingSchedule.enabled = true
+                App.editEnabledChangeTrigger.value++
             }
+        }
 
+        HeightSpacer()
+        MyCronTimeTextField(
+            "Name: ",
+            editingSchedule::name,
+            false,
+            onChange
+        )
+        Column(Modifier.padding(start = 20.dp)) {
+            uiTimeConfigChanged.value
             HeightSpacer()
             MyCronTimeTextField(
-                "Name: ",
-                editingSchedule::name,
-                false,
+                "Minute: ",
+                editingSchedule::minuteConfig,
+                true,
                 onChange
             )
-            Column(Modifier.padding(start = 20.dp)) {
-                uiTimeConfigChanged.value
-                HeightSpacer()
-                MyCronTimeTextField(
-                    "Minute: ",
-                    editingSchedule::minuteConfig,
-                    true,
-                    onChange
-                )
-                HeightSpacer()
-                MyCronTimeTextField(
-                    "Hour: ",
-                    editingSchedule::hourConfig,
-                    true,
-                    onChange
-                )
-                HeightSpacer()
-                MyCronTimeTextField(
-                    "Day: ",
-                    editingSchedule::dayConfig,
-                    true,
-                    onChange
-                )
-                HeightSpacer()
-                MyCronTimeTextField(
-                    "Month: ",
-                    editingSchedule::monthConfig,
-                    true,
-                    onChange
-                )
-                HeightSpacer()
-                MyCronTimeTextField(
-                    "WeekDay: ",
-                    editingSchedule::weekDayConfig,
-                    true,
-                    onChange
-                )
-            }
+            HeightSpacer()
+            MyCronTimeTextField(
+                "Hour: ",
+                editingSchedule::hourConfig,
+                true,
+                onChange
+            )
+            HeightSpacer()
+            MyCronTimeTextField(
+                "Day: ",
+                editingSchedule::dayConfig,
+                true,
+                onChange
+            )
+            HeightSpacer()
+            MyCronTimeTextField(
+                "Month: ",
+                editingSchedule::monthConfig,
+                true,
+                onChange
+            )
+            HeightSpacer()
+            MyCronTimeTextField(
+                "WeekDay: ",
+                editingSchedule::weekDayConfig,
+                true,
+                onChange
+            )
+        }
 
-            Recompose { recompose ->
-                HeightSpacer()
-                MySwitch(
-                    hint = "Play Music:",
-                    booleanProp = editingSchedule::playMusic,
-                    onCheckedChange = { recompose() })
+        Recompose { recompose ->
+            HeightSpacer()
+            MySwitch(
+                hint = "Play Music:",
+                booleanProp = editingSchedule::playMusic,
+                onCheckedChange = { recompose() })
 
-                if (editingSchedule.playMusic) {
-                    Column(Modifier.padding(start = 20.dp)) {
-                        HeightSpacer()
-                        Recompose { recomposeFileSelect ->
-                            MyFileSelect("Music File:",
-                                editingSchedule.musicFile,
-                                onSelect = {
-                                    FileSelector.openMusicFile {
-                                        editingSchedule.musicFile = it?.path?.substringAfter(':')!!
-                                        recomposeFileSelect()
-                                    }
-                                },
-                                onClear = {
-                                    editingSchedule.musicFile = ""
-                                    recomposeFileSelect()
-                                }
-                            )
-                        }
-
-                        HeightSpacer()
-                        Recompose { recomposeFileSelect ->
-                            MyFileSelect("Music Folder:",
-                                editingSchedule.musicFolder,
-                                onSelect = {
-                                    FileSelector.openFolder {
-                                        editingSchedule.musicFolder =
-                                            it?.path?.substringAfter(':')!!
-                                        recomposeFileSelect()
-                                    }
-                                },
-                                onClear = {
-                                    editingSchedule.musicFolder = ""
-                                    recomposeFileSelect()
-                                }
-                            )
-                        }
-                    }
-                }
-
-                Recompose { recomposeVibration ->
+            if (editingSchedule.playMusic) {
+                Column(Modifier.padding(start = 20.dp)) {
                     HeightSpacer()
-                    MySwitch(
-                        "Vibration",
-                        editingSchedule::vibration,
-                        onCheckedChange = { recomposeVibration() })
-
-                    if (editingSchedule.vibration) {
-                        HeightSpacer()
-                        Text(
-                            editingSchedule.vibrationCount.toString(),
-                            modifier = Modifier.padding(start = 20.dp)
+                    Recompose { recomposeFileSelect ->
+                        MyFileSelect("Music File:",
+                            editingSchedule.musicFile,
+                            onSelect = {
+                                FileSelector.openMusicFile {
+                                    editingSchedule.musicFile = it?.path?.substringAfter(':')!!
+                                    recomposeFileSelect()
+                                }
+                            },
+                            onClear = {
+                                editingSchedule.musicFile = ""
+                                recomposeFileSelect()
+                            }
                         )
                     }
+
+                    HeightSpacer()
+                    Recompose { recomposeFileSelect ->
+                        MyFileSelect("Music Folder:",
+                            editingSchedule.musicFolder,
+                            onSelect = {
+                                FileSelector.openFolder {
+                                    editingSchedule.musicFolder =
+                                        it?.path?.substringAfter(':')!!
+                                    recomposeFileSelect()
+                                }
+                            },
+                            onClear = {
+                                editingSchedule.musicFolder = ""
+                                recomposeFileSelect()
+                            }
+                        )
+                    }
+                }
+            }
+
+            Recompose { recomposeVibration ->
+                HeightSpacer()
+                MySwitch(
+                    "Vibration",
+                    editingSchedule::vibration,
+                    onCheckedChange = { recomposeVibration() })
+
+                if (editingSchedule.vibration) {
+                    HeightSpacer()
+                    Text(
+                        editingSchedule.vibrationCount.toString(),
+                        modifier = Modifier.padding(start = 20.dp)
+                    )
                 }
             }
         }
     }
 }
 
-
 @Composable
-private fun BottomBar() {
+fun BottomBar() {
     MyBottomBar {
         SimpleVectorButton(
             vectorResource(R.drawable.ic_back),

@@ -4,10 +4,12 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import com.beust.klaxon.Klaxon
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.ui.GlobalState
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -21,7 +23,8 @@ enum class ScreenType {
 class App : Application() {
     companion object {
         lateinit var context: Context
-        var json = Klaxon()
+
+        val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
         private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
         fun format(calendar: Calendar?): String {

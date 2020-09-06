@@ -1,6 +1,5 @@
 package com.tinyfish.jeekalarm
 
-import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleParser
 import org.junit.Assert
 import org.junit.Test

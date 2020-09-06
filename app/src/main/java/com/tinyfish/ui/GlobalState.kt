@@ -1,7 +1,7 @@
 package com.tinyfish.ui
 
-import androidx.compose.MutableState
-import androidx.compose.mutableStateOf
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 
 class GlobalState<T>(data: T) {
     private var stateValue: MutableState<T>? = null
