@@ -182,7 +182,7 @@ fun SimpleImageButton(
 ) {
     Column(
         modifier.clickable(onClick = onClick),
-        horizontalGravity = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val imageModifier =
             if (imageSize != null) Modifier.preferredSize(imageSize) else Modifier
