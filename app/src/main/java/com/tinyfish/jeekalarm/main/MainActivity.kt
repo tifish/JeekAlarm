@@ -7,6 +7,7 @@ import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.platform.setContent
 import com.tinyfish.jeekalarm.PermissionsHome
 import com.tinyfish.jeekalarm.edit.FileSelector
@@ -21,6 +22,7 @@ class MainActivity : AppCompatActivity() {
         var onFileSelect: (uri: Uri?) -> Unit = {}
     }
 
+    @ExperimentalFocus
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

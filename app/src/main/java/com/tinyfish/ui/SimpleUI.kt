@@ -3,17 +3,20 @@ package com.tinyfish.ui
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Surface
 import androidx.compose.material.Switch
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.ExperimentalFocus
+import androidx.compose.ui.focus.FocusState
+import androidx.compose.ui.focusObserver
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -68,11 +71,19 @@ fun SimpleSwitch(
     textModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
+    var isFirstChange = remember { true }
+
     Row(modifier) {
         Switch(
             checked = value,
             onCheckedChange = {
-                onCheckedChange(it)
+                // At 1.0.0-Alpha02, onCheckedChange is triggered during the composition.
+                // We don't want that. So ignore the first trigger.
+                if (isFirstChange) {
+                    isFirstChange = false
+                } else {
+                    onCheckedChange(it)
+                }
             }
         )
 
@@ -110,37 +121,71 @@ fun SimpleSwitchOnText(
     }
 }
 
+@ExperimentalFocus
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SimpleTextField(
     hint: String,
-    textProp: KMutableProperty0<String>,
-    onFocus: () -> Unit = {},
-    onBlur: () -> Unit = {},
+    textFieldValue: TextFieldValue,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle.Default,
-    onChange: () -> Unit = {}
+    onTextFieldFocused: (Boolean) -> Unit = {},
+    onTextChanged: (TextFieldValue) -> Unit = {}
 ) {
-    Row(modifier) {
+    Row(modifier = modifier) {
+        Text(hint)
+        WidthSpacer()
 
-        val textValue = remember { mutableStateOf(TextFieldValue(textProp.get())) }
+        var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        Recompose { recompose ->
-            OutlinedTextField(
-                modifier = textModifier,
-                value = textValue.value,
-                onValueChange = {
-                    if (textProp.get() != it.text) {
-                        textProp.set(it.text)
-                        onChange()
-                    }
-                    textValue.value = it
-                    recompose()
-                },
-                label = { Text(hint) },
-                textStyle = textStyle
-            )
-        }
+        BaseTextField(
+            modifier = textModifier.focusObserver { state ->
+                if (lastFocusState != state) {
+                    onTextFieldFocused(state == FocusState.Active)
+                }
+                lastFocusState = state
+            },
+            value = textFieldValue,
+            onValueChange = {
+                onTextChanged(it)
+            },
+            textStyle = textStyle
+        )
+    }
+}
+
+@ExperimentalFocus
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun SimpleIntField(
+    hint: String,
+    textFieldValue: TextFieldValue,
+    textModifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
+    onTextFieldFocused: (Boolean) -> Unit = {},
+    onTextChanged: (TextFieldValue) -> Unit = {}
+) {
+    Row {
+        Text(hint)
+        WidthSpacer()
+
+        var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
+
+        BaseTextField(
+            modifier = textModifier.focusObserver { state ->
+                if (lastFocusState != state) {
+                    onTextFieldFocused(state == FocusState.Active)
+                }
+                lastFocusState = state
+            },
+            value = textFieldValue,
+            onValueChange = {
+                onTextChanged(it)
+            },
+            textStyle = textStyle,
+            keyboardType = KeyboardType.Number
+        )
     }
 }
 
@@ -191,7 +236,7 @@ fun SimpleImageButton(
         if (text != "") {
             if (imageSize != null)
                 Spacer(Modifier.preferredHeight(2.dp))
-            Text(text, Modifier.gravity(Alignment.CenterHorizontally))
+            Text(text, Modifier.align(Alignment.CenterHorizontally))
         }
     }
 }

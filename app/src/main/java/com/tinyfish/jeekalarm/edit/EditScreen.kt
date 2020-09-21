@@ -8,6 +8,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
@@ -22,9 +23,10 @@ private lateinit var editingSchedule: Schedule
 private var isAdding = false
 private lateinit var uiTimeConfigChanged: MutableState<Int>
 
+@ExperimentalFocus
 @Composable
 fun EditScreen() {
-    uiTimeConfigChanged =  remember { mutableStateOf(0) }
+    uiTimeConfigChanged = remember { mutableStateOf(0) }
 
     isAdding = App.editScheduleIndex == -1
     editingSchedule =
@@ -49,6 +51,7 @@ fun EditScreen() {
     }
 }
 
+@ExperimentalFocus
 @Composable
 private fun Editor() {
     ScrollableColumn(Modifier.padding(20.dp)) {
@@ -59,7 +62,7 @@ private fun Editor() {
         HeightSpacer()
         MySwitch("Only Once", editingSchedule::onlyOnce)
 
-        val onChange = {
+        val onChange = { _: String ->
             if (!editingSchedule.enabled) {
                 editingSchedule.enabled = true
                 App.editEnabledChangeTrigger.value++

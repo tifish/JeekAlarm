@@ -1,7 +1,6 @@
 package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
@@ -12,16 +11,17 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.state
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tinyfish.jeekalarm.R
 import kotlin.reflect.KMutableProperty0
+import com.tinyfish.jeekalarm.R
 
 @Composable
 fun HeightSpacer(height: Dp = 10.dp) {
@@ -91,75 +91,79 @@ fun MySwitch(
     )
 }
 
+@ExperimentalFocus
 @Composable
 fun MyCronTimeTextField(
     hint: String,
     textProp: KMutableProperty0<String>,
     isTimeConfig: Boolean = false,
-    onChange: () -> Unit = {}
+    onChange: (String) -> Unit = {}
 ) {
     Row {
         val focusedState = remember { mutableStateOf(false) }
+        val textValue = remember { mutableStateOf(TextFieldValue(textProp.get())) }
 
-        Recompose { recompose ->
-            SimpleTextField(
-                hint = hint,
-                textProp = textProp,
-                onFocus = { focusedState.value = true },
-                onBlur = { focusedState.value = false },
-                textModifier = Modifier.preferredWidth(160.dp),
-                textStyle = TextStyle(fontSize = (20.sp)),
-                modifier = Modifier.weight(1f, true),
-                onChange = onChange
-            )
-
-            if (isTimeConfig && focusedState.value) {
-                MyTextButton("*") {
-                    if (textProp.get() != "*") {
-                        textProp.set("*")
-                        onChange()
-                        recompose()
-                    }
+        SimpleTextField(
+            hint = hint,
+            textFieldValue = textValue.value,
+            onTextFieldFocused = { focused -> focusedState.value = focused },
+            textModifier = Modifier.preferredWidth(160.dp),
+            textStyle = TextStyle(fontSize = (20.sp)),
+            modifier = Modifier.weight(1f, true),
+            onTextChanged = {
+                if (textValue.value.text != it.text) {
+                    onChange(it.text)
                 }
+                textValue.value = it
+            }
+        )
 
-                WidthSpacer()
-
-                MyTextButton("0") {
-                    if (textProp.get() != "0") {
-                        textProp.set("0")
-                        onChange()
-                        recompose()
-                    }
+        if (isTimeConfig && focusedState.value) {
+            MyTextButton("*") {
+                if (textProp.get() != "*") {
+                    textProp.set("*")
+                    textValue.value = TextFieldValue("*")
+                    onChange("*")
                 }
+            }
 
-                WidthSpacer()
+            WidthSpacer()
 
-                MyTextButton("1-3") {
-                    if (textProp.get() != "1-3") {
-                        textProp.set("1-3")
-                        onChange()
-                        recompose()
-                    }
+            MyTextButton("0") {
+                if (textProp.get() != "0") {
+                    textProp.set("0")
+                    textValue.value = TextFieldValue("0")
+                    onChange("0")
                 }
+            }
 
-                WidthSpacer()
+            WidthSpacer()
 
-                MyTextButton("1,3") {
-                    if (textProp.get() != "1,3") {
-                        textProp.set("1,3")
-                        onChange()
-                        recompose()
-                    }
+            MyTextButton("1-3") {
+                if (textProp.get() != "1-3") {
+                    textProp.set("1-3")
+                    textValue.value = TextFieldValue("1-3")
+                    onChange("1-3")
                 }
+            }
 
-                WidthSpacer()
+            WidthSpacer()
 
-                MyTextButton("*/3") {
-                    if (textProp.get() != "*/3") {
-                        textProp.set("*/3")
-                        onChange()
-                        recompose()
-                    }
+            MyTextButton("1,3") {
+                if (textProp.get() != "1,3") {
+                    textProp.set("1,3")
+                    textValue.value = TextFieldValue("1,3")
+                    onChange("1,3")
+                }
+            }
+
+            WidthSpacer()
+
+            MyTextButton("*/3") {
+                if (textProp.get() != "*/3") {
+                    textProp.set("*/3")
+                    textValue.value = TextFieldValue("*/3")
+                    onChange("*/3")
                 }
             }
         }
@@ -193,7 +197,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
     TopAppBar(
         title = {
             Row {
-                Icon(vectorResource(iconID), Modifier.gravity(Alignment.CenterVertically))
+                Icon(vectorResource(iconID), Modifier.align(Alignment.CenterVertically))
                 WidthSpacer()
                 Text(title)
             }
