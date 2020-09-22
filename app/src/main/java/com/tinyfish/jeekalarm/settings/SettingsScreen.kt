@@ -1,6 +1,7 @@
 package com.tinyfish.jeekalarm.settings
 
 import androidx.compose.foundation.Text
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
@@ -43,13 +44,15 @@ private fun Editor() {
             Row(modifier = Modifier.padding(start = 20.dp)) {
                 val options = listOf("Auto", "Dark", "Light")
                 options.forEach {
-                    RadioButton(selected = ConfigHome.data.theme == it, onClick = {
+                    val onClick = {
                         ConfigHome.data.theme = it
                         ConfigHome.save()
                         App.themeColorsChangeTrigger.value++
                         recompose()
-                    })
-                    Text(it)
+                    }
+                    RadioButton(selected = ConfigHome.data.theme == it, onClick = onClick)
+                    Text(it, Modifier.clickable(onClick = onClick))
+                    WidthSpacer()
                 }
             }
         }
