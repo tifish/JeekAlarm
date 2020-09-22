@@ -112,6 +112,7 @@ fun MyCronTimeTextField(
             modifier = Modifier.weight(1f, true),
             onTextChanged = {
                 if (textValue.value.text != it.text) {
+                    textProp.set(it.text)
                     onChange(it.text)
                 }
                 textValue.value = it
