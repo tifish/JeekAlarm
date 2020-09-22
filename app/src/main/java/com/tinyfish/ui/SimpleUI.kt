@@ -71,19 +71,11 @@ fun SimpleSwitch(
     textModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    var isFirstChange = remember { true }
-
     Row(modifier) {
         Switch(
             checked = value,
             onCheckedChange = {
-                // At 1.0.0-Alpha02, onCheckedChange is triggered during the composition.
-                // We don't want that. So ignore the first trigger.
-                if (isFirstChange) {
-                    isFirstChange = false
-                } else {
-                    onCheckedChange(it)
-                }
+                onCheckedChange(it)
             }
         )
 
