@@ -1,6 +1,7 @@
 package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Icon
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
@@ -91,6 +92,7 @@ fun MySwitch(
     )
 }
 
+@ExperimentalFoundationApi
 @ExperimentalFocus
 @Composable
 fun MyCronTimeTextField(
@@ -186,7 +188,7 @@ fun MyTextButton(
 }
 
 @Composable
-fun MyTopBar(title: @Composable() () -> Unit) {
+fun MyTopBar(title: @Composable () -> Unit) {
     TopAppBar(
         title = title,
         backgroundColor = MaterialTheme.colors.primary
@@ -208,7 +210,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
 }
 
 @Composable
-fun MyBottomBar(buttons: @Composable() () -> Unit) {
+fun MyBottomBar(buttons: @Composable () -> Unit) {
     Surface(Modifier.fillMaxWidth(), elevation = 2.dp, color = MaterialTheme.colors.background) {
         Row(Modifier.preferredHeight(80.dp), Arrangement.Center, Alignment.CenterVertically) {
             buttons()

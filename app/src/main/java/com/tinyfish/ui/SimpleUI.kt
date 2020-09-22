@@ -113,8 +113,8 @@ fun SimpleSwitchOnText(
     }
 }
 
+@ExperimentalFoundationApi
 @ExperimentalFocus
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SimpleTextField(
     hint: String,
@@ -147,8 +147,8 @@ fun SimpleTextField(
     }
 }
 
+@ExperimentalFoundationApi
 @ExperimentalFocus
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun SimpleIntField(
     hint: String,

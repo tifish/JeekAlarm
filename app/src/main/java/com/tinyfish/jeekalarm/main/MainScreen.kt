@@ -2,6 +2,7 @@ package com.tinyfish.jeekalarm.main
 
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.RowScope.align
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,6 +24,7 @@ import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.*
 import java.util.*
 
+@ExperimentalFoundationApi
 @ExperimentalFocus
 @Composable
 fun MainUI() {
@@ -93,7 +95,7 @@ private fun ScheduleList() {
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
         Recompose { recompose ->
-            Box(modifier = Modifier.gravity(Alignment.CenterVertically)) {
+            Box(modifier = Modifier.align(Alignment.CenterVertically)) {
                 Switch(
                     checked = schedule.enabled,
                     onCheckedChange = {
@@ -124,7 +126,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             )
         }
 
-        Row(Modifier.gravity(Alignment.CenterVertically)) {
+        Row(Modifier.align(Alignment.CenterVertically)) {
             if (App.removingIndex.value == -1) {
                 SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
                     App.removingIndex.value = index

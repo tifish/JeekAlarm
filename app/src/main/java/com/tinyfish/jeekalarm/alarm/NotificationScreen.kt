@@ -3,6 +3,7 @@ package com.tinyfish.jeekalarm.alarm
 import androidx.compose.foundation.Box
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.ColumnScope.align
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.runtime.Composable
@@ -40,12 +41,12 @@ fun NotificationContent() {
             Text(
                 schedule.name,
                 style = textStyle,
-                modifier = Modifier.gravity(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
             Text(
                 schedule.timeConfig,
                 style = textStyle,
-                modifier = Modifier.gravity(Alignment.CenterHorizontally)
+                modifier = Modifier.align(Alignment.CenterHorizontally)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -53,7 +54,7 @@ fun NotificationContent() {
 
         HeightSpacer(36.dp)
 
-        Row(modifier = Modifier.gravity(Alignment.CenterHorizontally)) {
+        Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
             val text = if (App.isPlaying.value) "Pause" else "Play"
             val onClick = {
                 if (App.isPlaying.value)

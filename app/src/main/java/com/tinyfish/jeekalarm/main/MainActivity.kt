@@ -5,8 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.foundation.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.platform.setContent
 import com.tinyfish.jeekalarm.PermissionsHome
@@ -22,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         var onFileSelect: (uri: Uri?) -> Unit = {}
     }
 
+    @ExperimentalFoundationApi
     @ExperimentalFocus
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

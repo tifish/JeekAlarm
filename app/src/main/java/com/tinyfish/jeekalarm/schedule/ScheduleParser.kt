@@ -81,7 +81,7 @@ internal object ScheduleParser {
         if (!configFile.exists())
             return result
 
-        configFile.forEachLine() {
+        configFile.forEachLine {
             val line = it.trim()
             if (line.isNotEmpty()) {
                 val schedule = parseJsonLine(line)

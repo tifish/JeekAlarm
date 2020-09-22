@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.edit
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.Text
 import androidx.compose.foundation.layout.Column
@@ -23,6 +24,7 @@ private lateinit var editingSchedule: Schedule
 private var isAdding = false
 private lateinit var uiTimeConfigChanged: MutableState<Int>
 
+@ExperimentalFoundationApi
 @ExperimentalFocus
 @Composable
 fun EditScreen() {
@@ -51,6 +53,7 @@ fun EditScreen() {
     }
 }
 
+@ExperimentalFoundationApi
 @ExperimentalFocus
 @Composable
 private fun Editor() {

@@ -3,7 +3,7 @@ package com.tinyfish.jeekalarm
 import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
-import android.os.Vibrator;
+import android.os.Vibrator
 import com.tinyfish.jeekalarm.start.App
 
 object VibrationHome {
@@ -22,7 +22,7 @@ object VibrationHome {
             vibrator.vibrate(VibrationEffect.createWaveform(waveList.toLongArray(), -1))
         } else {
             //deprecated in API 26
-            vibrator.vibrate(waveList.toLongArray(), -1);
+            vibrator.vibrate(waveList.toLongArray(), -1)
         }
     }
 
