@@ -95,7 +95,7 @@ object NotificationHome {
         val openIntent = Intent(App.context, NotificationClickReceiver::class.java).apply {
             putExtra("alarmIndexes", alarmIndexes.toIntArray())
         }
-        val openPendingIntent = PendingIntent.getBroadcast(App.context, 0, openIntent, 0)
+        val openPendingIntent = PendingIntent.getBroadcast(App.context, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT)
 
         val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
         val pausePendingIntent: PendingIntent =

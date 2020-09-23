@@ -9,7 +9,7 @@ import com.tinyfish.jeekalarm.start.ScreenType
 
 class NotificationClickReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val alarmIndexes = intent.extras!!.getIntArray("alarmIndexes")!!
+        val alarmIndexes = intent.getIntArrayExtra("alarmIndexes")!!
         App.notificationAlarmIndexes.addAll(alarmIndexes.toList())
 
         if (App.screen.value != ScreenType.NOTIFICATION) {
