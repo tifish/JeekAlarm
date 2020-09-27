@@ -11,7 +11,7 @@ val DarkColorPalette = darkColors(
     primary = MaterialColor.LightBlue400, // TopAppBar, BottomAppBar, Button
     primaryVariant = MaterialColor.LightBlue400,
     secondary = MaterialColor.LightBlue400, // Radio button
-    surface = Color.White // Surface, Switch off
+    surface = Color.LightGray // Surface, Switch off, disabled button background
     // onPrimary // text on primary
     // onSurface // text on Surface, Switch off background
 )
@@ -21,7 +21,7 @@ val LightColorPalette = lightColors(
     primaryVariant = MaterialColor.LightBlue600,
     secondary = MaterialColor.LightBlue600, // Radio button
     secondaryVariant = MaterialColor.LightBlue600, // Switch on
-    surface = Color.Gray // Surface, Switch off
+    surface = Color.LightGray // Surface, Switch off, disabled button background
     // onPrimary // text on primary
     // onSurface // text on Surface, Switch off background
 )
@@ -29,7 +29,7 @@ val LightColorPalette = lightColors(
 @Composable
 fun Theme(
     darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable () -> Unit
+    content: @Composable() () -> Unit
 ) {
     val colors = if (darkTheme) {
         DarkColorPalette
