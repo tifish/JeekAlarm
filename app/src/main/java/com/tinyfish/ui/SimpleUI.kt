@@ -1,10 +1,11 @@
 package com.tinyfish.ui
 
-import androidx.compose.foundation.*
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Switch
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,7 +17,6 @@ import androidx.compose.ui.graphics.ImageAsset
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.vector.VectorAsset
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -131,7 +131,7 @@ fun SimpleTextField(
 
         var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        BaseTextField(
+        BasicTextField(
             modifier = textModifier.focusObserver { state ->
                 if (lastFocusState != state) {
                     onTextFieldFocused(state == FocusState.Active)
@@ -164,7 +164,7 @@ fun SimpleIntField(
 
         var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        BaseTextField(
+        BasicTextField(
             modifier = textModifier.focusObserver { state ->
                 if (lastFocusState != state) {
                     onTextFieldFocused(state == FocusState.Active)
@@ -175,8 +175,7 @@ fun SimpleIntField(
             onValueChange = {
                 onTextChanged(it)
             },
-            textStyle = textStyle,
-            keyboardType = KeyboardType.Number
+            textStyle = textStyle
         )
     }
 }
