@@ -13,7 +13,7 @@ object MaterialColor {
     val Red700 = Color(0xFFD32F2F)
     val Red800 = Color(0xFFC62828)
     val Red900 = Color(0xFFB71C1C)
-    
+
     val RedA100 = Color(0xFFFF8A80)
     val RedA200 = Color(0xFFFF5252)
     val RedA400 = Color(0xFFFF1744)
@@ -29,7 +29,7 @@ object MaterialColor {
     val Pink700 = Color(0xFFC2185B)
     val Pink800 = Color(0xFFAD1457)
     val Pink900 = Color(0xFF880E4F)
-    
+
     val PinkA100 = Color(0xFFFF80AB)
     val PinkA200 = Color(0xFFFF4081)
     val PinkA400 = Color(0xFFF50057)
@@ -45,12 +45,12 @@ object MaterialColor {
     val Purple700 = Color(0xFF7B1FA2)
     val Purple800 = Color(0xFF6A1B9A)
     val Purple900 = Color(0xFF4A148C)
-    
+
     val PurpleA100 = Color(0xFFEA80FC)
     val PurpleA200 = Color(0xFFE040FB)
     val PurpleA400 = Color(0xFFD500F9)
     val PurpleA700 = Color(0xFFAA00FF)
-    
+
     val DeepPurple50 = Color(0xFFEDE7F6)
     val DeepPurple100 = Color(0xFFD1C4E9)
     val DeepPurple200 = Color(0xFFB39DDB)
@@ -77,7 +77,7 @@ object MaterialColor {
     val Indigo700 = Color(0xFF303F9F)
     val Indigo800 = Color(0xFF283593)
     val Indigo900 = Color(0xFF1A237E)
-    
+
     val IndigoA100 = Color(0xFF8C9EFF)
     val IndigoA200 = Color(0xFF536DFE)
     val IndigoA400 = Color(0xFF3D5AFE)
@@ -93,12 +93,12 @@ object MaterialColor {
     val Blue700 = Color(0xFF1976D2)
     val Blue800 = Color(0xFF1565C0)
     val Blue900 = Color(0xFF0D47A1)
-    
+
     val BlueA100 = Color(0xFF82B1FF)
     val BlueA200 = Color(0xFF448AFF)
     val BlueA400 = Color(0xFF2979FF)
     val BlueA700 = Color(0xFF2962FF)
-    
+
     val LightBlue50 = Color(0xFFE1F5FE)
     val LightBlue100 = Color(0xFFB3E5FC)
     val LightBlue200 = Color(0xFF81D4FA)
@@ -109,12 +109,12 @@ object MaterialColor {
     val LightBlue700 = Color(0xFF0288D1)
     val LightBlue800 = Color(0xFF0277BD)
     val LightBlue900 = Color(0xFF01579B)
- 
+
     val LightBlueA100 = Color(0xFF80D8FF)
     val LightBlueA200 = Color(0xFF40C4FF)
     val LightBlueA400 = Color(0xFF00B0FF)
     val LightBlueA700 = Color(0xFF0091EA)
-  
+
     val Cyan50 = Color(0xFFE0F7FA)
     val Cyan100 = Color(0xFFB2EBF2)
     val Cyan200 = Color(0xFF80DEEA)
@@ -125,12 +125,12 @@ object MaterialColor {
     val Cyan700 = Color(0xFF0097A7)
     val Cyan800 = Color(0xFF00838F)
     val Cyan900 = Color(0xFF006064)
-    
+
     val CyanA100 = Color(0xFF84FFFF)
     val CyanA200 = Color(0xFF18FFFF)
     val CyanA400 = Color(0xFF00E5FF)
     val CyanA700 = Color(0xFF00B8D4)
-  
+
     val Teal50 = Color(0xFFE0F2F1)
     val Teal100 = Color(0xFFB2DFDB)
     val Teal200 = Color(0xFF80CBC4)
@@ -141,12 +141,12 @@ object MaterialColor {
     val Teal700 = Color(0xFF00796B)
     val Teal800 = Color(0xFF00695C)
     val Teal900 = Color(0xFF004D40)
-  
+
     val TealA100 = Color(0xFFA7FFEB)
     val TealA200 = Color(0xFF64FFDA)
     val TealA400 = Color(0xFF1DE9B6)
     val TealA700 = Color(0xFF00BFA5)
-  
+
     val Green50 = Color(0xFFE8F5E9)
     val Green100 = Color(0xFFC8E6C9)
     val Green200 = Color(0xFFA5D6A7)
@@ -157,12 +157,12 @@ object MaterialColor {
     val Green700 = Color(0xFF388E3C)
     val Green800 = Color(0xFF2E7D32)
     val Green900 = Color(0xFF1B5E20)
-  
+
     val GreenA100 = Color(0xFFB9F6CA)
     val GreenA200 = Color(0xFF69F0AE)
     val GreenA400 = Color(0xFF00E676)
     val GreenA700 = Color(0xFF00C853)
- 
+
     val LightGreen50 = Color(0xFFF1F8E9)
     val LightGreen100 = Color(0xFFDCEDC8)
     val LightGreen200 = Color(0xFFC5E1A5)
@@ -173,7 +173,7 @@ object MaterialColor {
     val LightGreen700 = Color(0xFF689F38)
     val LightGreen800 = Color(0xFF558B2F)
     val LightGreen900 = Color(0xFF33691E)
-  
+
     val LightGreenA100 = Color(0xFFCCFF90)
     val LightGreenA200 = Color(0xFFB2FF59)
     val LightGreenA400 = Color(0xFF76FF03)
@@ -189,12 +189,12 @@ object MaterialColor {
     val Lime700 = Color(0xFFAFB42B)
     val Lime800 = Color(0xFF9E9D24)
     val Lime900 = Color(0xFF827717)
-  
+
     val LimeA100 = Color(0xFFF4FF81)
     val LimeA200 = Color(0xFFEEFF41)
     val LimeA400 = Color(0xFFC6FF00)
     val LimeA700 = Color(0xFFAEEA00)
-   
+
     val Yellow50 = Color(0xFFFFFDE7)
     val Yellow100 = Color(0xFFFFF9C4)
     val Yellow200 = Color(0xFFFFF59D)
@@ -205,7 +205,7 @@ object MaterialColor {
     val Yellow700 = Color(0xFFFBC02D)
     val Yellow800 = Color(0xFFF9A825)
     val Yellow900 = Color(0xFFF57F17)
-  
+
     val YellowA100 = Color(0xFFFFFF8D)
     val YellowA200 = Color(0xFFFFFF00)
     val YellowA400 = Color(0xFFFFEA00)
@@ -226,7 +226,7 @@ object MaterialColor {
     val AmberA200 = Color(0xFFFFD740)
     val AmberA400 = Color(0xFFFFC400)
     val AmberA700 = Color(0xFFFFAB00)
- 
+
     val Orange50 = Color(0xFFFFF3E0)
     val Orange100 = Color(0xFFFFE0B2)
     val Orange200 = Color(0xFFFFCC80)
@@ -237,12 +237,12 @@ object MaterialColor {
     val Orange700 = Color(0xFFF57C00)
     val Orange800 = Color(0xFFEF6C00)
     val Orange900 = Color(0xFFE65100)
- 
+
     val OrangeA100 = Color(0xFFFFD180)
     val OrangeA200 = Color(0xFFFFAB40)
     val OrangeA400 = Color(0xFFFF9100)
     val OrangeA700 = Color(0xFFFF6D00)
-  
+
     val DeepOrange50 = Color(0xFFFBE9E7)
     val DeepOrange100 = Color(0xFFFFCCBC)
     val DeepOrange200 = Color(0xFFFFAB91)
@@ -253,12 +253,12 @@ object MaterialColor {
     val DeepOrange700 = Color(0xFFE64A19)
     val DeepOrange800 = Color(0xFFD84315)
     val DeepOrange900 = Color(0xFFBF360C)
-  
+
     val DeepOrangeA100 = Color(0xFFFF9E80)
     val DeepOrangeA200 = Color(0xFFFF6E40)
     val DeepOrangeA400 = Color(0xFFFF3D00)
     val DeepOrangeA700 = Color(0xFFDD2C0)
-  
+
     val Brown50 = Color(0xFFEFEBE9)
     val Brown100 = Color(0xFFD7CCC8)
     val Brown200 = Color(0xFFBCAAA4)
@@ -269,7 +269,7 @@ object MaterialColor {
     val Brown700 = Color(0xFF5D4037)
     val Brown800 = Color(0xFF4E342E)
     val Brown900 = Color(0xFF3E2723)
-   
+
     val Grey50 = Color(0xFFFAFAFA)
     val Grey100 = Color(0xFFF5F5F5)
     val Grey200 = Color(0xFFEEEEEE)
@@ -280,7 +280,7 @@ object MaterialColor {
     val Grey700 = Color(0xFF616161)
     val Grey800 = Color(0xFF424242)
     val Grey900 = Color(0xFF212121)
-   
+
     val BlueGrey50 = Color(0xFFECEFF1)
     val BlueGrey100 = Color(0xFFCFD8DC)
     val BlueGrey200 = Color(0xFFB0BEC5)

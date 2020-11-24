@@ -9,7 +9,6 @@ import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.ui.GlobalState
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 

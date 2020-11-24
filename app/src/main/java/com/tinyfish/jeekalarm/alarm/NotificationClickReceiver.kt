@@ -3,8 +3,8 @@ package com.tinyfish.jeekalarm.alarm
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
-import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.main.MainActivity
+import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 
 class NotificationClickReceiver : BroadcastReceiver() {
