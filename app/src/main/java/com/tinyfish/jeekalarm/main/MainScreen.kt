@@ -30,10 +30,10 @@ import java.util.*
 @ExperimentalFocus
 @Composable
 fun MainUI() {
-    App.themeColorsChangeTrigger.value
+    App.themeColorsChangeTrigger
 
     MaterialTheme(colors = GetThemeFromConfig()) {
-        when (App.screen.value) {
+        when (App.screen) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen()
             ScreenType.SETTINGS -> SettingsScreen()
@@ -68,7 +68,7 @@ fun MainScreen() {
 
 @Composable
 private fun ScheduleList() {
-    App.scheduleChangeTrigger.value
+    App.scheduleChangeTrigger
 
     if (ScheduleHome.scheduleList.size == 0) {
         Box(Modifier.wrapContentSize()) {
@@ -77,11 +77,12 @@ private fun ScheduleList() {
                 "Add"
             ) {
                 App.editScheduleIndex = -1
-                App.screen.value = ScreenType.EDIT
+                App.screen = ScreenType.EDIT
             }
         }
     } else {
         ScrollableColumn(Modifier.padding(20.dp)) {
+            App.scheduleChangeTrigger
             val now = Calendar.getInstance()
             for (index in ScheduleHome.scheduleList.indices) {
                 val schedule = ScheduleHome.scheduleList[index]
@@ -112,12 +113,12 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
         Spacer(Modifier.preferredWidth(20.dp))
 
         Column(Modifier.weight(1f, true).clickable(onClick = {
-            if (App.removingIndex.value == -1) {
+            if (App.removingIndex == -1) {
                 App.editScheduleIndex = index
-                App.screen.value = ScreenType.EDIT
+                App.screen = ScreenType.EDIT
             }
         })) {
-            Text(schedule.name + if (index in App.nextAlarmIndexes.value) " (Next alarm)" else "")
+            Text(schedule.name + if (index in App.nextAlarmIndexes) " (Next alarm)" else "")
             Text(
                 schedule.timeConfig,
                 style = TextStyle(color = Color.Gray)
@@ -129,17 +130,17 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
         }
 
         Row(Modifier.align(Alignment.CenterVertically)) {
-            if (App.removingIndex.value == -1) {
+            if (App.removingIndex == -1) {
                 SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
-                    App.removingIndex.value = index
+                    App.removingIndex = index
                 }
                 WidthSpacer()
-            } else if (App.removingIndex.value == index) {
+            } else if (App.removingIndex == index) {
                 SimpleVectorButton(
                     vectorResource(R.drawable.ic_done),
                     "Remove"
                 ) {
-                    App.removingIndex.value = -1
+                    App.removingIndex = -1
                     ScheduleHome.scheduleList.removeAt(index)
                     ScheduleHome.saveConfig()
                 }
@@ -149,7 +150,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     vectorResource(R.drawable.ic_back),
                     "Cancel"
                 ) {
-                    App.removingIndex.value = -1
+                    App.removingIndex = -1
                 }
             }
         }
@@ -159,7 +160,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 @Composable
 private fun BottomBar() {
     MyBottomBar {
-        App.scheduleChangeTrigger.value
+        App.scheduleChangeTrigger
 
         if (ScheduleHome.scheduleList.size > 0) {
             SimpleVectorButton(
@@ -167,7 +168,7 @@ private fun BottomBar() {
                 "Add"
             ) {
                 App.editScheduleIndex = -1
-                App.screen.value = ScreenType.EDIT
+                App.screen = ScreenType.EDIT
             }
             ToolButtonWidthSpacer()
         }
@@ -176,7 +177,7 @@ private fun BottomBar() {
             vectorResource(R.drawable.ic_settings),
             "Settings"
         ) {
-            App.screen.value = ScreenType.SETTINGS
+            App.screen = ScreenType.SETTINGS
         }
     }
 }

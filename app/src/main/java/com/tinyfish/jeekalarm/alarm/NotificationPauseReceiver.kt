@@ -8,7 +8,7 @@ import com.tinyfish.jeekalarm.start.App
 
 class NotificationPauseReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (App.isPlaying.value)
+        if (App.isPlaying)
             ScheduleHome.pausePlaying()
         else
             ScheduleHome.resumePlaying()

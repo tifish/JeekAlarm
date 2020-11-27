@@ -4,11 +4,13 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinyfish.jeekalarm.ConfigHome
 import com.tinyfish.jeekalarm.schedule.ScheduleHome
-import com.tinyfish.ui.GlobalState
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -34,34 +36,14 @@ class App : Application() {
         var screenBeforeNotification = ScreenType.MAIN
         val notificationAlarmIndexes = mutableListOf<Int>()
 
-        val themeColorsChangeTrigger = GlobalState<Int>(0)
+        var themeColorsChangeTrigger by mutableStateOf(0)
 
-        val screen = GlobalState(ScreenType.MAIN)
-        val nextAlarmIndexes = GlobalState(listOf<Int>())
-        val scheduleChangeTrigger = GlobalState(0)
-        val isPlaying = GlobalState(false)
-        val removingIndex = GlobalState(-1)
-        val editEnabledChangeTrigger = GlobalState(0)
-
-        fun bindComposer() {
-            themeColorsChangeTrigger.createState()
-            screen.createState()
-            nextAlarmIndexes.createState()
-            scheduleChangeTrigger.createState()
-            isPlaying.createState()
-            removingIndex.createState()
-            editEnabledChangeTrigger.createState()
-        }
-
-        fun unbindComposer() {
-            themeColorsChangeTrigger.destroyState()
-            screen.destroyState()
-            nextAlarmIndexes.destroyState()
-            scheduleChangeTrigger.destroyState()
-            isPlaying.destroyState()
-            removingIndex.destroyState()
-            editEnabledChangeTrigger.destroyState()
-        }
+        var screen by mutableStateOf(ScreenType.MAIN)
+        var nextAlarmIndexes by mutableStateOf(listOf<Int>())
+        var scheduleChangeTrigger by mutableStateOf(0)
+        var isPlaying by mutableStateOf(false)
+        var removingIndex by mutableStateOf(-1)
+        var editEnabledChangeTrigger by mutableStateOf(0)
 
         fun startService() {
             val startIntent = Intent(context, StartService::class.java).apply {

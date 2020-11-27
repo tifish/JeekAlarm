@@ -62,7 +62,7 @@ fun EditScreen() {
 private fun Editor() {
     ScrollableColumn(Modifier.padding(20.dp)) {
         Observe {
-            App.editEnabledChangeTrigger.value
+            App.editEnabledChangeTrigger
             MySwitch("Enabled", editingSchedule::enabled)
         }
         HeightSpacer()
@@ -71,7 +71,7 @@ private fun Editor() {
         val onChange = { _: String ->
             if (!editingSchedule.enabled) {
                 editingSchedule.enabled = true
-                App.editEnabledChangeTrigger.value++
+                App.editEnabledChangeTrigger++
             }
         }
 
@@ -202,7 +202,7 @@ fun BottomBar() {
                 vectorResource(R.drawable.ic_cancel),
                 "Cancel"
             ) {
-                App.screen.value = ScreenType.MAIN
+                App.screen = ScreenType.MAIN
             }
         }
 
@@ -222,15 +222,15 @@ fun BottomBar() {
 
         ToolButtonWidthSpacer()
         Observe {
-            val text = if (App.isPlaying.value) "Stop" else "Play"
+            val text = if (App.isPlaying) "Stop" else "Play"
             val onClick = {
-                if (App.isPlaying.value)
+                if (App.isPlaying)
                     ScheduleHome.stopPlaying()
                 else
                     editingSchedule.play()
             }
 
-            if (App.isPlaying.value)
+            if (App.isPlaying)
                 SimpleVectorButton(
                     vectorResource(R.drawable.ic_stop),
                     text,
@@ -253,5 +253,5 @@ fun onEditScreenPressBack() {
     ScheduleHome.saveConfig()
 
     ScheduleHome.stopPlaying()
-    App.screen.value = ScreenType.MAIN
+    App.screen = ScreenType.MAIN
 }

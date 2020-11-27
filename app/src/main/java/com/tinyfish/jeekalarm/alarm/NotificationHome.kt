@@ -116,7 +116,7 @@ object NotificationHome {
             setContentIntent(openPendingIntent)
             addAction(
                 R.drawable.ic_pause,
-                if (App.isPlaying.value) "Pause" else "Play",
+                if (App.isPlaying) "Pause" else "Play",
                 pausePendingIntent
             )
             addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)

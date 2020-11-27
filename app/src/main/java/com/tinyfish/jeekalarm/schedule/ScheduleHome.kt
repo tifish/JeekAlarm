@@ -24,14 +24,14 @@ object ScheduleHome {
     fun saveConfig() {
         ScheduleParser.saveToFile(configFile, scheduleList)
 
-        App.scheduleChangeTrigger.value++
+        App.scheduleChangeTrigger++
         setNextAlarm()
     }
 
     var nextAlarmIndexes = mutableListOf<Int>()
         private set(value) {
             field = value
-            App.nextAlarmIndexes.value = value.toList()
+            App.nextAlarmIndexes = value.toList()
         }
 
     fun setNextAlarm() {
@@ -78,19 +78,19 @@ object ScheduleHome {
         MusicHome.stop()
         VibrationHome.stop()
 
-        App.isPlaying.value = false
+        App.isPlaying = false
     }
 
     fun pausePlaying() {
         MusicHome.pause()
         VibrationHome.stop()
 
-        App.isPlaying.value = false
+        App.isPlaying = false
     }
 
     fun resumePlaying() {
         MusicHome.resume()
 
-        App.isPlaying.value = true
+        App.isPlaying = true
     }
 }

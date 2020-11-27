@@ -12,9 +12,9 @@ class NotificationClickReceiver : BroadcastReceiver() {
         val alarmIndexes = intent.getIntArrayExtra("alarmIndexes")!!
         App.notificationAlarmIndexes.addAll(alarmIndexes.toList())
 
-        if (App.screen.value != ScreenType.NOTIFICATION) {
-            App.screenBeforeNotification = App.screen.value
-            App.screen.value = ScreenType.NOTIFICATION
+        if (App.screen != ScreenType.NOTIFICATION) {
+            App.screenBeforeNotification = App.screen
+            App.screen = ScreenType.NOTIFICATION
         }
 
         val openIntent = Intent(App.context, MainActivity::class.java).apply {

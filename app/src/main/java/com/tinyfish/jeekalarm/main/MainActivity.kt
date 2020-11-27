@@ -31,29 +31,25 @@ class MainActivity : AppCompatActivity() {
         PermissionsHome.checkExternalStoragePermission(this)
 
         setContent {
-            App.bindComposer()
-
             MainUI()
         }
     }
 
     override fun onDestroy() {
-        App.unbindComposer()
-
         super.onDestroy()
 
         instance = null
     }
 
     override fun onBackPressed() {
-        if (App.screen.value == ScreenType.MAIN) {
-            if (App.removingIndex.value > -1)
-                App.removingIndex.value = -1
+        if (App.screen == ScreenType.MAIN) {
+            if (App.removingIndex > -1)
+                App.removingIndex = -1
             else
                 super.onBackPressed()
-        } else if (App.screen.value == ScreenType.EDIT) {
+        } else if (App.screen == ScreenType.EDIT) {
             onEditScreenPressBack()
-        } else if (App.screen.value == ScreenType.SETTINGS) {
+        } else if (App.screen == ScreenType.SETTINGS) {
             onSettingsScreenPressBack()
         }
     }

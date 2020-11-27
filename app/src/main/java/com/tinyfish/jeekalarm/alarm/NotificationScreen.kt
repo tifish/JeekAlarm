@@ -53,14 +53,14 @@ fun NotificationContent() {
         HeightSpacer(36.dp)
 
         Row(modifier = Modifier.align(Alignment.CenterHorizontally)) {
-            val text = if (App.isPlaying.value) "Pause" else "Play"
+            val text = if (App.isPlaying) "Pause" else "Play"
             val onClick = {
-                if (App.isPlaying.value)
+                if (App.isPlaying)
                     ScheduleHome.pausePlaying()
                 else
                     ScheduleHome.resumePlaying()
             }
-            if (App.isPlaying.value)
+            if (App.isPlaying)
                 SimpleVectorButton(
                     vectorResource(R.drawable.ic_pause),
                     text,
@@ -79,7 +79,7 @@ fun NotificationContent() {
                 vectorResource(R.drawable.ic_close),
                 "Dismiss"
             ) {
-                App.screen.value = App.screenBeforeNotification
+                App.screen = App.screenBeforeNotification
                 App.notificationAlarmIndexes.clear()
             }
         }

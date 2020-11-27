@@ -112,5 +112,5 @@ private fun BottomBar() {
 
 fun onSettingsScreenPressBack() {
     ConfigHome.save()
-    App.screen.value = ScreenType.MAIN
+    App.screen = ScreenType.MAIN
 }
