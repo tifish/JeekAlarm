@@ -3,7 +3,10 @@ package com.tinyfish.ui
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
+import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -12,8 +15,10 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -111,7 +116,7 @@ fun SimpleTextField(
     textFieldValue: TextFieldValue,
     modifier: Modifier = Modifier,
     textModifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle.Default,
+    textStyle: TextStyle = LocalTextStyle.current,
     onTextFieldFocused: (Boolean) -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit = {}
 ) {
@@ -121,7 +126,11 @@ fun SimpleTextField(
 
         var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        TextField(
+        val colors = TextFieldDefaults.textFieldColors()
+        val textColor = colors.textColor(true).value
+        val newTextStyle = textStyle.copy(color = textColor)
+
+        BasicTextField(
             modifier = textModifier.onFocusChanged { state ->
                 if (lastFocusState != state) {
                     onTextFieldFocused(state == FocusState.Active)
@@ -132,7 +141,8 @@ fun SimpleTextField(
             onValueChange = {
                 onTextChanged(it)
             },
-            textStyle = textStyle,
+            textStyle = newTextStyle,
+            cursorBrush = SolidColor(colors.cursorColor(false).value)
         )
     }
 }
@@ -142,7 +152,7 @@ fun SimpleIntField(
     hint: String,
     textFieldValue: TextFieldValue,
     modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle.Default,
+    textStyle: TextStyle = LocalTextStyle.current,
     onTextFieldFocused: (Boolean) -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit = {}
 ) {
@@ -152,7 +162,11 @@ fun SimpleIntField(
 
         var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        TextField(
+        val colors = TextFieldDefaults.textFieldColors()
+        val textColor = colors.textColor(true).value
+        val newTextStyle = textStyle.copy(color = textColor)
+
+        BasicTextField(
             modifier = modifier.onFocusChanged { state ->
                 if (lastFocusState != state) {
                     onTextFieldFocused(state == FocusState.Active)
@@ -163,7 +177,9 @@ fun SimpleIntField(
             onValueChange = {
                 onTextChanged(it)
             },
-            textStyle = textStyle
+            textStyle = newTextStyle,
+            cursorBrush = SolidColor(colors.cursorColor(false).value),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
 }
