@@ -7,6 +7,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -62,21 +63,21 @@ fun NotificationContent() {
             }
             if (App.isPlaying)
                 SimpleVectorButton(
-                    vectorResource(R.drawable.ic_pause),
+                    ImageVector.vectorResource(R.drawable.ic_pause),
                     text,
                     onClick
                 )
             else
                 SimpleVectorButton(
-                    vectorResource(R.drawable.ic_play_arrow),
+                    ImageVector.vectorResource(R.drawable.ic_play_arrow),
                     text,
                     onClick
                 )
 
-            Spacer(Modifier.preferredWidth(36.dp))
+            Spacer(Modifier.width(36.dp))
 
             SimpleVectorButton(
-                vectorResource(R.drawable.ic_close),
+                ImageVector.vectorResource(R.drawable.ic_close),
                 "Dismiss"
             ) {
                 App.screen = App.screenBeforeNotification

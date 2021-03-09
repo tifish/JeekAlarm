@@ -1,18 +1,15 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
@@ -27,8 +24,6 @@ private lateinit var editingSchedule: Schedule
 private var isAdding = false
 private lateinit var uiTimeConfigChanged: MutableState<Int>
 
-@ExperimentalFoundationApi
-@ExperimentalFocus
 @Composable
 fun EditScreen() {
     uiTimeConfigChanged = remember { mutableStateOf(0) }
@@ -56,11 +51,12 @@ fun EditScreen() {
     }
 }
 
-@ExperimentalFoundationApi
-@ExperimentalFocus
 @Composable
 private fun Editor() {
-    ScrollableColumn(Modifier.padding(20.dp)) {
+    Column(
+        Modifier
+            .padding(20.dp)
+            .verticalScroll(rememberScrollState())) {
         Observe {
             App.editEnabledChangeTrigger
             MySwitch("Enabled", editingSchedule::enabled)
@@ -121,58 +117,62 @@ private fun Editor() {
             )
         }
 
-        Recompose { recompose ->
+        Observe {
+            val playScope = currentRecomposeScope
             HeightSpacer()
             MySwitch(
                 hint = "Play Music:",
                 booleanProp = editingSchedule::playMusic,
-                onCheckedChange = { recompose() })
+                onCheckedChange = { playScope.invalidate() })
 
             if (editingSchedule.playMusic) {
                 Column(Modifier.padding(start = 20.dp)) {
                     HeightSpacer()
-                    Recompose { recomposeFileSelect ->
+                    Observe {
+                        val fileSelectScope = currentRecomposeScope
                         MyFileSelect("Music File:",
                             editingSchedule.musicFile,
                             onSelect = {
                                 FileSelector.openMusicFile {
                                     editingSchedule.musicFile = it?.path?.substringAfter(':')!!
-                                    recomposeFileSelect()
+                                    fileSelectScope.invalidate()
                                 }
                             },
                             onClear = {
                                 editingSchedule.musicFile = ""
-                                recomposeFileSelect()
+                                fileSelectScope.invalidate()
                             }
                         )
                     }
 
                     HeightSpacer()
-                    Recompose { recomposeFileSelect ->
+                    Observe {
+                        val fileSelectScope = currentRecomposeScope
                         MyFileSelect("Music Folder:",
                             editingSchedule.musicFolder,
                             onSelect = {
                                 FileSelector.openFolder {
                                     editingSchedule.musicFolder =
                                         it?.path?.substringAfter(':')!!
-                                    recomposeFileSelect()
+                                    fileSelectScope.invalidate()
                                 }
                             },
                             onClear = {
                                 editingSchedule.musicFolder = ""
-                                recomposeFileSelect()
+                                fileSelectScope.invalidate()
                             }
                         )
                     }
                 }
             }
 
-            Recompose { recomposeVibration ->
+            Observe {
+                val vibrationScope = currentRecomposeScope
                 HeightSpacer()
                 MySwitch(
                     "Vibration",
                     editingSchedule::vibration,
-                    onCheckedChange = { recomposeVibration() })
+                    onCheckedChange = { vibrationScope.invalidate() })
 
                 if (editingSchedule.vibration) {
                     HeightSpacer()
@@ -190,7 +190,7 @@ private fun Editor() {
 fun BottomBar() {
     MyBottomBar {
         SimpleVectorButton(
-            vectorResource(R.drawable.ic_back),
+            ImageVector.vectorResource(R.drawable.ic_back),
             if (isAdding) "Add" else "Back"
         ) {
             onEditScreenPressBack()
@@ -199,7 +199,7 @@ fun BottomBar() {
         if (isAdding) {
             ToolButtonWidthSpacer()
             SimpleVectorButton(
-                vectorResource(R.drawable.ic_cancel),
+                ImageVector.vectorResource(R.drawable.ic_cancel),
                 "Cancel"
             ) {
                 App.screen = ScreenType.MAIN
@@ -208,7 +208,7 @@ fun BottomBar() {
 
         ToolButtonWidthSpacer()
         SimpleVectorButton(
-            vectorResource(R.drawable.ic_access_time),
+            ImageVector.vectorResource(R.drawable.ic_access_time),
             "Now"
         ) {
             Calendar.getInstance().apply {
@@ -232,13 +232,13 @@ fun BottomBar() {
 
             if (App.isPlaying)
                 SimpleVectorButton(
-                    vectorResource(R.drawable.ic_stop),
+                    ImageVector.vectorResource(R.drawable.ic_stop),
                     text,
                     onClick
                 )
             else
                 SimpleVectorButton(
-                    vectorResource(R.drawable.ic_play_arrow),
+                    ImageVector.vectorResource(R.drawable.ic_play_arrow),
                     text,
                     onClick
                 )

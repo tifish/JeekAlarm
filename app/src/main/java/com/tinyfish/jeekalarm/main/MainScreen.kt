@@ -1,16 +1,17 @@
 package com.tinyfish.jeekalarm.main
 
-import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollableColumn
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -26,8 +27,6 @@ import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.*
 import java.util.*
 
-@ExperimentalFoundationApi
-@ExperimentalFocus
 @Composable
 fun MainUI() {
     App.themeColorsChangeTrigger
@@ -57,7 +56,9 @@ fun MainScreen() {
     Column {
         MyTopBar(R.drawable.ic_alarm, "JeekAlarm")
         Surface(
-            Modifier.weight(1f, true).fillMaxSize(),
+            Modifier
+                .weight(1f, true)
+                .fillMaxSize(),
             color = MaterialTheme.colors.background
         ) {
             ScheduleList()
@@ -73,7 +74,7 @@ private fun ScheduleList() {
     if (ScheduleHome.scheduleList.size == 0) {
         Box(Modifier.wrapContentSize()) {
             SimpleVectorButton(
-                vectorResource(R.drawable.ic_add),
+                ImageVector.vectorResource(R.drawable.ic_add),
                 "Add"
             ) {
                 App.editScheduleIndex = -1
@@ -81,7 +82,10 @@ private fun ScheduleList() {
             }
         }
     } else {
-        ScrollableColumn(Modifier.padding(20.dp)) {
+        Column(
+            Modifier
+                .padding(20.dp)
+                .verticalScroll(rememberScrollState())) {
             App.scheduleChangeTrigger
             val now = Calendar.getInstance()
             for (index in ScheduleHome.scheduleList.indices) {
@@ -97,27 +101,29 @@ private fun ScheduleList() {
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row {
-        Recompose { recompose ->
             Box(modifier = Modifier.align(Alignment.CenterVertically)) {
+                val boxScope = currentRecomposeScope
                 Switch(
                     checked = schedule.enabled,
                     onCheckedChange = {
                         schedule.enabled = it
                         ScheduleHome.saveConfig()
-                        recompose()
+                        boxScope.invalidate()
                     }
                 )
             }
-        }
 
-        Spacer(Modifier.preferredWidth(20.dp))
+        Spacer(Modifier.width(20.dp))
 
-        Column(Modifier.weight(1f, true).clickable(onClick = {
-            if (App.removingIndex == -1) {
-                App.editScheduleIndex = index
-                App.screen = ScreenType.EDIT
-            }
-        })) {
+        Column(
+            Modifier
+                .weight(1f, true)
+                .clickable(onClick = {
+                    if (App.removingIndex == -1) {
+                        App.editScheduleIndex = index
+                        App.screen = ScreenType.EDIT
+                    }
+                })) {
             Text(schedule.name + if (index in App.nextAlarmIndexes) " (Next alarm)" else "")
             Text(
                 schedule.timeConfig,
@@ -131,13 +137,13 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         Row(Modifier.align(Alignment.CenterVertically)) {
             if (App.removingIndex == -1) {
-                SimpleVectorButton(vectorResource(R.drawable.ic_remove)) {
+                SimpleVectorButton(ImageVector.vectorResource(R.drawable.ic_remove)) {
                     App.removingIndex = index
                 }
                 WidthSpacer()
             } else if (App.removingIndex == index) {
                 SimpleVectorButton(
-                    vectorResource(R.drawable.ic_done),
+                    ImageVector.vectorResource(R.drawable.ic_done),
                     "Remove"
                 ) {
                     App.removingIndex = -1
@@ -145,9 +151,9 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     ScheduleHome.saveConfig()
                 }
 
-                Spacer(Modifier.preferredWidth(20.dp))
+                Spacer(Modifier.width(20.dp))
                 SimpleVectorButton(
-                    vectorResource(R.drawable.ic_back),
+                    ImageVector.vectorResource(R.drawable.ic_back),
                     "Cancel"
                 ) {
                     App.removingIndex = -1
@@ -164,7 +170,7 @@ private fun BottomBar() {
 
         if (ScheduleHome.scheduleList.size > 0) {
             SimpleVectorButton(
-                vectorResource(R.drawable.ic_add),
+                ImageVector.vectorResource(R.drawable.ic_add),
                 "Add"
             ) {
                 App.editScheduleIndex = -1
@@ -174,7 +180,7 @@ private fun BottomBar() {
         }
 
         SimpleVectorButton(
-            vectorResource(R.drawable.ic_settings),
+            ImageVector.vectorResource(R.drawable.ic_settings),
             "Settings"
         ) {
             App.screen = ScreenType.SETTINGS

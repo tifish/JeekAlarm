@@ -11,7 +11,7 @@ val DarkColorPalette = darkColors(
     primary = MaterialColor.LightBlue400, // TopAppBar, BottomAppBar, Button
     primaryVariant = MaterialColor.LightBlue400,
     secondary = MaterialColor.LightBlue400, // Radio button
-    surface = Color.LightGray // Surface, Switch off, disabled button background
+    surface = Color.LightGray, // Surface, Switch off, disabled button background
     // onPrimary // text on primary
     // onSurface // text on Surface, Switch off background
 )

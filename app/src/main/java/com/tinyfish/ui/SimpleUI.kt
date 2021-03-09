@@ -1,29 +1,23 @@
 package com.tinyfish.ui
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
 import androidx.compose.ui.focus.FocusState
-import androidx.compose.ui.focusObserver
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageAsset
+import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.vector.VectorAsset
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import kotlin.reflect.KMutableProperty0
-
-@Composable
-fun Recompose(body: @Composable (recompose: () -> Unit) -> Unit) = body(invalidate)
 
 @Composable
 fun Observe(body: @Composable () -> Unit) = body()
@@ -32,33 +26,32 @@ fun Observe(body: @Composable () -> Unit) = body()
 fun SimpleSwitch(
     hint: String,
     booleanProp: KMutableProperty0<Boolean>,
-    textStyle: TextStyle = TextStyle.Default,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
     textModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
     Row(modifier) {
-        Recompose { recompose ->
-            Switch(
-                checked = booleanProp.get(),
-                onCheckedChange = {
-                    booleanProp.set(it)
-                    onCheckedChange(it)
-                    recompose()
-                }
-            )
+        val rowScope = currentRecomposeScope
 
-            Spacer(Modifier.preferredWidth(10.dp))
+        Switch(
+            checked = booleanProp.get(),
+            onCheckedChange = {
+                booleanProp.set(it)
+                onCheckedChange(it)
+                rowScope.invalidate()
+            }
+        )
 
-            Text(
-                hint, style = textStyle, modifier = textModifier.clickable(
-                    indication = null,
-                    onClick = {
-                        booleanProp.set(!booleanProp.get())
-                        recompose()
-                    })
-            )
-        }
+        Spacer(Modifier.width(10.dp))
+
+        Text(
+            hint, style = textStyle, modifier = textModifier.clickable(
+                onClick = {
+                    booleanProp.set(!booleanProp.get())
+                    rowScope.invalidate()
+                })
+        )
     }
 }
 
@@ -66,8 +59,8 @@ fun SimpleSwitch(
 fun SimpleSwitch(
     hint: String,
     value: Boolean,
-    textStyle: TextStyle = TextStyle.Default,
     modifier: Modifier = Modifier,
+    textStyle: TextStyle = TextStyle.Default,
     textModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
@@ -79,11 +72,10 @@ fun SimpleSwitch(
             }
         )
 
-        Spacer(Modifier.preferredWidth(10.dp))
+        Spacer(Modifier.width(10.dp))
 
         Text(
             hint, style = textStyle, modifier = textModifier.clickable(
-                indication = null,
                 onClick = {
                     onCheckedChange(!value)
                 })
@@ -107,14 +99,12 @@ fun SimpleSwitchOnText(
         )
 
         if (hint != "") {
-            Spacer(modifier = Modifier.preferredHeight(3.dp))
+            Spacer(modifier = Modifier.height(3.dp))
             Text(text = hint, modifier = Modifier.wrapContentSize(Alignment.Center))
         }
     }
 }
 
-@ExperimentalFoundationApi
-@ExperimentalFocus
 @Composable
 fun SimpleTextField(
     hint: String,
@@ -131,8 +121,8 @@ fun SimpleTextField(
 
         var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        BasicTextField(
-            modifier = textModifier.focusObserver { state ->
+        TextField(
+            modifier = textModifier.onFocusChanged { state ->
                 if (lastFocusState != state) {
                     onTextFieldFocused(state == FocusState.Active)
                 }
@@ -142,18 +132,16 @@ fun SimpleTextField(
             onValueChange = {
                 onTextChanged(it)
             },
-            textStyle = textStyle
+            textStyle = textStyle,
         )
     }
 }
 
-@ExperimentalFoundationApi
-@ExperimentalFocus
 @Composable
 fun SimpleIntField(
     hint: String,
     textFieldValue: TextFieldValue,
-    textModifier: Modifier = Modifier,
+    modifier: Modifier = Modifier,
     textStyle: TextStyle = TextStyle.Default,
     onTextFieldFocused: (Boolean) -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit = {}
@@ -164,8 +152,8 @@ fun SimpleIntField(
 
         var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
 
-        BasicTextField(
-            modifier = textModifier.focusObserver { state ->
+        TextField(
+            modifier = modifier.onFocusChanged { state ->
                 if (lastFocusState != state) {
                     onTextFieldFocused(state == FocusState.Active)
                 }
@@ -182,27 +170,27 @@ fun SimpleIntField(
 
 @Composable
 fun SimpleVectorButton(
-    vectorAsset: VectorAsset,
+    vectorAsset: ImageVector,
     text: String = "",
     onClick: () -> Unit
 ) {
-    SimpleVectorButton(vectorAsset, text, Modifier, onClick)
+    SimpleVectorButton(vectorAsset, Modifier, text, onClick)
 }
 
 @Composable
 fun SimpleVectorButton(
-    vectorAsset: VectorAsset,
-    text: String = "",
+    vectorAsset: ImageVector,
     modifier: Modifier = Modifier,
+    text: String = "",
     onClick: () -> Unit
 ) {
     Column(modifier.clickable(onClick = onClick), Arrangement.Center, Alignment.CenterHorizontally) {
         Box {
-            Icon(vectorAsset)
+            Icon(vectorAsset, null)
         }
 
         if (text != "") {
-            Spacer(Modifier.preferredHeight(vectorAsset.defaultHeight / 8))
+            Spacer(Modifier.height(vectorAsset.defaultHeight / 8))
             Text(text)
         }
     }
@@ -210,10 +198,10 @@ fun SimpleVectorButton(
 
 @Composable
 fun SimpleImageButton(
-    imageAsset: ImageAsset,
+    imageAsset: ImageBitmap,
+    modifier: Modifier = Modifier,
     text: String = "",
     imageSize: Dp? = null,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Column(
@@ -221,12 +209,12 @@ fun SimpleImageButton(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         val imageModifier =
-            if (imageSize != null) Modifier.preferredSize(imageSize) else Modifier
-        Image(imageAsset, imageModifier)
+            if (imageSize != null) Modifier.size(imageSize) else Modifier
+        Image(imageAsset, null, imageModifier)
 
         if (text != "") {
             if (imageSize != null)
-                Spacer(Modifier.preferredHeight(2.dp))
+                Spacer(Modifier.height(2.dp))
             Text(text, Modifier.align(Alignment.CenterHorizontally))
         }
     }
@@ -234,16 +222,18 @@ fun SimpleImageButton(
 
 @Composable
 fun SimpleTextButton(
-    text: String = "",
+    text: String,
     width: Dp,
     height: Dp,
+    modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.small,
     backgroundColor: Color = MaterialTheme.colors.primary,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Surface(
-        modifier.clickable(onClick = onClick).preferredSize(width, height),
+        modifier
+            .clickable(onClick = onClick)
+            .size(width, height),
         shape = shape,
         color = backgroundColor
     ) {

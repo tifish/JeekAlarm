@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigHome
@@ -17,6 +19,7 @@ import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.*
+import java.util.*
 
 @Composable
 fun SettingsScreen() {
@@ -35,7 +38,8 @@ fun SettingsScreen() {
 @Composable
 private fun Editor() {
     Column(Modifier.padding(20.dp)) {
-        Recompose { recompose ->
+        Observe {
+            val themeScope = currentRecomposeScope
             Text("Theme:")
             Row(modifier = Modifier.padding(start = 20.dp)) {
                 val options = listOf("Auto", "Dark", "Light")
@@ -44,7 +48,7 @@ private fun Editor() {
                         ConfigHome.data.theme = it
                         ConfigHome.save()
                         App.themeColorsChangeTrigger++
-                        recompose()
+                        themeScope.invalidate()
                     }
                     RadioButton(selected = ConfigHome.data.theme == it, onClick = onClick)
                     Text(it, Modifier.clickable(onClick = onClick))
@@ -54,35 +58,37 @@ private fun Editor() {
         }
 
         HeightSpacer()
-        Recompose { recomposeFileSelect ->
+        Observe {
+            val fileSelectScope = currentRecomposeScope
             MyFileSelect("Music File:",
                 ConfigHome.data.defaultMusicFile,
                 onSelect = {
                     FileSelector.openMusicFile {
                         ConfigHome.data.defaultMusicFile = it?.path?.substringAfter(':')!!
-                        recomposeFileSelect()
+                        fileSelectScope.invalidate()
                     }
                 },
                 onClear = {
                     ConfigHome.data.defaultMusicFile = ""
-                    recomposeFileSelect()
+                    fileSelectScope.invalidate()
                 }
             )
         }
 
         HeightSpacer()
-        Recompose { recomposeFileSelect ->
+        Observe {
+            val fileSelectScope = currentRecomposeScope
             MyFileSelect("Music Folder:",
                 ConfigHome.data.defaultMusicFolder,
                 onSelect = {
                     FileSelector.openFolder {
                         ConfigHome.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
-                        recomposeFileSelect()
+                        fileSelectScope.invalidate()
                     }
                 },
                 onClear = {
                     ConfigHome.data.defaultMusicFolder = ""
-                    recomposeFileSelect()
+                    fileSelectScope.invalidate()
                 }
             )
         }
@@ -102,7 +108,7 @@ private fun BottomBar() {
     MyBottomBar {
         val backResId = R.drawable.ic_back
         SimpleVectorButton(
-            vectorResource(backResId),
+            ImageVector.vectorResource(backResId),
             "Back"
         ) {
             onSettingsScreenPressBack()

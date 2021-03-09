@@ -1,7 +1,6 @@
 package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
@@ -10,7 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.ExperimentalFocus
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
@@ -23,12 +22,12 @@ import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun HeightSpacer(height: Dp = 10.dp) {
-    Spacer(Modifier.preferredHeight(height))
+    Spacer(Modifier.height(height))
 }
 
 @Composable
 fun WidthSpacer(width: Dp = 10.dp) {
-    Spacer(Modifier.preferredWidth(width))
+    Spacer(Modifier.width(width))
 }
 
 @Composable
@@ -44,13 +43,13 @@ fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -
         Text(text, Modifier.weight(1f, true))
 
         SimpleVectorButton(
-            vectorResource(R.drawable.ic_location_searching),
+            ImageVector.vectorResource(R.drawable.ic_location_searching),
             "Select",
             onClick = onSelect
         )
         WidthSpacer()
         SimpleVectorButton(
-            vectorResource(R.drawable.ic_clear),
+            ImageVector.vectorResource(R.drawable.ic_clear),
             "Clear",
             onClick = onClear
         )
@@ -89,8 +88,6 @@ fun MySwitch(
     )
 }
 
-@ExperimentalFoundationApi
-@ExperimentalFocus
 @Composable
 fun MyCronTimeTextField(
     hint: String,
@@ -108,7 +105,7 @@ fun MyCronTimeTextField(
             onTextFieldFocused = { focused ->
                 focusedState.value = focused
             },
-            textModifier = Modifier.preferredWidth(160.dp),
+            textModifier = Modifier.width(160.dp),
             textStyle = TextStyle(fontSize = (20.sp)),
             modifier = Modifier.weight(1f, true),
             onTextChanged = {
@@ -200,7 +197,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
     TopAppBar(
         title = {
             Row {
-                Icon(vectorResource(iconID), Modifier.align(Alignment.CenterVertically))
+                Icon(ImageVector.vectorResource(iconID), null, Modifier.align(Alignment.CenterVertically))
                 WidthSpacer()
                 Text(title)
             }
@@ -212,7 +209,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
 @Composable
 fun MyBottomBar(buttons: @Composable () -> Unit) {
     Surface(Modifier.fillMaxWidth(), elevation = 2.dp, color = MaterialTheme.colors.background) {
-        Row(Modifier.preferredHeight(80.dp), Arrangement.Center, Alignment.CenterVertically) {
+        Row(Modifier.height(80.dp), Arrangement.Center, Alignment.CenterVertically) {
             buttons()
         }
     }
