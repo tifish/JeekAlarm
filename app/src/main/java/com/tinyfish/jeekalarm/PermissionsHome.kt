@@ -11,8 +11,7 @@ import androidx.core.content.ContextCompat
 object PermissionsHome {
     private const val REQUEST_EXTERNAL_PERMISSION_CODE = 666
 
-    @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN)
-    val PERMISSIONS_EXTERNAL_STORAGE = arrayOf(
+    private val PERMISSIONS_EXTERNAL_STORAGE = arrayOf(
         READ_EXTERNAL_STORAGE,
     )
 

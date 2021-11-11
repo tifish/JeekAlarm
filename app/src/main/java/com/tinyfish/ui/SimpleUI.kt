@@ -6,11 +6,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.*
-import androidx.compose.material.MaterialTheme.colors
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusState
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -124,7 +122,7 @@ fun SimpleTextField(
         Text(hint)
         WidthSpacer()
 
-        var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
+        var lastFocusState by remember { mutableStateOf(false) }
 
         val colors = TextFieldDefaults.textFieldColors()
         val textColor = colors.textColor(true).value
@@ -132,10 +130,10 @@ fun SimpleTextField(
 
         BasicTextField(
             modifier = textModifier.onFocusChanged { state ->
-                if (lastFocusState != state) {
-                    onTextFieldFocused(state == FocusState.Active)
+                if (lastFocusState != state.hasFocus) {
+                    onTextFieldFocused(state.hasFocus)
                 }
-                lastFocusState = state
+                lastFocusState = state.hasFocus
             },
             value = textFieldValue,
             onValueChange = {
@@ -160,7 +158,7 @@ fun SimpleIntField(
         Text(hint)
         WidthSpacer()
 
-        var lastFocusState by remember { mutableStateOf(FocusState.Inactive) }
+        var lastFocusState by remember { mutableStateOf(false) }
 
         val colors = TextFieldDefaults.textFieldColors()
         val textColor = colors.textColor(true).value
@@ -168,10 +166,10 @@ fun SimpleIntField(
 
         BasicTextField(
             modifier = modifier.onFocusChanged { state ->
-                if (lastFocusState != state) {
-                    onTextFieldFocused(state == FocusState.Active)
+                if (lastFocusState != state.hasFocus) {
+                    onTextFieldFocused(state.hasFocus)
                 }
-                lastFocusState = state
+                lastFocusState = state.hasFocus
             },
             value = textFieldValue,
             onValueChange = {

@@ -19,7 +19,7 @@ object MusicHome {
         return play(Uri.fromFile(file), loop)
     }
 
-    fun play(uri: Uri, loop: Boolean = true): MediaPlayer? {
+    fun play(uri: Uri, loop: Boolean = true): MediaPlayer {
         mediaPlayer.apply {
             reset()
 

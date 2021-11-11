@@ -114,10 +114,12 @@ internal object ScheduleParser {
         // 1-3,5,6 or */5
         result.clear()
         val calendar = Calendar.getInstance()
+        val minValue = calendar.getMinimum(indexType)
+        val maxValue = calendar.getMaximum(indexType)
 
         if (content.startsWith("*/")) {
             val interval = content.substring(2).toInt()
-            for (i in calendar.getMinimum(indexType)..calendar.getMaximum(indexType) step interval) {
+            for (i in minValue..maxValue step interval) {
                 result.add(i)
             }
             return
