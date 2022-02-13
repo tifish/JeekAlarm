@@ -86,139 +86,169 @@ data class Schedule(
         timeConfigChanged()
     }
 
-    fun getNextTriggerTime(calendar: Calendar? = null): Calendar? {
+    fun getNextTriggerTime(now: Calendar? = null): Calendar? {
         if (!isValid)
             return null
 
-        val result =
-            if (calendar == null)
+        val resultTime =
+            if (now == null)
                 Calendar.getInstance()
             else
-                calendar.clone() as Calendar
-        result.clear(Calendar.SECOND)
-        result.clear(Calendar.MILLISECOND)
+                now.clone() as Calendar
+        resultTime.clear(Calendar.SECOND)
+        resultTime.clear(Calendar.MILLISECOND)
         var minuteCompareMethod = CompareMethod.Bigger
 
+        // Match from month to minute.
+        // May loop once or twice.
         while (true) {
-            var matchType = processTriggerCalendarPart(
-                result,
+            var matchType = findNextTriggerTimePart(
+                resultTime,
                 Calendar.MONTH,
                 months,
                 Calendar.YEAR,
                 CompareMethod.EqualOrBigger
             )
-            if (matchType == MatchType.NotMatch) {
-                result.set(result[Calendar.YEAR], result.getMinimum(Calendar.MONTH), 1, 0, 0)
-                minuteCompareMethod = CompareMethod.EqualOrBigger
-                continue
-            } else if (matchType == MatchType.Bigger) {
-                result.set(
-                    result[Calendar.YEAR],
-                    result[Calendar.MONTH],
-                    days[0],
-                    hours[0],
-                    minutes[0]
-                )
-                minuteCompareMethod = CompareMethod.EqualOrBigger
+            when (matchType) {
+                MatchType.NotMatch -> {
+                    resultTime.set(resultTime[Calendar.YEAR], resultTime.getMinimum(Calendar.MONTH), 1, 0, 0)
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                    continue
+                }
+                MatchType.Bigger -> {
+                    resultTime.set(
+                        resultTime[Calendar.YEAR],
+                        resultTime[Calendar.MONTH],
+                        days[0],
+                        hours[0],
+                        minutes[0]
+                    )
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                }
+                MatchType.Equals -> {}
             }
 
-            matchType = processTriggerCalendarPart(
-                result,
+            matchType = findNextTriggerTimePart(
+                resultTime,
                 Calendar.DAY_OF_MONTH,
                 days,
                 Calendar.MONTH,
                 CompareMethod.EqualOrBigger
             )
-            if (matchType == MatchType.NotMatch) {
-                minuteCompareMethod = CompareMethod.EqualOrBigger
-                continue
-            } else if (matchType == MatchType.Bigger) {
-                result.set(
-                    result[Calendar.YEAR],
-                    result[Calendar.MONTH],
-                    result[Calendar.DAY_OF_MONTH],
-                    hours[0],
-                    minutes[0]
-                )
-                minuteCompareMethod = CompareMethod.EqualOrBigger
+            when (matchType) {
+                MatchType.NotMatch -> {
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                    continue
+                }
+                MatchType.Bigger -> {
+                    resultTime.set(
+                        resultTime[Calendar.YEAR],
+                        resultTime[Calendar.MONTH],
+                        resultTime[Calendar.DAY_OF_MONTH],
+                        hours[0],
+                        minutes[0]
+                    )
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                }
+                MatchType.Equals -> {}
             }
 
-            matchType = processTriggerCalendarPart(
-                result,
+            matchType = findNextTriggerTimePart(
+                resultTime,
                 Calendar.DAY_OF_WEEK,
                 weekDays,
                 Calendar.DAY_OF_MONTH,
                 CompareMethod.Equal
             )
-            if (matchType == MatchType.NotMatch) {
-                minuteCompareMethod = CompareMethod.EqualOrBigger
-                continue
+            when (matchType) {
+                MatchType.NotMatch -> {
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                    continue
+                }
+                MatchType.Equals -> {}
+                MatchType.Bigger -> throw Exception("unexpected match type")
             }
 
-            matchType = processTriggerCalendarPart(
-                result,
+            matchType = findNextTriggerTimePart(
+                resultTime,
                 Calendar.HOUR_OF_DAY,
                 hours,
                 Calendar.DAY_OF_MONTH,
                 CompareMethod.EqualOrBigger
             )
-            if (matchType == MatchType.NotMatch) {
-                minuteCompareMethod = CompareMethod.EqualOrBigger
-                continue
-            } else if (matchType == MatchType.Bigger) {
-                result.set(
-                    result[Calendar.YEAR],
-                    result[Calendar.MONTH],
-                    result[Calendar.DAY_OF_MONTH],
-                    result[Calendar.HOUR_OF_DAY],
-                    minutes[0]
-                )
-                minuteCompareMethod = CompareMethod.EqualOrBigger
+            when (matchType) {
+                MatchType.NotMatch -> {
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                    continue
+                }
+                MatchType.Bigger -> {
+                    resultTime.set(
+                        resultTime[Calendar.YEAR],
+                        resultTime[Calendar.MONTH],
+                        resultTime[Calendar.DAY_OF_MONTH],
+                        resultTime[Calendar.HOUR_OF_DAY],
+                        minutes[0]
+                    )
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                }
+                MatchType.Equals -> {}
             }
 
-            matchType = processTriggerCalendarPart(
-                result,
+            matchType = findNextTriggerTimePart(
+                resultTime,
                 Calendar.MINUTE,
                 minutes,
                 Calendar.HOUR_OF_DAY,
                 minuteCompareMethod
             )
-            if (matchType == MatchType.NotMatch) {
-                minuteCompareMethod = CompareMethod.EqualOrBigger
-                continue
+            when (matchType) {
+                MatchType.NotMatch -> {
+                    minuteCompareMethod = CompareMethod.EqualOrBigger
+                    continue
+                }
+                else -> break;
             }
-
-            break
         }
 
-        return result
+        return resultTime
     }
 
-    private fun processTriggerCalendarPart(
-        calendar: Calendar?,
+    /// Find the next month/day/hour/minute should be triggered.
+    private fun findNextTriggerTimePart(
+        time: Calendar,
         partType: Int,
-        partList: List<Int>,
+        partTriggerList: List<Int>,
         parentPartType: Int,
         compareMethod: CompareMethod
     ): MatchType {
-        assert(partList.isNotEmpty())
-        val current = calendar!![partType]
-        val min = calendar.getActualMinimum(partType)
-        val max = calendar.getActualMaximum(partType)
+        if (partTriggerList.isEmpty()) {
+            return when (compareMethod) {
+                CompareMethod.Bigger -> {
+                    assert(partType == Calendar.MINUTE)
+                    time.add(Calendar.MINUTE, 1)
+                    MatchType.Bigger
+                }
+                else -> MatchType.Equals
+            }
+        }
 
-        for (index in partList) {
-            if (index < min || index > max) {
-                continue
+        val current = time[partType]
+        val min = time.getActualMinimum(partType)
+        val max = time.getActualMaximum(partType)
+
+        for (value in partTriggerList) {
+            if (value < min || value > max) {
+                throw Exception("invalid trigger time part $value")
             }
 
-            val isBigger = index > current
-            val isEqual = index == current
+            val isBigger = value > current
+            val isEqual = value == current
             if (compareMethod == CompareMethod.Bigger && isBigger
                 || compareMethod == CompareMethod.EqualOrBigger && (isEqual || isBigger)
                 || compareMethod == CompareMethod.Equal && isEqual
             ) {
                 if (partType != Calendar.DAY_OF_WEEK) {
-                    calendar[partType] = index
+                    time[partType] = value
                 }
                 when {
                     isBigger -> {
@@ -234,9 +264,9 @@ data class Schedule(
             }
         }
 
-        calendar.add(parentPartType, 1)
+        time.add(parentPartType, 1)
         if (partType != Calendar.DAY_OF_WEEK) {
-            calendar[partType] = calendar.getMinimum(partType)
+            time[partType] = time.getMinimum(partType)
         }
         return MatchType.NotMatch
     }

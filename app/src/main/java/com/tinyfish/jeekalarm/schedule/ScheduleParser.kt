@@ -19,7 +19,7 @@ internal object ScheduleParser {
         }
     }
 
-    fun parseTextLine(line: String): Schedule? {
+    fun parseTextLine(line: String): Schedule {
         val parts = line.split(' ')
         return Schedule(
             name = parts[0],
@@ -32,34 +32,14 @@ internal object ScheduleParser {
     }
 
     fun parseTimeConfig(schedule: Schedule) {
-        parseIndexes(
-            Calendar.MINUTE,
-            schedule.minuteConfig,
-            schedule.minutes
-        )
-        parseIndexes(
-            Calendar.HOUR_OF_DAY,
-            schedule.hourConfig,
-            schedule.hours
-        )
-        parseIndexes(
-            Calendar.DAY_OF_MONTH,
-            schedule.dayConfig,
-            schedule.days
-        )
-        parseIndexes(
-            Calendar.MONTH,
-            schedule.monthConfig,
-            schedule.months
-        )
-        parseIndexes(
-            Calendar.DAY_OF_WEEK,
-            schedule.weekDayConfig,
-            schedule.weekDays
-        )
+        schedule.minutes = parseIndexes(Calendar.MINUTE, schedule.minuteConfig)
+        schedule.hours = parseIndexes(Calendar.HOUR_OF_DAY, schedule.hourConfig)
+        schedule.days = parseIndexes(Calendar.DAY_OF_MONTH, schedule.dayConfig)
+        schedule.months = parseIndexes(Calendar.MONTH, schedule.monthConfig)
+        schedule.weekDays = parseIndexes(Calendar.DAY_OF_WEEK, schedule.weekDayConfig)
     }
 
-    private fun normalizeMonths(months: MutableList<Int>) {
+    private fun toCalendarMonth(months: MutableList<Int>) {
         // Crontab's month is 1-based
         // Calendar's month is 0-based
         for (i in months.indices) {
@@ -67,7 +47,7 @@ internal object ScheduleParser {
         }
     }
 
-    private fun normalizeWeekDays(weekDays: MutableList<Int>) {
+    private fun toCalendarWeekDay(weekDays: MutableList<Int>) {
         // Crontab's weekday: 0-7, 0 and 7 are both Sunday
         // Calendar's weekday: Sunday: 1, Monday: 2
         for (i in weekDays.indices) {
@@ -108,61 +88,74 @@ internal object ScheduleParser {
     private fun parseIndexes(
         indexType: Int,
         content: String,
-        result: MutableList<Int>
-    ) {
+    ): MutableList<Int> {
         // content format:
         // 1-3,5,6 or */5
-        result.clear()
-        val calendar = Calendar.getInstance()
-        val minValue = calendar.getMinimum(indexType)
-        val maxValue = calendar.getMaximum(indexType)
+
+        val minCronValue = when (indexType) {
+            Calendar.MINUTE -> 0
+            Calendar.HOUR_OF_DAY -> 0
+            Calendar.DAY_OF_MONTH -> 1
+            Calendar.MONTH -> 1
+            Calendar.DAY_OF_WEEK -> 0
+            else -> throw IllegalArgumentException("Invalid index type $indexType")
+        }
+        val maxCronValue = when (indexType) {
+            Calendar.MINUTE -> 59
+            Calendar.HOUR_OF_DAY -> 23
+            Calendar.DAY_OF_MONTH -> 31
+            Calendar.MONTH -> 12
+            Calendar.DAY_OF_WEEK -> 7
+            else -> throw IllegalArgumentException("Invalid index type $indexType")
+        }
+
+        var result = mutableListOf<Int>()
 
         if (content.startsWith("*/")) {
             val interval = content.substring(2).toInt()
-            for (i in minValue..maxValue step interval) {
+            for (i in minCronValue..maxCronValue step interval) {
                 result.add(i)
             }
-            return
         } else {
             for (part in content.split(",")) {
                 when {
                     part == "*" -> {
-                        for (i in minValue..maxValue) {
-                            result.add(i)
-                        }
-                        return
+                        result.clear()
+                        return result
                     }
                     part.contains("-") -> {
                         val beginEnd = part.split("-")
                         assert(beginEnd.size == 2)
-                        val begin = ensureRange(beginEnd[0].toInt(), minValue, maxValue)
-                        val end = ensureRange(beginEnd[1].toInt(), minValue, maxValue)
+                        val begin = ensureRange(beginEnd[0].toInt(), minCronValue, maxCronValue)
+                        val end = ensureRange(beginEnd[1].toInt(), minCronValue, maxCronValue)
                         for (i in begin..end) {
                             result.add(i)
                         }
                     }
                     else -> {
-                        result.add(ensureRange(part.toInt(), minValue, maxValue))
+                        result.add(ensureRange(part.toInt(), minCronValue, maxCronValue))
                     }
                 }
             }
         }
 
+        result = result.distinct().toMutableList()
+
         when (indexType) {
-            Calendar.MONTH -> normalizeMonths(result)
-            Calendar.DAY_OF_WEEK -> normalizeWeekDays(result)
+            Calendar.MONTH -> toCalendarMonth(result)
+            Calendar.DAY_OF_WEEK -> toCalendarWeekDay(result)
         }
 
         result.sort()
+
+        return result
     }
 
     private fun ensureRange(value: Int, min: Int, max: Int): Int {
-        return when (value) {
-            in min..max -> value
-            else -> {
-                if (value < min) min
-                else max
-            }
+        return when {
+            value < min -> min
+            value > max -> max
+            else -> value
         }
     }
 }
