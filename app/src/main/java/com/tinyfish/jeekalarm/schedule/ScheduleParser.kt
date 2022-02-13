@@ -127,7 +127,7 @@ internal object ScheduleParser {
             for (part in content.split(",")) {
                 when {
                     part == "*" -> {
-                        for (i in calendar.getMinimum(indexType)..calendar.getMaximum(indexType)) {
+                        for (i in minValue..maxValue) {
                             result.add(i)
                         }
                         return
@@ -135,24 +135,34 @@ internal object ScheduleParser {
                     part.contains("-") -> {
                         val beginEnd = part.split("-")
                         assert(beginEnd.size == 2)
-                        val begin = beginEnd[0].toInt()
-                        val end = beginEnd[1].toInt()
+                        val begin = ensureRange(beginEnd[0].toInt(), minValue, maxValue)
+                        val end = ensureRange(beginEnd[1].toInt(), minValue, maxValue)
                         for (i in begin..end) {
                             result.add(i)
                         }
                     }
                     else -> {
-                        result.add(part.toInt())
+                        result.add(ensureRange(part.toInt(), minValue, maxValue))
                     }
                 }
             }
         }
 
-        if (indexType == Calendar.MONTH)
-            normalizeMonths(result)
-        else if (indexType == Calendar.DAY_OF_WEEK)
-            normalizeWeekDays(result)
+        when (indexType) {
+            Calendar.MONTH -> normalizeMonths(result)
+            Calendar.DAY_OF_WEEK -> normalizeWeekDays(result)
+        }
 
         result.sort()
+    }
+
+    private fun ensureRange(value: Int, min: Int, max: Int): Int {
+        return when (value) {
+            in min..max -> value
+            else -> {
+                if (value < min) min
+                else max
+            }
+        }
     }
 }
