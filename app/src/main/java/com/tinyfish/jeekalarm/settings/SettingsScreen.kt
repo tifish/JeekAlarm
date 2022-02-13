@@ -19,7 +19,6 @@ import com.tinyfish.jeekalarm.schedule.ScheduleHome
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.*
-import java.util.*
 
 @Composable
 fun SettingsScreen() {
