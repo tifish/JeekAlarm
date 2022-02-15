@@ -18,7 +18,7 @@ class CronScheduleTest {
 
     @Test
     fun nextTriggerTime0a() {
-        val cron = ScheduleParser.parseTextLine("name 1 * * * * {}")
+        val cron = ScheduleParser.parseTextLine("name * 1 * * * {}")
         val result = cron.getNextTriggerTime(
             Calendar.getInstance().apply { clear(); set(2017, 2, 1, 23, 44) })!!
         Assert.assertEquals(
@@ -28,7 +28,7 @@ class CronScheduleTest {
 
     @Test
     fun nextTriggerTime1() {
-        val cron = ScheduleParser.parseTextLine("name 50 23 1 3 * {}")
+        val cron = ScheduleParser.parseTextLine("name 23 50 * 1 3 {}")
         val result = cron.getNextTriggerTime(
             Calendar.getInstance().apply { clear(); set(2017, 2, 1, 23, 44) })!!
         Assert.assertEquals(
@@ -38,7 +38,7 @@ class CronScheduleTest {
 
     @Test
     fun nextTriggerTime2() {
-        val cron = ScheduleParser.parseTextLine("name 40 23 1 3 * {}")
+        val cron = ScheduleParser.parseTextLine("name 23 40 * 1 3 {}")
         val result = cron.getNextTriggerTime(
             Calendar.getInstance().apply { clear(); set(2017, 2, 1, 23, 44) })!!
         Assert.assertEquals(
@@ -48,7 +48,7 @@ class CronScheduleTest {
 
     @Test
     fun nextTriggerTime3() {
-        val cron = ScheduleParser.parseTextLine("name 44 23 1 3 * {}")
+        val cron = ScheduleParser.parseTextLine("name 23 44 * 1 3 {}")
         val result = cron.getNextTriggerTime(
             Calendar.getInstance().apply { clear(); set(2017, 2, 1, 23, 44) })!!
         Assert.assertEquals(
@@ -58,7 +58,7 @@ class CronScheduleTest {
 
     @Test
     fun nextTriggerTime4() {
-        val cron = ScheduleParser.parseTextLine("name 40 23 30 3,4 0 {}")
+        val cron = ScheduleParser.parseTextLine("name 23 40 0 30 3,4 {}")
         val result = cron.getNextTriggerTime(
             Calendar.getInstance().apply { clear(); set(2017, 1, 30, 0, 0) })!!
         Assert.assertEquals(
@@ -68,7 +68,7 @@ class CronScheduleTest {
 
     @Test
     fun nextTriggerTime5() {
-        val cron = ScheduleParser.parseTextLine("name 0 0 1 3 5 {}")
+        val cron = ScheduleParser.parseTextLine("name 0 0 5 1 3 {}")
         val result = cron.getNextTriggerTime(
             Calendar.getInstance().apply { clear(); set(2017, 2, 1, 23, 44) })!!
         Assert.assertEquals(

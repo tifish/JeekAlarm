@@ -82,6 +82,13 @@ private fun Editor() {
             uiTimeConfigChanged.value
             HeightSpacer()
             MyCronTimeTextField(
+                "Hour: ",
+                editingSchedule::hourConfig,
+                true,
+                onChange
+            )
+            HeightSpacer()
+            MyCronTimeTextField(
                 "Minute: ",
                 editingSchedule::minuteConfig,
                 true,
@@ -89,8 +96,8 @@ private fun Editor() {
             )
             HeightSpacer()
             MyCronTimeTextField(
-                "Hour: ",
-                editingSchedule::hourConfig,
+                "WeekDay: ",
+                editingSchedule::weekDayConfig,
                 true,
                 onChange
             )
@@ -105,13 +112,6 @@ private fun Editor() {
             MyCronTimeTextField(
                 "Month: ",
                 editingSchedule::monthConfig,
-                true,
-                onChange
-            )
-            HeightSpacer()
-            MyCronTimeTextField(
-                "WeekDay: ",
-                editingSchedule::weekDayConfig,
                 true,
                 onChange
             )

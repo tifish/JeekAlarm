@@ -23,11 +23,11 @@ internal object ScheduleParser {
         val parts = line.split(' ')
         return Schedule(
             name = parts[0],
-            minuteConfig = parts[1],
-            hourConfig = parts[2],
-            dayConfig = parts[3],
-            monthConfig = parts[4],
-            weekDayConfig = parts[5]
+            hourConfig = parts[1],
+            minuteConfig = parts[2],
+            weekDayConfig = parts[3],
+            dayConfig = parts[4],
+            monthConfig = parts[5],
         )
     }
 

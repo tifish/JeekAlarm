@@ -31,7 +31,7 @@ import java.util.*
 fun MainUI() {
     App.themeColorsChangeTrigger
 
-    MaterialTheme(colors = GetThemeFromConfig()) {
+    MaterialTheme(colors = getThemeFromConfig()) {
         when (App.screen) {
             ScreenType.MAIN -> MainScreen()
             ScreenType.EDIT -> EditScreen()
@@ -42,7 +42,7 @@ fun MainUI() {
 }
 
 @Composable
-fun GetThemeFromConfig(): Colors {
+fun getThemeFromConfig(): Colors {
     return when (ConfigService.data.theme) {
         "Auto" -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
         "Dark" -> DarkColorPalette
