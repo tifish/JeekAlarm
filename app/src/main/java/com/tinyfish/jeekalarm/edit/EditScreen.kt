@@ -223,6 +223,7 @@ fun BottomBar() {
                 editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
                 editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
                 editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
+                editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
                 uiTimeConfigChanged.value++
             }
         }
