@@ -115,6 +115,13 @@ private fun Editor() {
                 true,
                 onChange
             )
+            HeightSpacer()
+            MyCronTimeTextField(
+                "Year: ",
+                editingSchedule::yearConfig,
+                true,
+                onChange
+            )
         }
 
         Observe {

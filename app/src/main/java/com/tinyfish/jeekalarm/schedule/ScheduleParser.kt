@@ -25,18 +25,20 @@ internal object ScheduleParser {
             name = parts[0],
             hourConfig = parts[1],
             minuteConfig = parts[2],
-            weekDayConfig = parts[3],
-            dayConfig = parts[4],
-            monthConfig = parts[5],
+            weekDayConfig = if (parts.size > 3) parts[3] else "*",
+            dayConfig = if (parts.size > 4) parts[4] else "*",
+            monthConfig = if (parts.size > 5) parts[5] else "*",
+            yearConfig = if (parts.size > 6) parts[6] else "*",
         )
     }
 
     fun parseTimeConfig(schedule: Schedule) {
-        schedule.minutes = parseIndexes(Calendar.MINUTE, schedule.minuteConfig)
         schedule.hours = parseIndexes(Calendar.HOUR_OF_DAY, schedule.hourConfig)
+        schedule.minutes = parseIndexes(Calendar.MINUTE, schedule.minuteConfig)
+        schedule.weekDays = parseIndexes(Calendar.DAY_OF_WEEK, schedule.weekDayConfig)
         schedule.days = parseIndexes(Calendar.DAY_OF_MONTH, schedule.dayConfig)
         schedule.months = parseIndexes(Calendar.MONTH, schedule.monthConfig)
-        schedule.weekDays = parseIndexes(Calendar.DAY_OF_WEEK, schedule.weekDayConfig)
+        schedule.years = parseIndexes(Calendar.YEAR, schedule.yearConfig)
     }
 
     private fun toCalendarMonth(months: MutableList<Int>) {
@@ -93,19 +95,21 @@ internal object ScheduleParser {
         // 1-3,5,6 or */5
 
         val minCronValue = when (indexType) {
-            Calendar.MINUTE -> 0
             Calendar.HOUR_OF_DAY -> 0
+            Calendar.MINUTE -> 0
+            Calendar.DAY_OF_WEEK -> 0
             Calendar.DAY_OF_MONTH -> 1
             Calendar.MONTH -> 1
-            Calendar.DAY_OF_WEEK -> 0
+            Calendar.YEAR -> 1
             else -> throw IllegalArgumentException("Invalid index type $indexType")
         }
         val maxCronValue = when (indexType) {
-            Calendar.MINUTE -> 59
             Calendar.HOUR_OF_DAY -> 23
+            Calendar.MINUTE -> 59
+            Calendar.DAY_OF_WEEK -> 7
             Calendar.DAY_OF_MONTH -> 31
             Calendar.MONTH -> 12
-            Calendar.DAY_OF_WEEK -> 7
+            Calendar.YEAR -> 9999
             else -> throw IllegalArgumentException("Invalid index type $indexType")
         }
 

@@ -20,6 +20,7 @@ data class Schedule(
     var dayConfig: String = "*",
     var monthConfig: String = "*",
     var weekDayConfig: String = "*",
+    var yearConfig: String = "*",
     var enabled: Boolean = true,
     var onlyOnce: Boolean = false,
     var playMusic: Boolean = true,
@@ -35,6 +36,7 @@ data class Schedule(
         dest.dayConfig = dayConfig
         dest.monthConfig = monthConfig
         dest.weekDayConfig = weekDayConfig
+        dest.yearConfig = yearConfig
         dest.enabled = enabled
         dest.onlyOnce = onlyOnce
         dest.playMusic = playMusic
@@ -45,7 +47,7 @@ data class Schedule(
     }
 
     fun timeConfigChanged() {
-        timeConfig = "$hourConfig $minuteConfig $weekDayConfig $dayConfig $monthConfig"
+        timeConfig = "$hourConfig $minuteConfig $weekDayConfig $dayConfig $monthConfig $yearConfig"
         try {
             ScheduleParser.parseTimeConfig(this)
             isValid = true
@@ -57,6 +59,7 @@ data class Schedule(
             hours.clear()
             minutes.clear()
             weekDays.clear()
+            years.clear()
         }
     }
 
@@ -81,6 +84,9 @@ data class Schedule(
 
     @Transient
     var weekDays = mutableListOf<Int>()
+
+    @Transient
+    var years = mutableListOf<Int>()
 
     init {
         timeConfigChanged()
@@ -109,6 +115,9 @@ data class Schedule(
             val orgTime = resultTime.clone() as Calendar
 
             when (currentTimePart) {
+                Calendar.YEAR -> {
+                    return Int.MIN_VALUE
+                }
                 Calendar.MONTH -> {
                     resultTime.add(Calendar.YEAR, 1)
                     resultTime.set(Calendar.MONTH, minTriggerMonth)
@@ -153,6 +162,13 @@ data class Schedule(
             minuteCompareMethod = CompareMethod.EqualOrBigger
 
             return when (currentTimePart) {
+                Calendar.YEAR -> {
+                    resultTime.set(Calendar.MONTH, minTriggerMonth)
+                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
+                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
+                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                    Calendar.DAY_OF_WEEK
+                }
                 Calendar.MONTH -> {
                     resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
                     resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
@@ -173,12 +189,29 @@ data class Schedule(
         }
 
         // Match from month to minute.
-        var matchingPart = Calendar.MONTH
+        var matchingPart = Calendar.YEAR
 
         while (true) {
             when (matchingPart) {
+                Calendar.YEAR ->{
+                    matchingPart = when (findNextTriggerTimePart(
+                        resultTime,
+                        Calendar.YEAR,
+                        years,
+                        CompareMethod.EqualOrBigger
+                    )) {
+                        MatchResult.NotMatch -> notMatchHandler(Calendar.YEAR)
+                        MatchResult.Bigger -> biggerHandler(Calendar.YEAR)
+                        MatchResult.Equals -> Calendar.MONTH
+                    }
+                }
                 Calendar.MONTH -> {
-                    matchingPart = when (findNextTriggerTimePart(resultTime, Calendar.MONTH, months, CompareMethod.EqualOrBigger)) {
+                    matchingPart = when (findNextTriggerTimePart(
+                        resultTime,
+                        Calendar.MONTH,
+                        months,
+                        CompareMethod.EqualOrBigger
+                    )) {
                         MatchResult.NotMatch -> notMatchHandler(Calendar.MONTH)
                         MatchResult.Bigger -> biggerHandler(Calendar.MONTH)
                         MatchResult.Equals -> Calendar.DAY_OF_MONTH
@@ -186,7 +219,12 @@ data class Schedule(
                 }
 
                 Calendar.DAY_OF_MONTH -> {
-                    matchingPart = when (findNextTriggerTimePart(resultTime, Calendar.DAY_OF_MONTH, days, CompareMethod.EqualOrBigger)) {
+                    matchingPart = when (findNextTriggerTimePart(
+                        resultTime,
+                        Calendar.DAY_OF_MONTH,
+                        days,
+                        CompareMethod.EqualOrBigger
+                    )) {
                         MatchResult.NotMatch -> notMatchHandler(Calendar.DAY_OF_MONTH)
                         MatchResult.Bigger -> biggerHandler(Calendar.DAY_OF_MONTH)
                         MatchResult.Equals -> Calendar.DAY_OF_WEEK
@@ -194,7 +232,12 @@ data class Schedule(
                 }
 
                 Calendar.DAY_OF_WEEK -> {
-                    matchingPart = when (findNextTriggerTimePart(resultTime, Calendar.DAY_OF_WEEK, weekDays, CompareMethod.Equal)) {
+                    matchingPart = when (findNextTriggerTimePart(
+                        resultTime,
+                        Calendar.DAY_OF_WEEK,
+                        weekDays,
+                        CompareMethod.Equal
+                    )) {
                         MatchResult.NotMatch -> notMatchHandler(Calendar.DAY_OF_WEEK)
                         MatchResult.Bigger -> throw Exception("unexpected match type")
                         MatchResult.Equals -> Calendar.HOUR_OF_DAY
@@ -202,7 +245,12 @@ data class Schedule(
                 }
 
                 Calendar.HOUR_OF_DAY -> {
-                    matchingPart = when (findNextTriggerTimePart(resultTime, Calendar.HOUR_OF_DAY, hours, CompareMethod.EqualOrBigger)) {
+                    matchingPart = when (findNextTriggerTimePart(
+                        resultTime,
+                        Calendar.HOUR_OF_DAY,
+                        hours,
+                        CompareMethod.EqualOrBigger
+                    )) {
                         MatchResult.NotMatch -> notMatchHandler(Calendar.HOUR_OF_DAY)
                         MatchResult.Bigger -> biggerHandler(Calendar.HOUR_OF_DAY)
                         MatchResult.Equals -> Calendar.MINUTE
@@ -210,13 +258,19 @@ data class Schedule(
                 }
 
                 Calendar.MINUTE -> {
-                    matchingPart = when (findNextTriggerTimePart(resultTime, Calendar.MINUTE, minutes, minuteCompareMethod)) {
+                    matchingPart = when (findNextTriggerTimePart(
+                        resultTime,
+                        Calendar.MINUTE,
+                        minutes,
+                        minuteCompareMethod
+                    )) {
                         MatchResult.NotMatch -> notMatchHandler(Calendar.MINUTE)
                         else -> break
                     }
                 }
 
                 Int.MAX_VALUE -> break
+                Int.MIN_VALUE -> return null
             }
         }
 
