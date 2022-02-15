@@ -4,9 +4,9 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
-import com.tinyfish.jeekalarm.ConfigHome
-import com.tinyfish.jeekalarm.MusicHome
-import com.tinyfish.jeekalarm.VibrationHome
+import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.MusicService
+import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.util.*
@@ -290,7 +290,7 @@ data class Schedule(
         }
 
         if (vibration)
-            VibrationHome.vibrate(vibrationCount)
+            VibrationService.vibrate(vibrationCount)
 
         App.isPlaying = true
     }
@@ -298,7 +298,7 @@ data class Schedule(
     private fun playMusic() {
         val finalMusicFolder =
             if (musicFolder.isEmpty())
-                ConfigHome.data.defaultMusicFolder
+                ConfigService.data.defaultMusicFolder
             else
                 musicFolder
 
@@ -315,19 +315,19 @@ data class Schedule(
                 return
 
             val randomIndex = Random.nextInt(musicFiles.size)
-            MusicHome.play(musicFiles[randomIndex])
+            MusicService.play(musicFiles[randomIndex])
 
         } else {
             val finalMusicFile =
                 if (musicFile.isEmpty())
-                    ConfigHome.data.defaultMusicFile
+                    ConfigService.data.defaultMusicFile
                 else
                     musicFile
 
             if (finalMusicFile.isNotEmpty())
-                MusicHome.play(finalMusicFile)
+                MusicService.play(finalMusicFile)
             else
-                MusicHome.play(Settings.System.DEFAULT_ALARM_ALERT_URI)
+                MusicService.play(Settings.System.DEFAULT_ALARM_ALERT_URI)
         }
     }
 }

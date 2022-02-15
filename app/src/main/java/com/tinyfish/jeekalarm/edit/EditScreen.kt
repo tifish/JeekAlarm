@@ -14,7 +14,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.schedule.Schedule
-import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.*
@@ -33,7 +33,7 @@ fun EditScreen() {
         if (isAdding)
             Schedule()
         else
-            ScheduleHome.scheduleList[App.editScheduleIndex]
+            ScheduleService.scheduleList[App.editScheduleIndex]
 
 
     Column {
@@ -225,7 +225,7 @@ fun BottomBar() {
             val text = if (App.isPlaying) "Stop" else "Play"
             val onClick = {
                 if (App.isPlaying)
-                    ScheduleHome.stopPlaying()
+                    ScheduleService.stopPlaying()
                 else
                     editingSchedule.play()
             }
@@ -248,10 +248,10 @@ fun BottomBar() {
 
 fun onEditScreenPressBack() {
     if (isAdding)
-        ScheduleHome.scheduleList.add(editingSchedule)
+        ScheduleService.scheduleList.add(editingSchedule)
     editingSchedule.timeConfigChanged()
-    ScheduleHome.saveConfig()
+    ScheduleService.saveConfig()
 
-    ScheduleHome.stopPlaying()
+    ScheduleService.stopPlaying()
     App.screen = ScreenType.MAIN
 }

@@ -9,8 +9,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
-import com.tinyfish.jeekalarm.ConfigHome
-import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -67,9 +67,9 @@ class App : Application() {
         super.onCreate()
 
         context = applicationContext
-        ConfigHome.load()
-        ScheduleHome.loadConfig()
-        ScheduleHome.setNextAlarm()
+        ConfigService.load()
+        ScheduleService.loadConfig()
+        ScheduleService.setNextAlarm()
     }
 
 }

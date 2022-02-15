@@ -15,12 +15,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
-import com.tinyfish.jeekalarm.ConfigHome
+import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
-import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
@@ -43,7 +43,7 @@ fun MainUI() {
 
 @Composable
 fun GetThemeFromConfig(): Colors {
-    return when (ConfigHome.data.theme) {
+    return when (ConfigService.data.theme) {
         "Auto" -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
         "Dark" -> DarkColorPalette
         "Light" -> LightColorPalette
@@ -71,7 +71,7 @@ fun MainScreen() {
 private fun ScheduleList() {
     App.scheduleChangeTrigger
 
-    if (ScheduleHome.scheduleList.size == 0) {
+    if (ScheduleService.scheduleList.size == 0) {
         Box(Modifier.wrapContentSize()) {
             SimpleVectorButton(
                 ImageVector.vectorResource(R.drawable.ic_add),
@@ -88,8 +88,8 @@ private fun ScheduleList() {
                 .verticalScroll(rememberScrollState())) {
             App.scheduleChangeTrigger
             val now = Calendar.getInstance()
-            for (index in ScheduleHome.scheduleList.indices) {
-                val schedule = ScheduleHome.scheduleList[index]
+            for (index in ScheduleService.scheduleList.indices) {
+                val schedule = ScheduleService.scheduleList[index]
                 HeightSpacer()
                 ScheduleItem(index, schedule, now)
                 Divider(color = Color.DarkGray)
@@ -107,7 +107,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     checked = schedule.enabled,
                     onCheckedChange = {
                         schedule.enabled = it
-                        ScheduleHome.saveConfig()
+                        ScheduleService.saveConfig()
                         boxScope.invalidate()
                     }
                 )
@@ -147,8 +147,8 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     "Remove"
                 ) {
                     App.removingIndex = -1
-                    ScheduleHome.scheduleList.removeAt(index)
-                    ScheduleHome.saveConfig()
+                    ScheduleService.scheduleList.removeAt(index)
+                    ScheduleService.saveConfig()
                 }
 
                 Spacer(Modifier.width(20.dp))
@@ -168,7 +168,7 @@ private fun BottomBar() {
     MyBottomBar {
         App.scheduleChangeTrigger
 
-        if (ScheduleHome.scheduleList.size > 0) {
+        if (ScheduleService.scheduleList.size > 0) {
             SimpleVectorButton(
                 ImageVector.vectorResource(R.drawable.ic_add),
                 "Add"

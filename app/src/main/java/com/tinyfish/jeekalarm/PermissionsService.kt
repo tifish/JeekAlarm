@@ -8,7 +8,7 @@ import androidx.annotation.RequiresApi
 import androidx.core.app.ActivityCompat.requestPermissions
 import androidx.core.content.ContextCompat
 
-object PermissionsHome {
+object PermissionsService {
     private const val REQUEST_EXTERNAL_PERMISSION_CODE = 666
 
     private val PERMISSIONS_EXTERNAL_STORAGE = arrayOf(

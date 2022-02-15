@@ -8,7 +8,7 @@ import android.os.Build
 import com.tinyfish.jeekalarm.start.App
 import java.util.*
 
-object AlarmHome {
+object AlarmService {
     private var alarmManager: AlarmManager? = null
     private var alarmIntent: PendingIntent? = null
 

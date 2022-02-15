@@ -3,7 +3,7 @@ package com.tinyfish.jeekalarm.start
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.tinyfish.jeekalarm.alarm.NotificationHome
+import com.tinyfish.jeekalarm.alarm.NotificationService
 
 class StartService : Service() {
     var isCreating = true
@@ -11,8 +11,8 @@ class StartService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForeground(
-            NotificationHome.InformationId,
-            NotificationHome.getInformationNotification()
+            NotificationService.InformationId,
+            NotificationService.getInformationNotification()
         )
     }
 
@@ -23,7 +23,7 @@ class StartService : Service() {
         }
 
         if (intent?.action == "Start") {
-            NotificationHome.showInformation()
+            NotificationService.showInformation()
         }
         if (intent?.action == "Stop") {
             stopForeground(true)

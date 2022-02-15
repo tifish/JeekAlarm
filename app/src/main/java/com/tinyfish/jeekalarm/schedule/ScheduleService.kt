@@ -1,14 +1,14 @@
 package com.tinyfish.jeekalarm.schedule
 
-import com.tinyfish.jeekalarm.ConfigHome
-import com.tinyfish.jeekalarm.MusicHome
-import com.tinyfish.jeekalarm.VibrationHome
-import com.tinyfish.jeekalarm.alarm.AlarmHome
+import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.MusicService
+import com.tinyfish.jeekalarm.VibrationService
+import com.tinyfish.jeekalarm.alarm.AlarmService
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.util.*
 
-object ScheduleHome {
+object ScheduleService {
     var scheduleList = mutableListOf<Schedule>()
     private val configFile: File by lazy {
         File(App.context.filesDir, "schedule.cron")
@@ -35,7 +35,7 @@ object ScheduleHome {
         }
 
     fun setNextAlarm() {
-        AlarmHome.cancelAlarm()
+        AlarmService.cancelAlarm()
         if (scheduleList.size == 0) {
             if (nextAlarmIndexes.size > 0)
                 nextAlarmIndexes = mutableListOf()
@@ -69,27 +69,27 @@ object ScheduleHome {
             return
         }
 
-        AlarmHome.setAlarm(minTriggerTime)
-        ConfigHome.save()
+        AlarmService.setAlarm(minTriggerTime)
+        ConfigService.save()
         App.startService()
     }
 
     fun stopPlaying() {
-        MusicHome.stop()
-        VibrationHome.stop()
+        MusicService.stop()
+        VibrationService.stop()
 
         App.isPlaying = false
     }
 
     fun pausePlaying() {
-        MusicHome.pause()
-        VibrationHome.stop()
+        MusicService.pause()
+        VibrationService.stop()
 
         App.isPlaying = false
     }
 
     fun resumePlaying() {
-        MusicHome.resume()
+        MusicService.resume()
 
         App.isPlaying = true
     }

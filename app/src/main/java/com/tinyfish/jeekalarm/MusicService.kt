@@ -7,7 +7,7 @@ import android.os.Environment
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 
-object MusicHome {
+object MusicService {
     private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
 
     fun play(musicPath: String, loop: Boolean = true): MediaPlayer? {

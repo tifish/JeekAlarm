@@ -4,7 +4,7 @@ import com.squareup.moshi.JsonAdapter
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 
-object ConfigHome {
+object ConfigService {
     var data = ConfigData()
     private val configDataMoshiAdapter: JsonAdapter<ConfigData> = App.moshi.adapter(ConfigData::class.java)
 

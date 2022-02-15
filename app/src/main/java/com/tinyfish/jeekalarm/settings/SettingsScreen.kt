@@ -11,11 +11,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import com.tinyfish.jeekalarm.ConfigHome
+import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
-import com.tinyfish.jeekalarm.alarm.NotificationHome
+import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
-import com.tinyfish.jeekalarm.schedule.ScheduleHome
+import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.*
@@ -44,12 +44,12 @@ private fun Editor() {
                 val options = listOf("Auto", "Dark", "Light")
                 options.forEach {
                     val onClick = {
-                        ConfigHome.data.theme = it
-                        ConfigHome.save()
+                        ConfigService.data.theme = it
+                        ConfigService.save()
                         App.themeColorsChangeTrigger++
                         themeScope.invalidate()
                     }
-                    RadioButton(selected = ConfigHome.data.theme == it, onClick = onClick)
+                    RadioButton(selected = ConfigService.data.theme == it, onClick = onClick)
                     Text(it, Modifier.clickable(onClick = onClick))
                     WidthSpacer()
                 }
@@ -60,15 +60,15 @@ private fun Editor() {
         Observe {
             val fileSelectScope = currentRecomposeScope
             MyFileSelect("Music File:",
-                ConfigHome.data.defaultMusicFile,
+                ConfigService.data.defaultMusicFile,
                 onSelect = {
                     FileSelector.openMusicFile {
-                        ConfigHome.data.defaultMusicFile = it?.path?.substringAfter(':')!!
+                        ConfigService.data.defaultMusicFile = it?.path?.substringAfter(':')!!
                         fileSelectScope.invalidate()
                     }
                 },
                 onClear = {
-                    ConfigHome.data.defaultMusicFile = ""
+                    ConfigService.data.defaultMusicFile = ""
                     fileSelectScope.invalidate()
                 }
             )
@@ -78,15 +78,15 @@ private fun Editor() {
         Observe {
             val fileSelectScope = currentRecomposeScope
             MyFileSelect("Music Folder:",
-                ConfigHome.data.defaultMusicFolder,
+                ConfigService.data.defaultMusicFolder,
                 onSelect = {
                     FileSelector.openFolder {
-                        ConfigHome.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
+                        ConfigService.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
                         fileSelectScope.invalidate()
                     }
                 },
                 onClear = {
-                    ConfigHome.data.defaultMusicFolder = ""
+                    ConfigService.data.defaultMusicFolder = ""
                     fileSelectScope.invalidate()
                 }
             )
@@ -95,7 +95,7 @@ private fun Editor() {
         HeightSpacer()
 
         Button(onClick = {
-            NotificationHome.showAlarm(ScheduleHome.nextAlarmIndexes)
+            NotificationService.showAlarm(ScheduleService.nextAlarmIndexes)
         }) {
             Text("Test Next Alarm")
         }
@@ -116,6 +116,6 @@ private fun BottomBar() {
 }
 
 fun onSettingsScreenPressBack() {
-    ConfigHome.save()
+    ConfigService.save()
     App.screen = ScreenType.MAIN
 }
