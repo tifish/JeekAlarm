@@ -1,12 +1,15 @@
 package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
@@ -34,22 +37,22 @@ fun ToolButtonWidthSpacer() {
 }
 
 @Composable
-fun MyFileSelect(hint: String, text: String, onSelect: () -> Unit, onClear: () -> Unit) {
-    Row {
-        Text(hint)
+fun MyFileSelector(hint: String, text: String, onSelect: () -> Unit, onClear: () -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Text(hint, Modifier.clickable { onSelect() })
         WidthSpacer()
         Text(text, Modifier.weight(1f, true))
 
         SimpleVectorButton(
             ImageVector.vectorResource(R.drawable.ic_location_searching),
-            "Select",
-            onClick = onSelect
+            text = "Select",
+            onClick = onSelect,
         )
         WidthSpacer()
         SimpleVectorButton(
             ImageVector.vectorResource(R.drawable.ic_clear),
             "Clear",
-            onClick = onClear
+            onClick = onClear,
         )
     }
 }

@@ -136,7 +136,7 @@ private fun Editor() {
                     HeightSpacer()
                     Observe {
                         val fileSelectScope = currentRecomposeScope
-                        MyFileSelect("Music File:",
+                        MyFileSelector("Music File:",
                             editingSchedule.musicFile,
                             onSelect = {
                                 FileSelector.openMusicFile {
@@ -154,7 +154,7 @@ private fun Editor() {
                     HeightSpacer()
                     Observe {
                         val fileSelectScope = currentRecomposeScope
-                        MyFileSelect("Music Folder:",
+                        MyFileSelector("Music Folder:",
                             editingSchedule.musicFolder,
                             onSelect = {
                                 FileSelector.openFolder {

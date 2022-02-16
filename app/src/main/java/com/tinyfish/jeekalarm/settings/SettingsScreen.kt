@@ -69,7 +69,7 @@ private fun Editor() {
         HeightSpacer()
         Observe {
             val fileSelectScope = currentRecomposeScope
-            MyFileSelect("Music File:",
+            MyFileSelector("Music File:",
                 ConfigService.data.defaultMusicFile,
                 onSelect = {
                     FileSelector.openMusicFile {
@@ -87,7 +87,7 @@ private fun Editor() {
         HeightSpacer()
         Observe {
             val fileSelectScope = currentRecomposeScope
-            MyFileSelect("Music Folder:",
+            MyFileSelector("Music Folder:",
                 ConfigService.data.defaultMusicFolder,
                 onSelect = {
                     FileSelector.openFolder {
