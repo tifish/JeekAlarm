@@ -53,7 +53,7 @@ fun SimpleSwitch(
         Text(
             hint,
             style = textStyle,
-            modifier = Modifier.clickable(
+            modifier = textModifier.clickable(
                 onClick = {
                     booleanProp.set(!booleanProp.get())
                     rowScope.invalidate()
