@@ -35,7 +35,6 @@ fun EditScreen() {
         else
             ScheduleService.scheduleList[App.editScheduleIndex]
 
-
     Column {
         MyTopBar(
             R.drawable.ic_edit,

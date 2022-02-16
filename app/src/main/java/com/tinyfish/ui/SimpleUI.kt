@@ -34,7 +34,7 @@ fun SimpleSwitch(
     textModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Row(modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         val rowScope = currentRecomposeScope
 
         Switch(
@@ -49,7 +49,9 @@ fun SimpleSwitch(
         Spacer(Modifier.width(10.dp))
 
         Text(
-            hint, style = textStyle, modifier = textModifier.clickable(
+            hint,
+            style = textStyle,
+            modifier = Modifier.clickable(
                 onClick = {
                     booleanProp.set(!booleanProp.get())
                     rowScope.invalidate()
@@ -67,7 +69,7 @@ fun SimpleSwitch(
     textModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit = {}
 ) {
-    Row(modifier) {
+    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
         Switch(
             checked = value,
             onCheckedChange = {
@@ -78,7 +80,9 @@ fun SimpleSwitch(
         Spacer(Modifier.width(10.dp))
 
         Text(
-            hint, style = textStyle, modifier = textModifier.clickable(
+            hint,
+            style = textStyle,
+            modifier = textModifier.clickable(
                 onClick = {
                     onCheckedChange(!value)
                 })
@@ -198,7 +202,11 @@ fun SimpleVectorButton(
     text: String = "",
     onClick: () -> Unit
 ) {
-    Column(modifier.clickable(onClick = onClick), Arrangement.Center, Alignment.CenterHorizontally) {
+    Column(
+        modifier.clickable(onClick = onClick),
+        Arrangement.Center,
+        Alignment.CenterHorizontally
+    ) {
         Box {
             Icon(vectorAsset, null)
         }

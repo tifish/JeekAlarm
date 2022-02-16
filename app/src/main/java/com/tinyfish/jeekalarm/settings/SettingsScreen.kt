@@ -4,9 +4,12 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -36,11 +39,18 @@ fun SettingsScreen() {
 
 @Composable
 private fun Editor() {
-    Column(Modifier.padding(20.dp)) {
+    Column(
+        Modifier
+            .padding(20.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        Text("Theme:")
         Observe {
             val themeScope = currentRecomposeScope
-            Text("Theme:")
-            Row(modifier = Modifier.padding(start = 20.dp)) {
+            Row(
+                modifier = Modifier.padding(start = 20.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 val options = listOf("Auto", "Dark", "Light")
                 options.forEach {
                     val onClick = {

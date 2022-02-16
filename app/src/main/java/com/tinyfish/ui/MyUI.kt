@@ -66,7 +66,6 @@ fun MySwitch(
         booleanProp = booleanProp,
         textStyle = textStyle,
         onCheckedChange = onCheckedChange,
-        textModifier = Modifier.size(200.dp, 36.dp)
     )
 }
 
@@ -82,7 +81,6 @@ fun MySwitch(
         value = value,
         textStyle = textStyle,
         onCheckedChange = onCheckedChange,
-        textModifier = Modifier.size(200.dp, 36.dp)
     )
 }
 
