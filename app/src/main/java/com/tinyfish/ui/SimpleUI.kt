@@ -9,6 +9,8 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -122,8 +124,10 @@ fun SimpleTextField(
     onTextFieldFocused: (Boolean) -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit = {}
 ) {
-    Row(modifier = modifier) {
-        Text(hint)
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        val focusRequester = remember { FocusRequester() }
+
+        Text(hint, Modifier.clickable { focusRequester.requestFocus() })
         WidthSpacer()
 
         var lastFocusState by remember { mutableStateOf(false) }
@@ -133,12 +137,14 @@ fun SimpleTextField(
         val newTextStyle = textStyle.copy(color = textColor)
 
         BasicTextField(
-            modifier = textModifier.onFocusChanged { state ->
-                if (lastFocusState != state.hasFocus) {
-                    onTextFieldFocused(state.hasFocus)
+            modifier = textModifier
+                .onFocusChanged { state ->
+                    if (lastFocusState != state.hasFocus) {
+                        onTextFieldFocused(state.hasFocus)
+                    }
+                    lastFocusState = state.hasFocus
                 }
-                lastFocusState = state.hasFocus
-            },
+                .focusRequester(focusRequester),
             value = textFieldValue,
             onValueChange = {
                 onTextChanged(it)
