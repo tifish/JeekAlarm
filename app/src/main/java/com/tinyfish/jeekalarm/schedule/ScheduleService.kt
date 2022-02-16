@@ -51,7 +51,7 @@ object ScheduleService {
             if (!schedule.enabled || !schedule.isValid)
                 continue
 
-            val currentTriggerTime = schedule.getNextTriggerTime()!!
+            val currentTriggerTime = schedule.getNextTriggerTime() ?: continue
             if (currentTriggerTime == minTriggerTime) {
                 minScheduleIndexes.add(index)
             } else if (currentTriggerTime < minTriggerTime) {
