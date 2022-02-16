@@ -31,11 +31,11 @@ data class Schedule(
 ) {
     fun copyTo(dest: Schedule) {
         dest.name = name
-        dest.minuteConfig = minuteConfig
         dest.hourConfig = hourConfig
+        dest.minuteConfig = minuteConfig
+        dest.weekDayConfig = weekDayConfig
         dest.dayConfig = dayConfig
         dest.monthConfig = monthConfig
-        dest.weekDayConfig = weekDayConfig
         dest.yearConfig = yearConfig
         dest.enabled = enabled
         dest.onlyOnce = onlyOnce
@@ -54,11 +54,11 @@ data class Schedule(
         } catch (ex: Exception) {
             Log.e(this.javaClass.name, ex.message ?: "parse error")
             isValid = false
-            months.clear()
-            days.clear()
             hours.clear()
             minutes.clear()
             weekDays.clear()
+            months.clear()
+            days.clear()
             years.clear()
         }
     }
@@ -71,19 +71,19 @@ data class Schedule(
     var isValid: Boolean = false
 
     @Transient
+    var hours = mutableListOf<Int>()
+
+    @Transient
     var minutes = mutableListOf<Int>()
 
     @Transient
-    var hours = mutableListOf<Int>()
+    var weekDays = mutableListOf<Int>()
 
     @Transient
     var days = mutableListOf<Int>()
 
     @Transient
     var months = mutableListOf<Int>()
-
-    @Transient
-    var weekDays = mutableListOf<Int>()
 
     @Transient
     var years = mutableListOf<Int>()
@@ -111,6 +111,30 @@ data class Schedule(
 
         var minuteCompareMethod = CompareMethod.Bigger
 
+        val setMinValueBelow = fun(timePart: Int) {
+            when (timePart) {
+                Calendar.YEAR -> {
+                    resultTime.set(Calendar.MONTH, minTriggerMonth)
+                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
+                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
+                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                }
+                Calendar.MONTH -> {
+                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
+                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
+                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                }
+                Calendar.DAY_OF_MONTH -> {
+                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
+                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                }
+                Calendar.HOUR_OF_DAY -> {
+                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                }
+                else -> throw Exception("not match")
+            }
+        }
+
         val notMatchHandler = fun(currentTimePart: Int): Int {
             val orgTime = resultTime.clone() as Calendar
 
@@ -120,30 +144,23 @@ data class Schedule(
                 }
                 Calendar.MONTH -> {
                     resultTime.add(Calendar.YEAR, 1)
-                    resultTime.set(Calendar.MONTH, minTriggerMonth)
-                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                    setMinValueBelow(Calendar.YEAR)
                 }
                 Calendar.DAY_OF_MONTH -> {
                     resultTime.add(Calendar.MONTH, 1)
-                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                    setMinValueBelow(Calendar.MONTH)
                 }
                 Calendar.DAY_OF_WEEK -> {
                     resultTime.add(Calendar.DAY_OF_MONTH, 1)
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                    setMinValueBelow(Calendar.DAY_OF_MONTH)
                 }
                 Calendar.HOUR_OF_DAY -> {
                     resultTime.add(Calendar.DAY_OF_MONTH, 1)
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                    setMinValueBelow(Calendar.DAY_OF_MONTH)
                 }
                 Calendar.MINUTE -> {
                     resultTime.add(Calendar.HOUR_OF_DAY, 1)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
+                    setMinValueBelow(Calendar.HOUR_OF_DAY)
                 }
             }
 
@@ -161,29 +178,13 @@ data class Schedule(
         val biggerHandler = fun(currentTimePart: Int): Int {
             minuteCompareMethod = CompareMethod.EqualOrBigger
 
+            setMinValueBelow(currentTimePart)
+
             return when (currentTimePart) {
-                Calendar.YEAR -> {
-                    resultTime.set(Calendar.MONTH, minTriggerMonth)
-                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
-                    Calendar.DAY_OF_WEEK
-                }
-                Calendar.MONTH -> {
-                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
-                    Calendar.DAY_OF_WEEK
-                }
-                Calendar.DAY_OF_MONTH -> {
-                    resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
-                    Calendar.DAY_OF_WEEK
-                }
-                Calendar.HOUR_OF_DAY -> {
-                    resultTime.set(Calendar.MINUTE, minTriggerMinute)
-                    Int.MAX_VALUE
-                }
+                Calendar.YEAR -> Calendar.DAY_OF_WEEK
+                Calendar.MONTH -> Calendar.DAY_OF_WEEK
+                Calendar.DAY_OF_MONTH -> Calendar.DAY_OF_WEEK
+                Calendar.HOUR_OF_DAY -> Int.MAX_VALUE
                 else -> throw Exception("not match")
             }
         }
@@ -193,7 +194,7 @@ data class Schedule(
 
         while (true) {
             when (matchingPart) {
-                Calendar.YEAR ->{
+                Calendar.YEAR -> {
                     matchingPart = when (findNextTriggerTimePart(
                         resultTime,
                         Calendar.YEAR,
