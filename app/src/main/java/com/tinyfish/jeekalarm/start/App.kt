@@ -44,6 +44,7 @@ class App : Application() {
         var isPlaying by mutableStateOf(false)
         var removingIndex by mutableStateOf(-1)
         var editEnabledChangeTrigger by mutableStateOf(0)
+        var editTimeConfigChanged by mutableStateOf(0)
 
         fun startService() {
             val startIntent = Intent(context, StartService::class.java).apply {

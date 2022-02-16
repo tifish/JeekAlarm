@@ -22,12 +22,9 @@ import java.util.*
 
 private lateinit var editingSchedule: Schedule
 private var isAdding = false
-private lateinit var uiTimeConfigChanged: MutableState<Int>
 
 @Composable
 fun EditScreen() {
-    uiTimeConfigChanged = remember { mutableStateOf(0) }
-
     isAdding = App.editScheduleIndex == -1
     editingSchedule =
         if (isAdding)
@@ -71,51 +68,50 @@ private fun Editor() {
         }
 
         HeightSpacer()
-        MyCronTimeTextField(
+        CronTimeTextField(
             "Name: ",
             editingSchedule::name,
             false,
             onChange
         )
         Column(Modifier.padding(start = 20.dp)) {
-            uiTimeConfigChanged.value
             HeightSpacer()
-            MyCronTimeTextField(
+            CronTimeTextField(
                 "Hour: ",
                 editingSchedule::hourConfig,
                 true,
                 onChange
             )
             HeightSpacer()
-            MyCronTimeTextField(
+            CronTimeTextField(
                 "Minute: ",
                 editingSchedule::minuteConfig,
                 true,
                 onChange
             )
             HeightSpacer()
-            MyCronTimeTextField(
+            CronTimeTextField(
                 "WeekDay: ",
                 editingSchedule::weekDayConfig,
                 true,
                 onChange
             )
             HeightSpacer()
-            MyCronTimeTextField(
+            CronTimeTextField(
                 "Day: ",
                 editingSchedule::dayConfig,
                 true,
                 onChange
             )
             HeightSpacer()
-            MyCronTimeTextField(
+            CronTimeTextField(
                 "Month: ",
                 editingSchedule::monthConfig,
                 true,
                 onChange
             )
             HeightSpacer()
-            MyCronTimeTextField(
+            CronTimeTextField(
                 "Year: ",
                 editingSchedule::yearConfig,
                 true,
@@ -223,7 +219,7 @@ fun BottomBar() {
                 editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
                 editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
                 editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                uiTimeConfigChanged.value++
+                App.editTimeConfigChanged++
             }
         }
 
