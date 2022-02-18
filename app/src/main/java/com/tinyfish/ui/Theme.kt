@@ -10,20 +10,19 @@ import androidx.compose.ui.graphics.Color
 val DarkColorPalette = darkColors(
     primary = MaterialColor.LightBlue400, // TopAppBar, BottomAppBar, Button
     primaryVariant = MaterialColor.LightBlue400,
-    secondary = MaterialColor.LightBlue400, // Radio button
+    secondary = MaterialColor.LightBlue400, // Switch on, Radio button on
     surface = Color.LightGray, // Surface, Switch off, disabled button background
     // onPrimary // text on primary
     // onSurface // text on Surface, Switch off background
+    // background
 )
 
 val LightColorPalette = lightColors(
-    primary = MaterialColor.LightBlue600, // TopAppBar, BottomAppBar, Button
+    primary = MaterialColor.LightBlue600,
     primaryVariant = MaterialColor.LightBlue600,
-    secondary = MaterialColor.LightBlue600, // Radio button
-    secondaryVariant = MaterialColor.LightBlue600, // Switch on
-    surface = Color.LightGray // Surface, Switch off, disabled button background
-    // onPrimary // text on primary
-    // onSurface // text on Surface, Switch off background
+    secondary = MaterialColor.LightBlue600,
+    secondaryVariant = MaterialColor.LightBlue600,
+    surface = Color.LightGray
 )
 
 @Composable

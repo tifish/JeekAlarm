@@ -40,73 +40,76 @@ fun SettingsScreen() {
 @Composable
 private fun Editor() {
     Column(
-        Modifier
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState())
+        Modifier.verticalScroll(rememberScrollState())
     ) {
-        Text("Theme:")
-        Observe {
-            val themeScope = currentRecomposeScope
-            Row(
-                modifier = Modifier.padding(start = 20.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val options = listOf("Auto", "Dark", "Light")
-                options.forEach {
-                    val onClick = {
-                        ConfigService.data.theme = it
-                        ConfigService.save()
-                        App.themeColorsChangeTrigger++
-                        themeScope.invalidate()
+        MyGroupBox()
+        {
+            Text("Theme:")
+            Observe {
+                val themeScope = currentRecomposeScope
+                Row(
+                    modifier = Modifier.padding(start = 20.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    val options = listOf("Auto", "Dark", "Light")
+                    options.forEach {
+                        val onClick = {
+                            ConfigService.data.theme = it
+                            ConfigService.save()
+                            App.themeColorsChangeTrigger++
+                            themeScope.invalidate()
+                        }
+                        RadioButton(selected = ConfigService.data.theme == it, onClick = onClick)
+                        Text(it, Modifier.clickable(onClick = onClick))
+                        WidthSpacer()
                     }
-                    RadioButton(selected = ConfigService.data.theme == it, onClick = onClick)
-                    Text(it, Modifier.clickable(onClick = onClick))
-                    WidthSpacer()
                 }
             }
         }
 
-        HeightSpacer()
-        Observe {
-            val fileSelectScope = currentRecomposeScope
-            MyFileSelector("Music File:",
-                ConfigService.data.defaultMusicFile,
-                onSelect = {
-                    FileSelector.openMusicFile {
-                        ConfigService.data.defaultMusicFile = it?.path?.substringAfter(':')!!
+        MyGroupBox {
+            Observe {
+                val fileSelectScope = currentRecomposeScope
+                MyFileSelector("Music File:",
+                    ConfigService.data.defaultMusicFile,
+                    onSelect = {
+                        FileSelector.openMusicFile {
+                            ConfigService.data.defaultMusicFile = it?.path?.substringAfter(':')!!
+                            fileSelectScope.invalidate()
+                        }
+                    },
+                    onClear = {
+                        ConfigService.data.defaultMusicFile = ""
                         fileSelectScope.invalidate()
                     }
-                },
-                onClear = {
-                    ConfigService.data.defaultMusicFile = ""
-                    fileSelectScope.invalidate()
-                }
-            )
-        }
+                )
+            }
 
-        HeightSpacer()
-        Observe {
-            val fileSelectScope = currentRecomposeScope
-            MyFileSelector("Music Folder:",
-                ConfigService.data.defaultMusicFolder,
-                onSelect = {
-                    FileSelector.openFolder {
-                        ConfigService.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
+            HeightSpacer()
+            Observe {
+                val fileSelectScope = currentRecomposeScope
+                MyFileSelector("Music Folder:",
+                    ConfigService.data.defaultMusicFolder,
+                    onSelect = {
+                        FileSelector.openFolder {
+                            ConfigService.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
+                            fileSelectScope.invalidate()
+                        }
+                    },
+                    onClear = {
+                        ConfigService.data.defaultMusicFolder = ""
                         fileSelectScope.invalidate()
                     }
-                },
-                onClear = {
-                    ConfigService.data.defaultMusicFolder = ""
-                    fileSelectScope.invalidate()
-                }
-            )
+                )
+            }
         }
 
-        HeightSpacer()
-
-        Button(onClick = {
-            NotificationService.showAlarm(ScheduleService.nextAlarmIndexes)
-        }) {
+        Button(
+            onClick = {
+                NotificationService.showAlarm(ScheduleService.nextAlarmIndexes)
+            },
+            Modifier.padding(5.dp)
+        ) {
             Text("Test Next Alarm")
         }
     }

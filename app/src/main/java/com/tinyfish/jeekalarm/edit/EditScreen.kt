@@ -1,8 +1,12 @@
 package com.tinyfish.jeekalarm.edit
 
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -51,14 +55,16 @@ fun EditScreen() {
 private fun Editor() {
     Column(
         Modifier
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState())) {
-        Observe {
-            App.editEnabledChangeTrigger
-            MySwitch("Enabled", editingSchedule::enabled)
+            .padding(5.dp)
+            .verticalScroll(rememberScrollState())
+    ) {
+        MyGroupBox {
+            Observe {
+                App.editEnabledChangeTrigger
+                MySwitch("Enabled", editingSchedule::enabled)
+            }
+            MySwitch("Only Once", editingSchedule::onlyOnce)
         }
-        HeightSpacer()
-        MySwitch("Only Once", editingSchedule::onlyOnce)
 
         val onChange = { _: String ->
             if (!editingSchedule.enabled) {
@@ -67,14 +73,13 @@ private fun Editor() {
             }
         }
 
-        HeightSpacer()
-        CronTimeTextField(
-            "Name: ",
-            editingSchedule::name,
-            false,
-            onChange
-        )
-        Column(Modifier.padding(start = 20.dp)) {
+        MyGroupBox {
+            CronTimeTextField(
+                "Name: ",
+                editingSchedule::name,
+                false,
+                onChange
+            )
             HeightSpacer()
             CronTimeTextField(
                 "Hour: ",
@@ -119,69 +124,72 @@ private fun Editor() {
             )
         }
 
-        Observe {
-            val playScope = currentRecomposeScope
-            HeightSpacer()
-            MySwitch(
-                hint = "Play Music:",
-                booleanProp = editingSchedule::playMusic,
-                onCheckedChange = { playScope.invalidate() })
-
-            if (editingSchedule.playMusic) {
-                Column(Modifier.padding(start = 20.dp)) {
-                    HeightSpacer()
-                    Observe {
-                        val fileSelectScope = currentRecomposeScope
-                        MyFileSelector("Music File:",
-                            editingSchedule.musicFile,
-                            onSelect = {
-                                FileSelector.openMusicFile {
-                                    editingSchedule.musicFile = it?.path?.substringAfter(':')!!
-                                    fileSelectScope.invalidate()
-                                }
-                            },
-                            onClear = {
-                                editingSchedule.musicFile = ""
-                                fileSelectScope.invalidate()
-                            }
-                        )
-                    }
-
-                    HeightSpacer()
-                    Observe {
-                        val fileSelectScope = currentRecomposeScope
-                        MyFileSelector("Music Folder:",
-                            editingSchedule.musicFolder,
-                            onSelect = {
-                                FileSelector.openFolder {
-                                    editingSchedule.musicFolder =
-                                        it?.path?.substringAfter(':')!!
-                                    fileSelectScope.invalidate()
-                                }
-                            },
-                            onClear = {
-                                editingSchedule.musicFolder = ""
-                                fileSelectScope.invalidate()
-                            }
-                        )
-                    }
-                }
-            }
-
+        MyGroupBox {
             Observe {
-                val vibrationScope = currentRecomposeScope
+                val playScope = currentRecomposeScope
                 HeightSpacer()
                 MySwitch(
-                    "Vibration",
-                    editingSchedule::vibration,
-                    onCheckedChange = { vibrationScope.invalidate() })
+                    hint = "Play Music:",
+                    booleanProp = editingSchedule::playMusic,
+                    onCheckedChange = { playScope.invalidate() })
 
-                if (editingSchedule.vibration) {
+                if (editingSchedule.playMusic) {
+                    Column(Modifier.padding(start = 20.dp)) {
+                        HeightSpacer()
+                        Observe {
+                            val fileSelectScope = currentRecomposeScope
+                            MyFileSelector("Music File:",
+                                editingSchedule.musicFile,
+                                onSelect = {
+                                    FileSelector.openMusicFile {
+                                        editingSchedule.musicFile =
+                                            it?.path?.substringAfter(':')!!
+                                        fileSelectScope.invalidate()
+                                    }
+                                },
+                                onClear = {
+                                    editingSchedule.musicFile = ""
+                                    fileSelectScope.invalidate()
+                                }
+                            )
+                        }
+
+                        HeightSpacer()
+                        Observe {
+                            val fileSelectScope = currentRecomposeScope
+                            MyFileSelector("Music Folder:",
+                                editingSchedule.musicFolder,
+                                onSelect = {
+                                    FileSelector.openFolder {
+                                        editingSchedule.musicFolder =
+                                            it?.path?.substringAfter(':')!!
+                                        fileSelectScope.invalidate()
+                                    }
+                                },
+                                onClear = {
+                                    editingSchedule.musicFolder = ""
+                                    fileSelectScope.invalidate()
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Observe {
+                    val vibrationScope = currentRecomposeScope
                     HeightSpacer()
-                    Text(
-                        editingSchedule.vibrationCount.toString(),
-                        modifier = Modifier.padding(start = 20.dp)
-                    )
+                    MySwitch(
+                        "Vibration",
+                        editingSchedule::vibration,
+                        onCheckedChange = { vibrationScope.invalidate() })
+
+                    if (editingSchedule.vibration) {
+                        HeightSpacer()
+                        Text(
+                            editingSchedule.vibrationCount.toString(),
+                            modifier = Modifier.padding(start = 20.dp)
+                        )
+                    }
                 }
             }
         }

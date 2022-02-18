@@ -48,7 +48,7 @@ fun SimpleSwitch(
             }
         )
 
-        Spacer(Modifier.width(10.dp))
+        WidthSpacer()
 
         Text(
             hint,
@@ -79,7 +79,7 @@ fun SimpleSwitch(
             }
         )
 
-        Spacer(Modifier.width(10.dp))
+        WidthSpacer()
 
         Text(
             hint,

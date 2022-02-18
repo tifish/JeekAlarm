@@ -84,14 +84,15 @@ private fun ScheduleList() {
     } else {
         Column(
             Modifier
-                .padding(20.dp)
-                .verticalScroll(rememberScrollState())) {
+                .verticalScroll(rememberScrollState())
+        ) {
             App.scheduleChangeTrigger
             val now = Calendar.getInstance()
             for (index in ScheduleService.scheduleList.indices) {
                 val schedule = ScheduleService.scheduleList[index]
                 HeightSpacer()
                 ScheduleItem(index, schedule, now)
+                HeightSpacer()
                 Divider(color = Color.DarkGray)
             }
         }
@@ -100,20 +101,22 @@ private fun ScheduleList() {
 
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
-    Row {
-            Box(modifier = Modifier.align(Alignment.CenterVertically)) {
-                val boxScope = currentRecomposeScope
-                Switch(
-                    checked = schedule.enabled,
-                    onCheckedChange = {
-                        schedule.enabled = it
-                        ScheduleService.saveConfig()
-                        boxScope.invalidate()
-                    }
-                )
-            }
+    Row(
+        Modifier.padding(start = 10.dp, end = 10.dp)
+    ) {
+        Box(modifier = Modifier.align(Alignment.Top)) {
+            val boxScope = currentRecomposeScope
+            Switch(
+                checked = schedule.enabled,
+                onCheckedChange = {
+                    schedule.enabled = it
+                    ScheduleService.saveConfig()
+                    boxScope.invalidate()
+                }
+            )
+        }
 
-        Spacer(Modifier.width(20.dp))
+        WidthSpacer()
 
         Column(
             Modifier
@@ -123,7 +126,8 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                         App.editScheduleIndex = index
                         App.screen = ScreenType.EDIT
                     }
-                })) {
+                })
+        ) {
             Text(schedule.name + if (index in App.nextAlarmIndexes) " (Next alarm)" else "")
             Text(
                 schedule.timeConfig,
@@ -135,7 +139,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
             )
         }
 
-        Row(Modifier.align(Alignment.CenterVertically)) {
+        Row(Modifier.align(Alignment.Bottom)) {
             if (App.removingIndex == -1) {
                 SimpleVectorButton(ImageVector.vectorResource(R.drawable.ic_remove)) {
                     App.removingIndex = index
@@ -151,7 +155,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     ScheduleService.saveConfig()
                 }
 
-                Spacer(Modifier.width(20.dp))
+                WidthSpacer()
                 SimpleVectorButton(
                     ImageVector.vectorResource(R.drawable.ic_back),
                     "Cancel"
