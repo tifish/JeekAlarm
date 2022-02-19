@@ -43,7 +43,7 @@ fun CronTimeTextField(
         Observe {
             SimpleTextField(
                 hint = hint,
-                    textFieldValue = TextFieldValue(textProp.get(), textRange),
+                textFieldValue = TextFieldValue(textProp.get(), textRange),
                 onTextFieldFocused = { focused ->
                     if (focusedState != focused) {
                         focusedState = focused

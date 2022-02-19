@@ -63,7 +63,8 @@ object NotificationService {
             infoText = "Next: ${alarmNames.joinToString("; ")} $nextAlarmDateString"
         }
 
-        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)?.toBitmap()
+        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
+            ?.toBitmap()
 
         return NotificationCompat.Builder(App.context, "Information").run {
             setContentTitle("JeekAlarm standby:")
@@ -94,15 +95,23 @@ object NotificationService {
         val openIntent = Intent(App.context, NotificationClickReceiver::class.java).apply {
             putExtra("alarmIndexes", alarmIndexes.toIntArray())
         }
-        val openPendingIntent = PendingIntent.getBroadcast(App.context, 0, openIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        val openPendingIntent = PendingIntent.getBroadcast(
+            App.context,
+            0,
+            openIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT
+        )
 
         val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
-        val pausePendingIntent: PendingIntent = PendingIntent.getBroadcast(App.context, 0, pauseIntent, 0)
+        val pausePendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(App.context, 0, pauseIntent, 0)
 
         val dismissIntent = Intent(App.context, NotificationDismissReceiver::class.java)
-        val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(App.context, 0, dismissIntent, 0)
+        val dismissPendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(App.context, 0, dismissIntent, 0)
 
-        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)?.toBitmap()
+        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
+            ?.toBitmap()
         val alarmNames = getAlarmNames(alarmIndexes)
         val notification = NotificationCompat.Builder(App.context, "Alarm").run {
             setContentTitle("JeekAlarm triggered:")

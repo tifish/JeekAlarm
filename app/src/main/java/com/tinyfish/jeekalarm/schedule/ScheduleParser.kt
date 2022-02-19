@@ -7,7 +7,8 @@ import java.io.IOException
 import java.util.*
 
 internal object ScheduleParser {
-    private val scheduleMoshiAdapter: JsonAdapter<Schedule> = App.moshi.adapter(Schedule::class.java)
+    private val scheduleMoshiAdapter: JsonAdapter<Schedule> =
+        App.moshi.adapter(Schedule::class.java)
 
     fun parseJsonLine(line: String): Schedule? {
         return try {

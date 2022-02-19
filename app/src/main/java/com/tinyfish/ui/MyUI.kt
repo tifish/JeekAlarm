@@ -111,12 +111,8 @@ fun MyTopBar(title: @Composable () -> Unit) {
 fun MyTopBar(@DrawableRes iconID: Int, title: String) {
     TopAppBar(
         title = {
-            Row {
-                Icon(
-                    ImageVector.vectorResource(iconID),
-                    null,
-                    Modifier.align(Alignment.CenterVertically)
-                )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(ImageVector.vectorResource(iconID), title)
                 WidthSpacer()
                 Text(title)
             }

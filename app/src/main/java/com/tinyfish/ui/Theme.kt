@@ -23,13 +23,19 @@ val LightColorPalette = lightColors(
     secondary = MaterialColor.LightBlue600,
     secondaryVariant = MaterialColor.LightBlue600,
     surface = Color.LightGray
+
+    /* Other default colors to override
+    background = Color.White,
+    surface = Color.White,
+    onPrimary = Color.White,
+    onSecondary = Color.Black,
+    onBackground = Color.Black,
+    onSurface = Color.Black,
+    */
 )
 
 @Composable
-fun Theme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    content: @Composable() () -> Unit
-) {
+fun ComposeTheme(darkTheme: Boolean = isSystemInDarkTheme(), content: @Composable () -> Unit) {
     val colors = if (darkTheme) {
         DarkColorPalette
     } else {
@@ -38,8 +44,8 @@ fun Theme(
 
     MaterialTheme(
         colors = colors,
-        typography = typography,
-        shapes = shapes,
+        typography = Typography,
+        shapes = Shapes,
         content = content
     )
 }

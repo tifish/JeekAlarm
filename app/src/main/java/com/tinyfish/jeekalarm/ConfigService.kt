@@ -6,7 +6,8 @@ import java.io.File
 
 object ConfigService {
     var data = ConfigData()
-    private val configDataMoshiAdapter: JsonAdapter<ConfigData> = App.moshi.adapter(ConfigData::class.java)
+    private val configDataMoshiAdapter: JsonAdapter<ConfigData> =
+        App.moshi.adapter(ConfigData::class.java)
 
     data class ConfigData(
         var defaultMusicFile: String = "",

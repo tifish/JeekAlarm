@@ -6,7 +6,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -31,6 +32,7 @@ import java.util.*
 fun MainUI() {
     App.themeColorsChangeTrigger
 
+
     MaterialTheme(colors = getThemeFromConfig()) {
         when (App.screen) {
             ScreenType.HOME -> HomeScreen()
@@ -47,7 +49,7 @@ fun getThemeFromConfig(): Colors {
         "Auto" -> if (isSystemInDarkTheme()) DarkColorPalette else LightColorPalette
         "Dark" -> DarkColorPalette
         "Light" -> LightColorPalette
-        else -> LightColorPalette
+        else -> throw Exception("Unexpected theme")
     }
 }
 
