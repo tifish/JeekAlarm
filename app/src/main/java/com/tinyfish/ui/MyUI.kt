@@ -2,6 +2,7 @@ package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -139,13 +140,14 @@ fun MyBottomBar(buttons: @Composable () -> Unit) {
 
 @Composable
 fun MyGroupBox(modifier: Modifier = Modifier, body: @Composable () -> Unit = {}) {
-    Card(
+    Box(
         modifier
             .fillMaxWidth()
-            .padding(5.dp),
-        backgroundColor = MaterialTheme.colors.background,
-        border = BorderStroke(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.08f)),
-        shape = RoundedCornerShape(5.dp)
+            .padding(5.dp)
+            .border(
+                BorderStroke(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.08f)),
+                RoundedCornerShape(5.dp)
+            ),
     ) {
         Column(Modifier.padding(10.dp)) {
             body()

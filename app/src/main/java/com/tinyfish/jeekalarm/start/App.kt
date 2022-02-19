@@ -15,10 +15,19 @@ import java.text.SimpleDateFormat
 import java.util.*
 
 enum class ScreenType {
-    MAIN,
-    EDIT,
+    HOME,
     SETTINGS,
+    EDIT,
     NOTIFICATION,
+}
+
+fun getScreenName(screenType: ScreenType): String {
+    return when (screenType) {
+        ScreenType.HOME -> "Home"
+        ScreenType.SETTINGS -> "Settings"
+        ScreenType.EDIT -> "Edit"
+        ScreenType.NOTIFICATION -> "Notification"
+    }
 }
 
 class App : Application() {
@@ -33,12 +42,12 @@ class App : Application() {
         }
 
         var editScheduleIndex = -1
-        var screenBeforeNotification = ScreenType.MAIN
+        var screenBeforeNotification = ScreenType.HOME
         val notificationAlarmIndexes = mutableListOf<Int>()
 
         var themeColorsChangeTrigger by mutableStateOf(0)
 
-        var screen by mutableStateOf(ScreenType.MAIN)
+        var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIndexes by mutableStateOf(listOf<Int>())
         var scheduleChangeTrigger by mutableStateOf(0)
         var isPlaying by mutableStateOf(false)

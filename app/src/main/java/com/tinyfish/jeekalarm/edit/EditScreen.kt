@@ -1,17 +1,14 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -35,6 +32,18 @@ fun EditScreen() {
             Schedule()
         else
             ScheduleService.scheduleList[App.editScheduleIndex]
+
+//    Scaffold(
+//        topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") },
+//        content = {
+//            Surface(
+//                color = MaterialTheme.colors.background,
+//            ) {
+//                Editor()
+//            }
+//        },
+//        bottomBar = { BottomBar() }
+//    )
 
     Column {
         MyTopBar(
@@ -66,14 +75,14 @@ private fun Editor() {
             MySwitch("Only Once", editingSchedule::onlyOnce)
         }
 
-        val onChange = { _: String ->
-            if (!editingSchedule.enabled) {
-                editingSchedule.enabled = true
-                App.editEnabledChangeTrigger++
-            }
-        }
-
         MyGroupBox {
+            val onChange = { _: String ->
+                if (!editingSchedule.enabled) {
+                    editingSchedule.enabled = true
+                    App.editEnabledChangeTrigger++
+                }
+            }
+
             CronTimeTextField(
                 "Name: ",
                 editingSchedule::name,
@@ -212,7 +221,7 @@ fun BottomBar() {
                 ImageVector.vectorResource(R.drawable.ic_cancel),
                 "Cancel"
             ) {
-                App.screen = ScreenType.MAIN
+                App.screen = ScreenType.HOME
             }
         }
 
@@ -264,5 +273,5 @@ fun onEditScreenPressBack() {
     ScheduleService.saveConfig()
 
     ScheduleService.stopPlaying()
-    App.screen = ScreenType.MAIN
+    App.screen = ScreenType.HOME
 }

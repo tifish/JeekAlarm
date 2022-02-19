@@ -11,7 +11,7 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
 import com.tinyfish.jeekalarm.R
-import com.tinyfish.jeekalarm.main.MainActivity
+import com.tinyfish.jeekalarm.home.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import java.util.*

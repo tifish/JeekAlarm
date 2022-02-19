@@ -11,13 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
+import com.tinyfish.jeekalarm.home.NavigationBottomBar
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
@@ -25,16 +24,17 @@ import com.tinyfish.ui.*
 
 @Composable
 fun SettingsScreen() {
-    Column {
-        MyTopBar(R.drawable.ic_settings, "Settings")
-        Surface(
-            color = MaterialTheme.colors.background,
-            modifier = Modifier.weight(1f, true)
-        ) {
-            Editor()
-        }
-        BottomBar()
-    }
+    Scaffold(
+        topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
+        content = {
+            Surface(
+                color = MaterialTheme.colors.background,
+            ) {
+                Editor()
+            }
+        },
+        bottomBar = { NavigationBottomBar(ScreenType.SETTINGS) }
+    )
 }
 
 @Composable
@@ -115,20 +115,7 @@ private fun Editor() {
     }
 }
 
-@Composable
-private fun BottomBar() {
-    MyBottomBar {
-        val backResId = R.drawable.ic_back
-        SimpleVectorButton(
-            ImageVector.vectorResource(backResId),
-            "Back"
-        ) {
-            onSettingsScreenPressBack()
-        }
-    }
-}
-
 fun onSettingsScreenPressBack() {
     ConfigService.save()
-    App.screen = ScreenType.MAIN
+    App.screen = ScreenType.HOME
 }

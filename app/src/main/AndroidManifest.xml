@@ -20,7 +20,7 @@
         android:theme="@style/Theme.AppCompat.Light.NoActionBar"
         tools:targetApi="q">
         <activity
-            android:name=".main.MainActivity"
+            android:name=".home.MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

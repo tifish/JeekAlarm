@@ -2,7 +2,7 @@ package com.tinyfish.jeekalarm.edit
 
 import android.content.Intent
 import android.net.Uri
-import com.tinyfish.jeekalarm.main.MainActivity
+import com.tinyfish.jeekalarm.home.MainActivity
 
 object FileSelector {
     // Request code for selecting a PDF document.

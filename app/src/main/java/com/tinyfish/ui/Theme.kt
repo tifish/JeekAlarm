@@ -9,9 +9,9 @@ import androidx.compose.ui.graphics.Color
 
 val DarkColorPalette = darkColors(
     primary = MaterialColor.LightBlue400, // TopAppBar, BottomAppBar, Button
-    primaryVariant = MaterialColor.LightBlue400,
-    secondary = MaterialColor.LightBlue400, // Switch on, Radio button on
-    surface = Color.LightGray, // Surface, Switch off, disabled button background
+    primaryVariant = MaterialColor.LightBlue400, // top status bar
+    secondary = MaterialColor.LightBlue400, // Switch on, Radio button on, floating action button, slider, selected text, progress bar, link and headline
+    surface = Color.LightGray, // Surface, Switch off, disabled button background, card, sheet, menu
     // onPrimary // text on primary
     // onSurface // text on Surface, Switch off background
     // background

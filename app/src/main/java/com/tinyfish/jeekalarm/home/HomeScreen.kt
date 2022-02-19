@@ -1,4 +1,4 @@
-package com.tinyfish.jeekalarm.main
+package com.tinyfish.jeekalarm.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -6,8 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -24,6 +23,7 @@ import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
+import com.tinyfish.jeekalarm.start.getScreenName
 import com.tinyfish.ui.*
 import java.util.*
 
@@ -33,7 +33,7 @@ fun MainUI() {
 
     MaterialTheme(colors = getThemeFromConfig()) {
         when (App.screen) {
-            ScreenType.MAIN -> MainScreen()
+            ScreenType.HOME -> HomeScreen()
             ScreenType.EDIT -> EditScreen()
             ScreenType.SETTINGS -> SettingsScreen()
             ScreenType.NOTIFICATION -> NotificationScreen()
@@ -52,19 +52,27 @@ fun getThemeFromConfig(): Colors {
 }
 
 @Composable
-fun MainScreen() {
-    Column {
-        MyTopBar(R.drawable.ic_alarm, "JeekAlarm")
-        Surface(
-            Modifier
-                .weight(1f, true)
-                .fillMaxSize(),
-            color = MaterialTheme.colors.background
-        ) {
-            ScheduleList()
+fun HomeScreen() {
+    Scaffold(
+        topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
+        content = {
+            Surface(
+                Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.background
+            ) {
+                ScheduleList()
+            }
+        },
+        bottomBar = { NavigationBottomBar(ScreenType.HOME) },
+        floatingActionButton = {
+            FloatingActionButton(onClick = {
+                App.editScheduleIndex = -1
+                App.screen = ScreenType.EDIT
+            }) {
+                Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
+            }
         }
-        BottomBar()
-    }
+    )
 }
 
 @Composable
@@ -168,26 +176,20 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 }
 
 @Composable
-private fun BottomBar() {
-    MyBottomBar {
-        App.scheduleChangeTrigger
+fun NavigationBottomBar(currentScreen: ScreenType) {
+    BottomNavigation(
+        backgroundColor = MaterialTheme.colors.background
+    ) {
+        val items = listOf(ScreenType.HOME, ScreenType.SETTINGS)
+        val icons = listOf(R.drawable.ic_home, R.drawable.ic_settings)
 
-        if (ScheduleService.scheduleList.size > 0) {
-            SimpleVectorButton(
-                ImageVector.vectorResource(R.drawable.ic_add),
-                "Add"
-            ) {
-                App.editScheduleIndex = -1
-                App.screen = ScreenType.EDIT
-            }
-            ToolButtonWidthSpacer()
-        }
-
-        SimpleVectorButton(
-            ImageVector.vectorResource(R.drawable.ic_settings),
-            "Settings"
-        ) {
-            App.screen = ScreenType.SETTINGS
+        items.forEachIndexed { index, item ->
+            BottomNavigationItem(
+                selected = item == currentScreen,
+                onClick = { App.screen = item },
+                label = { Text(getScreenName(item)) },
+                icon = { Icon(ImageVector.vectorResource(icons[index]), getScreenName(item)) }
+            )
         }
     }
 }

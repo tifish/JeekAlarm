@@ -1,4 +1,4 @@
-package com.tinyfish.jeekalarm.main
+package com.tinyfish.jeekalarm.home
 
 import android.app.Activity
 import android.content.Intent
@@ -38,7 +38,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (App.screen == ScreenType.MAIN) {
+        if (App.screen == ScreenType.HOME) {
             if (App.removingIndex > -1)
                 App.removingIndex = -1
             else
