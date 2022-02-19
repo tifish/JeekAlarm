@@ -42,6 +42,8 @@ private fun Editor() {
     Column(
         Modifier.verticalScroll(rememberScrollState())
     ) {
+        HeightSpacer()
+
         MyGroupBox()
         {
             Text("Theme:")
@@ -66,6 +68,8 @@ private fun Editor() {
                 }
             }
         }
+
+        HeightSpacer()
 
         MyGroupBox {
             Observe {
@@ -104,6 +108,8 @@ private fun Editor() {
             }
         }
 
+        HeightSpacer()
+
         Button(
             onClick = {
                 NotificationService.showAlarm(ScheduleService.nextAlarmIndexes)
@@ -112,6 +118,8 @@ private fun Editor() {
         ) {
             Text("Test Next Alarm")
         }
+
+        HeightSpacer()
     }
 }
 

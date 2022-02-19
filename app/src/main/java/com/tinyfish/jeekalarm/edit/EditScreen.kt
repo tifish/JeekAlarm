@@ -64,9 +64,11 @@ fun EditScreen() {
 private fun Editor() {
     Column(
         Modifier
-            .padding(5.dp)
+            .padding(start = 5.dp, end = 5.dp)
             .verticalScroll(rememberScrollState())
     ) {
+        HeightSpacer()
+
         MyGroupBox {
             Observe {
                 App.editEnabledChangeTrigger
@@ -74,6 +76,8 @@ private fun Editor() {
             }
             MySwitch("Only Once", editingSchedule::onlyOnce)
         }
+
+        HeightSpacer()
 
         MyGroupBox {
             val onChange = { _: String ->
@@ -132,6 +136,8 @@ private fun Editor() {
                 onChange
             )
         }
+
+        HeightSpacer()
 
         MyGroupBox {
             Observe {
@@ -202,6 +208,8 @@ private fun Editor() {
                 }
             }
         }
+
+        HeightSpacer()
     }
 }
 

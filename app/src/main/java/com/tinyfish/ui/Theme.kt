@@ -8,30 +8,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
 val DarkColorPalette = darkColors(
-    primary = MaterialColor.LightBlue400, // TopAppBar, BottomAppBar, Button
-    primaryVariant = MaterialColor.LightBlue400, // top status bar
-    secondary = MaterialColor.LightBlue400, // Switch on, Radio button on, floating action button, slider, selected text, progress bar, link and headline
+    primary = MaterialColor.LightBlue900, // TopAppBar, BottomAppBar, Button, selected text, cursor
+    primaryVariant = MaterialColor.Grey900, // MyGroupBox
+    onPrimary = Color.White,
+    secondary = MaterialColor.LightBlue400, // Radio button on, floating action button, slider, progress bar, link and headline
+    secondaryVariant = MaterialColor.LightBlue400, // Switch on
+    onSecondary = Color.White,
     surface = Color.LightGray, // Surface, Switch off, disabled button background, card, sheet, menu
-    // onPrimary // text on primary
-    // onSurface // text on Surface, Switch off background
-    // background
+    onSurface = Color.White, // text on Surface, Switch off background, Radio button circle
+    background = Color.Black, // My background
+    onBackground = Color.White,
 )
 
 val LightColorPalette = lightColors(
-    primary = MaterialColor.LightBlue600,
-    primaryVariant = MaterialColor.LightBlue600,
-    secondary = MaterialColor.LightBlue600,
-    secondaryVariant = MaterialColor.LightBlue600,
-    surface = Color.LightGray
-
-    /* Other default colors to override
-    background = Color.White,
-    surface = Color.White,
-    onPrimary = Color.White,
+    primary = MaterialColor.LightBlue100, // TopAppBar, BottomAppBar, Button, selected text, cursor
+    primaryVariant = MaterialColor.Grey100, // MyGroupBox
+    onPrimary = Color.Black,
+    secondary = MaterialColor.LightBlue600, // Radio button on, floating action button, slider, progress bar, link and headline
+    secondaryVariant = MaterialColor.LightBlue600, // Switch on
     onSecondary = Color.Black,
+    surface = Color.LightGray, // Surface, Switch off, disabled button background, card, sheet, menu
+    onSurface = Color.Black, // text on Surface, Switch off background, Radio button circle
+    background = Color.White, // My background
     onBackground = Color.Black,
-    onSurface = Color.Black,
-    */
 )
 
 @Composable

@@ -32,7 +32,6 @@ import java.util.*
 fun MainUI() {
     App.themeColorsChangeTrigger
 
-
     MaterialTheme(colors = getThemeFromConfig()) {
         when (App.screen) {
             ScreenType.HOME -> HomeScreen()
@@ -59,8 +58,9 @@ fun HomeScreen() {
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
         content = {
             Surface(
-                Modifier.fillMaxSize(),
-                color = MaterialTheme.colors.background
+                Modifier
+                    .verticalScroll(rememberScrollState()),
+                color = MaterialTheme.colors.background,
             ) {
                 ScheduleList()
             }
@@ -73,7 +73,9 @@ fun HomeScreen() {
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
             }
-        }
+        },
+        floatingActionButtonPosition = FabPosition.Center,
+        isFloatingActionButtonDocked = true,
     )
 }
 
@@ -92,11 +94,9 @@ private fun ScheduleList() {
             }
         }
     } else {
-        Column(
-            Modifier
-                .verticalScroll(rememberScrollState())
-        ) {
+        Column {
             App.scheduleChangeTrigger
+
             val now = Calendar.getInstance()
             for (index in ScheduleService.scheduleList.indices) {
                 val schedule = ScheduleService.scheduleList[index]
@@ -105,6 +105,8 @@ private fun ScheduleList() {
                 HeightSpacer()
                 Divider(color = Color.DarkGray)
             }
+
+            HeightSpacer(100.dp)
         }
     }
 }
@@ -180,7 +182,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 @Composable
 fun NavigationBottomBar(currentScreen: ScreenType) {
     BottomNavigation(
-        backgroundColor = MaterialTheme.colors.background
+        backgroundColor = MaterialTheme.colors.primary,
     ) {
         val items = listOf(ScreenType.HOME, ScreenType.SETTINGS)
         val icons = listOf(R.drawable.ic_home, R.drawable.ic_settings)

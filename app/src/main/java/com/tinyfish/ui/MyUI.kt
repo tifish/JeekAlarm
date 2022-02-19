@@ -1,12 +1,9 @@
 package com.tinyfish.ui
 
 import androidx.annotation.DrawableRes
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -117,7 +114,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
                 Text(title)
             }
         },
-        backgroundColor = MaterialTheme.colors.primary
+        backgroundColor = MaterialTheme.colors.primary,
     )
 }
 
@@ -126,7 +123,7 @@ fun MyBottomBar(buttons: @Composable () -> Unit) {
     Surface(
         Modifier.fillMaxWidth(),
         elevation = 2.dp,
-        color = MaterialTheme.colors.background
+        color = MaterialTheme.colors.primary,
     ) {
         Row(Modifier.height(80.dp), Arrangement.Center, Alignment.CenterVertically) {
             buttons()
@@ -136,14 +133,11 @@ fun MyBottomBar(buttons: @Composable () -> Unit) {
 
 @Composable
 fun MyGroupBox(modifier: Modifier = Modifier, body: @Composable () -> Unit = {}) {
-    Box(
+    Card(
         modifier
             .fillMaxWidth()
-            .padding(5.dp)
-            .border(
-                BorderStroke(2.dp, MaterialTheme.colors.onSurface.copy(alpha = 0.08f)),
-                RoundedCornerShape(5.dp)
-            ),
+            .padding(5.dp),
+        backgroundColor = MaterialTheme.colors.primaryVariant
     ) {
         Column(Modifier.padding(10.dp)) {
             body()
