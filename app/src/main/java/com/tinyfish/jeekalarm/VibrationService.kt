@@ -4,11 +4,17 @@ import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.os.VibratorManager
 import com.tinyfish.jeekalarm.start.App
 
 object VibrationService {
     private val vibrator: Vibrator by lazy {
-        App.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            (App.context.getSystemService(Context.VIBRATOR_MANAGER_SERVICE) as VibratorManager).defaultVibrator
+        } else {
+            @Suppress("DEPRECATION")
+            App.context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        }
     }
 
     fun vibrate(count: Int) {
@@ -21,7 +27,7 @@ object VibrationService {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             vibrator.vibrate(VibrationEffect.createWaveform(waveList.toLongArray(), -1))
         } else {
-            //deprecated in API 26
+            @Suppress("DEPRECATION")
             vibrator.vibrate(waveList.toLongArray(), -1)
         }
     }
