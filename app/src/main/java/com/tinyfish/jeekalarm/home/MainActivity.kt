@@ -1,8 +1,5 @@
 package com.tinyfish.jeekalarm.home
 
-import android.app.Activity
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -16,7 +13,6 @@ import com.tinyfish.jeekalarm.start.ScreenType
 class MainActivity : AppCompatActivity() {
     companion object {
         var instance: MainActivity? = null
-        var onFileSelect: (uri: Uri?) -> Unit = {}
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,6 +21,7 @@ class MainActivity : AppCompatActivity() {
         instance = this
 
         PermissionsService.checkExternalStoragePermission(this)
+        FileSelector.init(this)
 
         setContent {
             MainUI()
@@ -48,20 +45,6 @@ class MainActivity : AppCompatActivity() {
         } else if (App.screen == ScreenType.SETTINGS) {
             onSettingsScreenPressBack()
         }
-    }
-
-    override fun onActivityResult(
-        requestCode: Int, resultCode: Int, resultData: Intent?
-    ) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == FileSelector.PICK_MP3_FILE ||
-                requestCode == FileSelector.PICK_FOLDER
-            ) {
-                onFileSelect(resultData?.data)
-            }
-        }
-
-        super.onActivityResult(requestCode, resultCode, resultData)
     }
 
 }

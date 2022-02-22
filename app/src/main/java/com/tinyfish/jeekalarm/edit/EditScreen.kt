@@ -158,7 +158,7 @@ private fun Editor() {
                                 onSelect = {
                                     FileSelector.openMusicFile {
                                         editingSchedule.musicFile =
-                                            it?.path?.substringAfter(':')!!
+                                            it.path?.substringAfter(':')!!
                                         fileSelectScope.invalidate()
                                     }
                                 },
@@ -177,7 +177,7 @@ private fun Editor() {
                                 onSelect = {
                                     FileSelector.openFolder {
                                         editingSchedule.musicFolder =
-                                            it?.path?.substringAfter(':')!!
+                                            it.path?.substringAfter(':')!!
                                         fileSelectScope.invalidate()
                                     }
                                 },

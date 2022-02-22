@@ -78,7 +78,7 @@ private fun Editor() {
                     ConfigService.data.defaultMusicFile,
                     onSelect = {
                         FileSelector.openMusicFile {
-                            ConfigService.data.defaultMusicFile = it?.path?.substringAfter(':')!!
+                            ConfigService.data.defaultMusicFile = it.path?.substringAfter(':')!!
                             fileSelectScope.invalidate()
                         }
                     },
@@ -96,7 +96,7 @@ private fun Editor() {
                     ConfigService.data.defaultMusicFolder,
                     onSelect = {
                         FileSelector.openFolder {
-                            ConfigService.data.defaultMusicFolder = it?.path?.substringAfter(':')!!
+                            ConfigService.data.defaultMusicFolder = it.path?.substringAfter(':')!!
                             fileSelectScope.invalidate()
                         }
                     },
