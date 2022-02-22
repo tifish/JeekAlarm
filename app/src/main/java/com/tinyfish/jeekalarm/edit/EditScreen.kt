@@ -5,10 +5,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -142,7 +142,7 @@ private fun Editor() {
         MyGroupBox {
             Observe {
                 val playScope = currentRecomposeScope
-                HeightSpacer()
+
                 MySwitch(
                     hint = "Play Music:",
                     booleanProp = editingSchedule::playMusic,
@@ -151,6 +151,7 @@ private fun Editor() {
                 if (editingSchedule.playMusic) {
                     Column(Modifier.padding(start = 20.dp)) {
                         HeightSpacer()
+
                         Observe {
                             val fileSelectScope = currentRecomposeScope
                             MyFileSelector("Music File:",
@@ -170,6 +171,7 @@ private fun Editor() {
                         }
 
                         HeightSpacer()
+
                         Observe {
                             val fileSelectScope = currentRecomposeScope
                             MyFileSelector("Music Folder:",
@@ -190,9 +192,10 @@ private fun Editor() {
                     }
                 }
 
+                HeightSpacer()
+
                 Observe {
                     val vibrationScope = currentRecomposeScope
-                    HeightSpacer()
                     MySwitch(
                         "Vibration",
                         editingSchedule::vibration,
@@ -200,9 +203,23 @@ private fun Editor() {
 
                     if (editingSchedule.vibration) {
                         HeightSpacer()
+
+                        var vibrationCount by remember { mutableStateOf(editingSchedule.vibrationCount.toFloat()) }
+
                         Text(
-                            editingSchedule.vibrationCount.toString(),
+                            vibrationCount.toInt().toString() + " times",
                             modifier = Modifier.padding(start = 20.dp)
+                        )
+                        Slider(
+                            value = vibrationCount,
+                            onValueChange = {
+                                vibrationCount = it
+                                editingSchedule.vibrationCount = vibrationCount.toInt()
+                                vibrationScope.invalidate()
+                            },
+                            modifier = Modifier.padding(start = 20.dp, end = 20.dp),
+                            steps = 30,
+                            valueRange = 1f..30f,
                         )
                     }
                 }
