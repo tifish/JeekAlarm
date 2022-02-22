@@ -64,7 +64,7 @@ fun EditScreen() {
 private fun Editor() {
     Column(
         Modifier
-            .padding(start = 5.dp, end = 5.dp)
+            .padding(start = 15.dp, end = 15.dp)
             .verticalScroll(rememberScrollState())
     ) {
         HeightSpacer()

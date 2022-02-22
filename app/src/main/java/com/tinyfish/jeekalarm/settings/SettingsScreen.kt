@@ -40,7 +40,9 @@ fun SettingsScreen() {
 @Composable
 private fun Editor() {
     Column(
-        Modifier.verticalScroll(rememberScrollState())
+        Modifier
+            .verticalScroll(rememberScrollState())
+            .padding(start = 15.dp, end = 15.dp)
     ) {
         HeightSpacer()
 

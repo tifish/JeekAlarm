@@ -125,7 +125,7 @@ fun MyBottomBar(buttons: @Composable () -> Unit) {
         elevation = 2.dp,
         color = MaterialTheme.colors.primary,
     ) {
-        Row(Modifier.height(80.dp), Arrangement.Center, Alignment.CenterVertically) {
+        Row(Modifier.height(60.dp), Arrangement.Center, Alignment.CenterVertically) {
             buttons()
         }
     }
@@ -134,9 +134,7 @@ fun MyBottomBar(buttons: @Composable () -> Unit) {
 @Composable
 fun MyGroupBox(modifier: Modifier = Modifier, body: @Composable () -> Unit = {}) {
     Card(
-        modifier
-            .fillMaxWidth()
-            .padding(5.dp),
+        modifier.fillMaxWidth(),
         backgroundColor = MaterialTheme.colors.primaryVariant
     ) {
         Column(Modifier.padding(10.dp)) {
