@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -102,7 +103,6 @@ private fun ScheduleList() {
                 val schedule = ScheduleService.scheduleList[index]
                 HeightSpacer()
                 ScheduleItem(index, schedule, now)
-                HeightSpacer()
                 Divider(color = Color.DarkGray)
             }
 
