@@ -47,7 +47,7 @@ data class Schedule(
     }
 
     fun timeConfigChanged() {
-        timeConfig = "$hourConfig $minuteConfig $weekDayConfig $dayConfig $monthConfig $yearConfig"
+        timeConfig = "$hourConfig:$minuteConfig W $weekDayConfig M $monthConfig D $dayConfig Y $yearConfig"
         try {
             ScheduleParser.parseTimeConfig(this)
             isValid = true

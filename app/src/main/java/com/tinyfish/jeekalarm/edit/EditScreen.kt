@@ -116,15 +116,15 @@ private fun Editor() {
             )
             HeightSpacer()
             CronTimeTextField(
-                "Day: ",
-                editingSchedule::dayConfig,
+                "Month: ",
+                editingSchedule::monthConfig,
                 true,
                 onChange
             )
             HeightSpacer()
             CronTimeTextField(
-                "Month: ",
-                editingSchedule::monthConfig,
+                "Day: ",
+                editingSchedule::dayConfig,
                 true,
                 onChange
             )
