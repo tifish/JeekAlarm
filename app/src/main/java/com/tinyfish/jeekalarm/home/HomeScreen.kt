@@ -4,7 +4,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
@@ -69,7 +68,7 @@ fun HomeScreen() {
         bottomBar = { NavigationBottomBar(ScreenType.HOME) },
         floatingActionButton = {
             FloatingActionButton(onClick = {
-                App.editScheduleIndex = -1
+                App.editScheduleId = -1
                 App.screen = ScreenType.EDIT
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
@@ -90,7 +89,7 @@ private fun ScheduleList() {
                 ImageVector.vectorResource(R.drawable.ic_add),
                 "Add"
             ) {
-                App.editScheduleIndex = -1
+                App.editScheduleId = -1
                 App.screen = ScreenType.EDIT
             }
         }
@@ -135,12 +134,12 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 .weight(1f, true)
                 .clickable(onClick = {
                     if (App.removingIndex == -1) {
-                        App.editScheduleIndex = index
+                        App.editScheduleId = schedule.id
                         App.screen = ScreenType.EDIT
                     }
                 })
         ) {
-            Text(schedule.name + if (index in App.nextAlarmIndexes) " (Next alarm)" else "")
+            Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next alarm)" else "")
             Text(
                 schedule.timeConfig,
                 style = TextStyle(color = Color.Gray)

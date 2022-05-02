@@ -10,6 +10,8 @@ import java.util.*
 
 object ScheduleService {
     var scheduleList = mutableListOf<Schedule>()
+    var nextScheduleId = 1
+
     private val configFile: File by lazy {
         File(App.context.filesDir, "schedule.cron")
     }
@@ -28,23 +30,27 @@ object ScheduleService {
         setNextAlarm()
     }
 
-    var nextAlarmIndexes = mutableListOf<Int>()
+    fun sort() {
+        scheduleList.sortWith { s1, s2 -> s1.nextTriggerTimeFrom1980!!.compareTo(s2.nextTriggerTimeFrom1980!!) }
+    }
+
+    var nextAlarmIds = mutableListOf<Int>()
         private set(value) {
             field = value
-            App.nextAlarmIndexes = value.toList()
+            App.nextAlarmIds = value.toList()
         }
 
     fun setNextAlarm() {
         AlarmService.cancelAlarm()
         if (scheduleList.size == 0) {
-            if (nextAlarmIndexes.size > 0)
-                nextAlarmIndexes = mutableListOf()
+            if (nextAlarmIds.size > 0)
+                nextAlarmIds = mutableListOf()
             App.stopService()
             return
         }
 
         var minTriggerTime = Calendar.getInstance().apply { set(9999, 12, 30) }
-        val minScheduleIndexes = mutableListOf<Int>()
+        val minScheduleIds = mutableListOf<Int>()
 
         for (index in scheduleList.indices) {
             val schedule = scheduleList[index]
@@ -53,18 +59,18 @@ object ScheduleService {
 
             val currentTriggerTime = schedule.getNextTriggerTime() ?: continue
             if (currentTriggerTime == minTriggerTime) {
-                minScheduleIndexes.add(index)
+                minScheduleIds.add(schedule.id)
             } else if (currentTriggerTime < minTriggerTime) {
                 minTriggerTime = currentTriggerTime
-                minScheduleIndexes.clear()
-                minScheduleIndexes.add(index)
+                minScheduleIds.clear()
+                minScheduleIds.add(schedule.id)
             }
         }
 
-        if (nextAlarmIndexes != minScheduleIndexes)
-            nextAlarmIndexes = minScheduleIndexes
+        if (nextAlarmIds != minScheduleIds)
+            nextAlarmIds = minScheduleIds
 
-        if (minScheduleIndexes.isEmpty()) {
+        if (minScheduleIds.isEmpty()) {
             App.stopService()
             return
         }

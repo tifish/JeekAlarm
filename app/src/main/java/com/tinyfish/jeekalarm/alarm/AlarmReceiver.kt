@@ -7,6 +7,6 @@ import com.tinyfish.jeekalarm.schedule.ScheduleService
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        NotificationService.showAlarm(ScheduleService.nextAlarmIndexes)
+        NotificationService.showAlarm(ScheduleService.nextAlarmIds)
     }
 }

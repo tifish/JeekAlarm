@@ -114,7 +114,7 @@ private fun Editor() {
 
         Button(
             onClick = {
-                NotificationService.showAlarm(ScheduleService.nextAlarmIndexes)
+                NotificationService.showAlarm(ScheduleService.nextAlarmIds)
             },
             Modifier.padding(5.dp)
         ) {

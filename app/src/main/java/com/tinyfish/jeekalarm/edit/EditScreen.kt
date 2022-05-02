@@ -26,12 +26,12 @@ private var isAdding = false
 
 @Composable
 fun EditScreen() {
-    isAdding = App.editScheduleIndex == -1
+    isAdding = App.editScheduleId == -1
     editingSchedule =
         if (isAdding)
             Schedule()
         else
-            ScheduleService.scheduleList[App.editScheduleIndex]
+            ScheduleService.scheduleList.filter { it.id == App.editScheduleId }[0]
 
 //    Scaffold(
 //        topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") },
@@ -292,9 +292,12 @@ fun BottomBar() {
 }
 
 fun onEditScreenPressBack() {
-    if (isAdding)
-        ScheduleService.scheduleList.add(editingSchedule)
     editingSchedule.timeConfigChanged()
+    if (isAdding) {
+        editingSchedule.id = ScheduleService.nextScheduleId++
+        ScheduleService.scheduleList.add(editingSchedule)
+        ScheduleService.sort();
+    }
     ScheduleService.saveConfig()
 
     ScheduleService.stopPlaying()

@@ -65,6 +65,7 @@ internal object ScheduleParser {
             if (line.isNotEmpty()) {
                 val schedule = parseJsonLine(line)
                 if (schedule != null) {
+                    schedule.id = ScheduleService.nextScheduleId++
                     result.add(schedule)
                 }
             }

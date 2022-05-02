@@ -37,14 +37,14 @@ class App : Application() {
             return if (calendar == null) "" else simpleDateFormat.format(calendar.time)
         }
 
-        var editScheduleIndex = -1
+        var editScheduleId = -1
         var screenBeforeNotification = ScreenType.HOME
-        val notificationAlarmIndexes = mutableListOf<Int>()
+        val notificationAlarmIds = mutableListOf<Int>()
 
         var themeColorsChangeTrigger by mutableStateOf(0)
 
         var screen by mutableStateOf(ScreenType.HOME)
-        var nextAlarmIndexes by mutableStateOf(listOf<Int>())
+        var nextAlarmIds by mutableStateOf(listOf<Int>())
         var scheduleChangeTrigger by mutableStateOf(0)
         var isPlaying by mutableStateOf(false)
         var removingIndex by mutableStateOf(-1)

@@ -55,9 +55,9 @@ object NotificationService {
         val pendingIntent = PendingIntent.getActivity(App.context, 0, intent, 0)
 
         var infoText = ""
-        if (ScheduleService.nextAlarmIndexes.size > 0) {
-            val alarmNames = getAlarmNames(ScheduleService.nextAlarmIndexes)
-            val schedule = ScheduleService.scheduleList[ScheduleService.nextAlarmIndexes[0]]
+        if (ScheduleService.nextAlarmIds.size > 0) {
+            val alarmNames = getAlarmNames(ScheduleService.nextAlarmIds)
+            val schedule = ScheduleService.scheduleList.filter { it.id in ScheduleService.nextAlarmIds }[0]
             val nextAlarmDateString =
                 App.format(schedule.getNextTriggerTime(Calendar.getInstance()))
             infoText = "Next: ${alarmNames.joinToString("; ")} $nextAlarmDateString"
@@ -80,20 +80,20 @@ object NotificationService {
         }
     }
 
-    private var lastAlarmIndexes = mutableListOf<Int>()
+    private var lastAlarmIds = mutableListOf<Int>()
 
-    fun showAlarm(alarmIndexes: List<Int>, isUpdating: Boolean = false) {
+    fun showAlarm(alarmIds: List<Int>, isUpdating: Boolean = false) {
         initOnce()
 
         if (!isUpdating) {
-            lastAlarmIndexes.clear()
-            lastAlarmIndexes.addAll(alarmIndexes)
+            lastAlarmIds.clear()
+            lastAlarmIds.addAll(alarmIds)
 
-            ScheduleService.scheduleList[ScheduleService.nextAlarmIndexes[0]].play()
+            ScheduleService.scheduleList.filter { it.id in ScheduleService.nextAlarmIds }[0].play()
         }
 
         val openIntent = Intent(App.context, NotificationClickReceiver::class.java).apply {
-            putExtra("alarmIndexes", alarmIndexes.toIntArray())
+            putExtra("alarmIds", alarmIds.toIntArray())
         }
         val openPendingIntent = PendingIntent.getBroadcast(
             App.context,
@@ -112,7 +112,7 @@ object NotificationService {
 
         val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
             ?.toBitmap()
-        val alarmNames = getAlarmNames(alarmIndexes)
+        val alarmNames = getAlarmNames(alarmIds)
         val notification = NotificationCompat.Builder(App.context, "Alarm").run {
             setContentTitle("JeekAlarm triggered:")
             setContentText(alarmNames.joinToString("\n"))
@@ -136,28 +136,30 @@ object NotificationService {
 
         if (!isUpdating) {
             var modified = false
-            for (alarmIndex in ScheduleService.nextAlarmIndexes) {
-                val schedule = ScheduleService.scheduleList[alarmIndex]
+            for (alarmId in ScheduleService.nextAlarmIds) {
+                val schedule = ScheduleService.scheduleList.filter { schedule -> schedule.id == alarmId }[0]
                 if (schedule.onlyOnce) {
                     schedule.enabled = false
                     modified = true
                 }
             }
+
             if (modified)
                 ScheduleService.saveConfig()
-            else
-                ScheduleService.setNextAlarm()
+
+            ScheduleService.setNextAlarm()
         }
     }
 
     fun updateAlarm() {
-        showAlarm(lastAlarmIndexes, true)
+        showAlarm(lastAlarmIds, true)
     }
 
-    private fun getAlarmNames(alarmIndexes: List<Int>): List<String> {
+    private fun getAlarmNames(alarmIds: List<Int>): List<String> {
         val alarmNames = mutableListOf<String>()
-        for (alarmIndex in alarmIndexes) {
-            alarmNames.add(ScheduleService.scheduleList[alarmIndex].name)
+        for (alarmId in alarmIds) {
+            val schedule = ScheduleService.scheduleList.filter { schedule -> schedule.id == alarmId }[0]
+            alarmNames.add(schedule.name)
         }
         return alarmNames
     }

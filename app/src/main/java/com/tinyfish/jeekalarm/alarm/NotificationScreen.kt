@@ -34,8 +34,8 @@ fun NotificationContent() {
     val textStyle = TextStyle(fontSize = 32.sp)
 
     Column {
-        for (alarmIndex in App.notificationAlarmIndexes) {
-            val schedule = ScheduleService.scheduleList[alarmIndex]
+        for (alarmId in App.notificationAlarmIds) {
+            val schedule = ScheduleService.scheduleList.filter{schedule -> schedule.id == alarmId }[0]
 
             Text(
                 schedule.name,
@@ -81,7 +81,7 @@ fun NotificationContent() {
                 "Dismiss"
             ) {
                 App.screen = App.screenBeforeNotification
-                App.notificationAlarmIndexes.clear()
+                App.notificationAlarmIds.clear()
             }
         }
     }

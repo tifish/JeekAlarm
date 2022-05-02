@@ -54,6 +54,10 @@ data class Schedule(
         try {
             ScheduleParser.parseTimeConfig(this)
             isValid = true
+
+            nextTriggerTimeFrom1980 = getNextTriggerTime(Calendar.getInstance().apply {
+                set(1980, 0, 1, 0, 0, 0)
+            })
         } catch (ex: Exception) {
             Log.e(this.javaClass.name, ex.message ?: "parse error")
             isValid = false
@@ -66,6 +70,11 @@ data class Schedule(
         }
     }
 
+    /// Unique ID at runtime
+    @Transient
+    var id: Int = 0
+
+    /// Time config to display in UI
     @Transient
     var timeConfig: String = ""
         private set
@@ -95,6 +104,10 @@ data class Schedule(
         timeConfigChanged()
     }
 
+    @Transient
+    var nextTriggerTimeFrom1980: Calendar? = null
+        private set
+
     fun getNextTriggerTime(now: Calendar? = null): Calendar? {
         if (!isValid)
             return null
@@ -107,6 +120,7 @@ data class Schedule(
         resultTime.clear(Calendar.SECOND)
         resultTime.clear(Calendar.MILLISECOND)
 
+        // Prepare handler of all cases
         val minTriggerMonth = if (months.size == 0) 0 else months[0]
         val minTriggerDay = if (days.size == 0) 1 else days[0]
         val minTriggerHour = if (hours.size == 0) 0 else hours[0]
@@ -192,7 +206,7 @@ data class Schedule(
             }
         }
 
-        // Match from month to minute.
+        // Match from year to minute
         var matchingPart = Calendar.YEAR
 
         while (true) {
