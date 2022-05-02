@@ -28,6 +28,7 @@ fun SettingsScreen() {
         topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
         content = {
             Surface(
+                modifier = Modifier.padding(it),
                 color = MaterialTheme.colors.background,
             ) {
                 Editor()

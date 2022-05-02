@@ -296,7 +296,7 @@ fun onEditScreenPressBack() {
     if (isAdding) {
         editingSchedule.id = ScheduleService.nextScheduleId++
         ScheduleService.scheduleList.add(editingSchedule)
-        ScheduleService.sort();
+        ScheduleService.sort()
     }
     ScheduleService.saveConfig()
 
