@@ -139,7 +139,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     }
                 })
         ) {
-            Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next alarm)" else "")
+            Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "")
             Text(
                 schedule.timeConfig,
                 style = TextStyle(color = Color.Gray)
