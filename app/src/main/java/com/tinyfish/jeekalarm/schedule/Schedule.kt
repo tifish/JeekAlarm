@@ -8,11 +8,14 @@ import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.start.App
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 import java.io.File
 import java.util.*
 import kotlin.random.Random
 
 // A single cron schedule
+@Serializable
 data class Schedule(
     var name: String = "Alarm",
     var minuteConfig: String = "*",

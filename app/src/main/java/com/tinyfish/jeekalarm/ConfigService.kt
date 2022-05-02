@@ -1,14 +1,16 @@
 package com.tinyfish.jeekalarm
 
-import com.squareup.moshi.JsonAdapter
 import com.tinyfish.jeekalarm.start.App
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import java.io.File
 
 object ConfigService {
     var data = ConfigData()
-    private val configDataMoshiAdapter: JsonAdapter<ConfigData> =
-        App.moshi.adapter(ConfigData::class.java)
 
+    @Serializable
     data class ConfigData(
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
@@ -21,10 +23,10 @@ object ConfigService {
 
     fun load() {
         if (configFile.exists())
-            data = configDataMoshiAdapter.fromJson(configFile.readText()) ?: ConfigData()
+            data = Json.decodeFromString(configFile.readText())
     }
 
     fun save() {
-        configFile.writeText(configDataMoshiAdapter.toJson(data))
+        configFile.writeText(Json.encodeToString(data))
     }
 }

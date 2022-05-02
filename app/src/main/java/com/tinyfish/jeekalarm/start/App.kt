@@ -7,8 +7,6 @@ import android.os.Build
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
@@ -33,8 +31,6 @@ fun getScreenName(screenType: ScreenType): String {
 class App : Application() {
     companion object {
         lateinit var context: Context
-
-        val moshi: Moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
 
         private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
         fun format(calendar: Calendar?): String {
