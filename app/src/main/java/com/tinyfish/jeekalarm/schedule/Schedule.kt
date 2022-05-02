@@ -51,6 +51,9 @@ data class Schedule(
 
     fun timeConfigChanged() {
         timeConfig = "$hourConfig:$minuteConfig W $weekDayConfig M $monthConfig D $dayConfig Y $yearConfig"
+        if (onlyOnce) {
+            timeConfig = "Once $timeConfig"
+        }
         try {
             ScheduleParser.parseTimeConfig(this)
             isValid = true
