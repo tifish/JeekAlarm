@@ -59,7 +59,8 @@ fun HomeScreen() {
         content = {
             Surface(
                 Modifier
-                    .verticalScroll(rememberScrollState()),
+                    .verticalScroll(rememberScrollState())
+                    .padding(it),
                 color = MaterialTheme.colors.background,
             ) {
                 ScheduleList()
