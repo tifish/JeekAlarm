@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.alarm
 
+import android.annotation.SuppressLint
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -7,6 +8,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
 import androidx.core.graphics.drawable.toBitmap
@@ -52,7 +54,14 @@ object NotificationService {
         val intent = Intent(App.context, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         }
-        val pendingIntent = PendingIntent.getActivity(App.context, 0, intent, 0)
+        val pendingIntent = PendingIntent.getActivity(
+            App.context, 0, intent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        )
 
         var infoText = ""
         if (ScheduleService.nextAlarmIds.size > 0) {
@@ -96,22 +105,35 @@ object NotificationService {
             putExtra("alarmIds", alarmIds.toIntArray())
         }
         val openPendingIntent = PendingIntent.getBroadcast(
-            App.context,
-            0,
-            openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT
+            App.context, 0, openIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
         )
 
         val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
-        val pausePendingIntent: PendingIntent =
-            PendingIntent.getBroadcast(App.context, 0, pauseIntent, 0)
+        val pausePendingIntent: PendingIntent = PendingIntent.getBroadcast(
+            App.context, 0, pauseIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        )
 
         val dismissIntent = Intent(App.context, NotificationDismissReceiver::class.java)
-        val dismissPendingIntent: PendingIntent =
-            PendingIntent.getBroadcast(App.context, 0, dismissIntent, 0)
+        val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(
+            App.context, 0, dismissIntent,
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            } else {
+                PendingIntent.FLAG_UPDATE_CURRENT
+            }
+        )
 
-        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
-            ?.toBitmap()
+        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)?.toBitmap()
         val alarmNames = getAlarmNames(alarmIds)
         val notification = NotificationCompat.Builder(App.context, "Alarm").run {
             setContentTitle("JeekAlarm triggered:")
@@ -123,11 +145,7 @@ object NotificationService {
             setSmallIcon(R.drawable.ic_launcher_foreground)
             setLargeIcon(bitmap)
             setContentIntent(openPendingIntent)
-            addAction(
-                R.drawable.ic_pause,
-                if (App.isPlaying) "Pause" else "Play",
-                pausePendingIntent
-            )
+            addAction(R.drawable.ic_pause, if (App.isPlaying) "Pause" else "Play", pausePendingIntent)
             addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
             build()
         }
