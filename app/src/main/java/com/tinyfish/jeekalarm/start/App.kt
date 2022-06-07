@@ -74,7 +74,8 @@ class App : Application() {
 
         context = applicationContext
         ConfigService.load()
-        ScheduleService.loadConfig()
+        ScheduleService.load()
+        ScheduleService.sort()
         ScheduleService.setNextAlarm()
     }
 

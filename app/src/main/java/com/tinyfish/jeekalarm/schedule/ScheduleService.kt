@@ -16,14 +16,14 @@ object ScheduleService {
         File(App.context.filesDir, "schedule.cron")
     }
 
-    fun loadConfig() {
+    fun load() {
         if (!configFile.exists())
             return
 
         scheduleList = ScheduleParser.loadFromFile(configFile)
     }
 
-    fun saveConfig() {
+    fun save() {
         ScheduleParser.saveToFile(configFile, scheduleList)
 
         App.scheduleChangeTrigger++
@@ -31,7 +31,8 @@ object ScheduleService {
     }
 
     fun sort() {
-        scheduleList.sortWith { s1, s2 -> s1.nextTriggerTimeFrom1980!!.compareTo(s2.nextTriggerTimeFrom1980!!) }
+        val now = Calendar.getInstance()
+        scheduleList.sortWith { s1, s2 -> s1.getNextTriggerTime(now)!!.compareTo(s2.getNextTriggerTime(now)!!) }
     }
 
     var nextAlarmIds = mutableListOf<Int>()
@@ -51,13 +52,14 @@ object ScheduleService {
 
         var minTriggerTime = Calendar.getInstance().apply { set(9999, 12, 30) }
         val minScheduleIds = mutableListOf<Int>()
+        val now = Calendar.getInstance()
 
         for (index in scheduleList.indices) {
             val schedule = scheduleList[index]
             if (!schedule.enabled || !schedule.isValid)
                 continue
 
-            val currentTriggerTime = schedule.getNextTriggerTime() ?: continue
+            val currentTriggerTime = schedule.getNextTriggerTime(now) ?: continue
             if (currentTriggerTime == minTriggerTime) {
                 minScheduleIds.add(schedule.id)
             } else if (currentTriggerTime < minTriggerTime) {

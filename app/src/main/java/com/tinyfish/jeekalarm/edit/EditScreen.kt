@@ -296,9 +296,9 @@ fun onEditScreenPressBack() {
     if (isAdding) {
         editingSchedule.id = ScheduleService.nextScheduleId++
         ScheduleService.scheduleList.add(editingSchedule)
-        ScheduleService.sort()
     }
-    ScheduleService.saveConfig()
+    ScheduleService.sort()
+    ScheduleService.save()
 
     ScheduleService.stopPlaying()
     App.screen = ScreenType.HOME

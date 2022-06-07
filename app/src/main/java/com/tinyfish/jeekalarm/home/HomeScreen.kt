@@ -122,7 +122,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 checked = schedule.enabled,
                 onCheckedChange = {
                     schedule.enabled = it
-                    ScheduleService.saveConfig()
+                    ScheduleService.save()
                     boxScope.invalidate()
                 }
             )
@@ -164,7 +164,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 ) {
                     App.removingIndex = -1
                     ScheduleService.scheduleList.removeAt(index)
-                    ScheduleService.saveConfig()
+                    ScheduleService.save()
                 }
 
                 WidthSpacer()
