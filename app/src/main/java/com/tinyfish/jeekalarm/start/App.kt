@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
 import java.util.*
@@ -51,21 +52,19 @@ class App : Application() {
         var editEnabledChangeTrigger by mutableStateOf(0)
         var editTimeConfigChanged by mutableStateOf(0)
 
-        fun startService() {
-            val startIntent = Intent(context, StartService::class.java).apply {
-                action = "Start"
-            }
+        fun startServiceAndUpdateInfo() {
+            val serviceIntent = Intent(context, StartService::class.java)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                context.startForegroundService(startIntent)
+                context.startForegroundService(serviceIntent)
             else
-                context.startService(startIntent)
+                context.startService(serviceIntent)
+
+            NotificationService.updateInfo()
         }
 
         fun stopService() {
-            val startIntent = Intent(context, StartService::class.java).apply {
-                action = "Stop"
-            }
-            context.startService(startIntent)
+            val serviceIntent = Intent(context, StartService::class.java)
+            context.stopService(serviceIntent)
         }
     }
 
@@ -78,5 +77,4 @@ class App : Application() {
         ScheduleService.sort()
         ScheduleService.setNextAlarm()
     }
-
 }

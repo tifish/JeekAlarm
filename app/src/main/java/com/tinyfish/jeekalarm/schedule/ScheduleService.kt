@@ -79,7 +79,7 @@ object ScheduleService {
 
         AlarmService.setAlarm(minTriggerTime)
         ConfigService.save()
-        App.startService()
+        App.startServiceAndUpdateInfo()
     }
 
     fun stopPlaying() {

@@ -10,12 +10,12 @@ import java.io.File
 object MusicService {
     private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
 
-    fun play(musicPath: String, loop: Boolean = true): MediaPlayer? {
+    fun play(musicPath: String, loop: Boolean = true): MediaPlayer {
         val file = File(Environment.getExternalStorageDirectory().path, musicPath)
         return play(file, loop)
     }
 
-    fun play(file: File, loop: Boolean = true): MediaPlayer? {
+    fun play(file: File, loop: Boolean = true): MediaPlayer {
         return play(Uri.fromFile(file), loop)
     }
 

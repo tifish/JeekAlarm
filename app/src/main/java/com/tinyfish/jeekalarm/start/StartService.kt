@@ -8,22 +8,11 @@ import com.tinyfish.jeekalarm.alarm.NotificationService
 class StartService : Service() {
     override fun onCreate() {
         super.onCreate()
+
         startForeground(
-            NotificationService.InformationId,
-            NotificationService.getInformationNotification()
+            NotificationService.InfoId,
+            NotificationService.getInfoNotification()
         )
-    }
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == "Start") {
-            NotificationService.showInformation()
-        }
-        if (intent?.action == "Stop") {
-            stopForeground(true)
-            stopSelf()
-        }
-
-        return super.onStartCommand(intent, flags, startId)
     }
 
     override fun onBind(intent: Intent): IBinder? {

@@ -22,12 +22,15 @@ object NotificationService {
         App.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     }
 
+    const val InfoChannel = "Info"
+    const val AlarmChannel = "Alarm"
+
     private fun initOnce() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel(
-                "Information", "Information", NotificationManager.IMPORTANCE_LOW
+                InfoChannel, InfoChannel, NotificationManager.IMPORTANCE_LOW
             )
-            createNotificationChannel("Alarm", "Alarm", NotificationManager.IMPORTANCE_HIGH)
+            createNotificationChannel(AlarmChannel, AlarmChannel, NotificationManager.IMPORTANCE_HIGH)
         }
     }
 
@@ -39,14 +42,14 @@ object NotificationService {
         notificationManager.createNotificationChannel(channel)
     }
 
-    const val InformationId = 1
+    const val InfoId = 1
     const val AlarmId = 2
 
-    fun showInformation() {
-        notificationManager.notify(InformationId, getInformationNotification())
+    fun updateInfo() {
+        notificationManager.notify(InfoId, getInfoNotification())
     }
 
-    fun getInformationNotification(): Notification {
+    fun getInfoNotification(): Notification {
         initOnce()
 
         val intent = Intent(App.context, MainActivity::class.java).apply {
@@ -73,7 +76,7 @@ object NotificationService {
         val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
             ?.toBitmap()
 
-        return NotificationCompat.Builder(App.context, "Information").run {
+        return NotificationCompat.Builder(App.context, InfoChannel).run {
             setContentTitle("JeekAlarm standby:")
             setContentText(infoText)
             setOngoing(true)
@@ -133,7 +136,7 @@ object NotificationService {
 
         val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)?.toBitmap()
         val alarmNames = getAlarmNames(alarmIds)
-        val notification = NotificationCompat.Builder(App.context, "Alarm").run {
+        val notification = NotificationCompat.Builder(App.context, AlarmChannel).run {
             setContentTitle("JeekAlarm triggered:")
             setContentText(alarmNames.joinToString("\n"))
             setOngoing(true)
