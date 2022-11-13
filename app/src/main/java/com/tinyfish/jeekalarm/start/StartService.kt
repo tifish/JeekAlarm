@@ -6,8 +6,6 @@ import android.os.IBinder
 import com.tinyfish.jeekalarm.alarm.NotificationService
 
 class StartService : Service() {
-    var isCreating = true
-
     override fun onCreate() {
         super.onCreate()
         startForeground(
@@ -17,11 +15,6 @@ class StartService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (isCreating) {
-            isCreating = false
-            return super.onStartCommand(intent, flags, startId)
-        }
-
         if (intent?.action == "Start") {
             NotificationService.showInformation()
         }
