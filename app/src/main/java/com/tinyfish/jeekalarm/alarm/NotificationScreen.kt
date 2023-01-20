@@ -35,7 +35,7 @@ fun NotificationContent() {
 
     Column {
         for (alarmId in App.notificationAlarmIds) {
-            val schedule = ScheduleService.scheduleList.filter{schedule -> schedule.id == alarmId }[0]
+            val schedule = ScheduleService.scheduleList.filter { schedule -> schedule.id == alarmId }[0]
 
             Text(
                 schedule.name,
@@ -80,8 +80,7 @@ fun NotificationContent() {
                 ImageVector.vectorResource(R.drawable.ic_close),
                 "Dismiss"
             ) {
-                App.screen = App.screenBeforeNotification
-                App.notificationAlarmIds.clear()
+                NotificationService.cancelAlarm()
             }
         }
     }

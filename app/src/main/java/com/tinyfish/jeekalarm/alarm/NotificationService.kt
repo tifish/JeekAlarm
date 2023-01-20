@@ -7,13 +7,12 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.os.Build
-import androidx.appcompat.content.res.AppCompatResources
 import androidx.core.app.NotificationCompat
-import androidx.core.graphics.drawable.toBitmap
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.home.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
+import com.tinyfish.jeekalarm.start.ScreenType
 import java.util.Calendar
 
 
@@ -73,9 +72,6 @@ object NotificationService {
             infoText = "Next: ${alarmNames.joinToString("; ")} $nextAlarmDateString"
         }
 
-        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)
-            ?.toBitmap()
-
         return NotificationCompat.Builder(App.context, InfoChannel).run {
             setContentTitle("JeekAlarm standby:")
             setContentText(infoText)
@@ -84,7 +80,6 @@ object NotificationService {
             priority = NotificationCompat.PRIORITY_LOW
             setCategory(NotificationCompat.CATEGORY_STATUS)
             setSmallIcon(R.drawable.ic_launcher_foreground)
-            setLargeIcon(bitmap)
             setContentIntent(pendingIntent)
             build()
         }
@@ -134,17 +129,15 @@ object NotificationService {
             }
         )
 
-        val bitmap = AppCompatResources.getDrawable(App.context, R.drawable.ic_launcher_foreground)?.toBitmap()
         val alarmNames = getAlarmNames(alarmIds)
         val notification = NotificationCompat.Builder(App.context, AlarmChannel).run {
             setContentTitle("JeekAlarm triggered:")
             setContentText(alarmNames.joinToString("\n"))
             setOngoing(true)
-            setAutoCancel(true)
+            setAutoCancel(false)
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(NotificationCompat.CATEGORY_ALARM)
             setSmallIcon(R.drawable.ic_launcher_foreground)
-            setLargeIcon(bitmap)
             setContentIntent(openPendingIntent)
             addAction(R.drawable.ic_pause, if (App.isPlaying) "Pause" else "Play", pausePendingIntent)
             addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
@@ -186,7 +179,15 @@ object NotificationService {
     }
 
     fun cancelAlarm() {
+        if (App.isPlaying)
+            ScheduleService.stopPlaying()
+
         notificationManager.cancel(AlarmId)
+
+        if (App.screen == ScreenType.NOTIFICATION)
+            App.screen = App.screenBeforeNotification
+
+        App.notificationAlarmIds.clear()
     }
 
 }
