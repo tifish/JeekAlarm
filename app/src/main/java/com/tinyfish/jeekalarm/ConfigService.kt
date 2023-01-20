@@ -1,5 +1,7 @@
 package com.tinyfish.jeekalarm
 
+import android.content.SharedPreferences
+import android.os.Environment
 import com.tinyfish.jeekalarm.start.App
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.decodeFromString
@@ -17,9 +19,28 @@ object ConfigService {
         var theme: String = "Dark"
     )
 
-    private val configFile: File by lazy {
-        File(App.context.filesDir, "config.json")
+    private val sharedPrefs: SharedPreferences by lazy {
+        App.context.getSharedPreferences("Config", 0)
     }
+
+    var configDir: String
+        get() = sharedPrefs.getString("ConfigDir", "")!!
+        set(value) {
+            sharedPrefs.edit().apply {
+                putString("ConfigDir", value)
+                apply()
+            }
+        }
+
+    val configFile: File
+        get() {
+            val dir = if (configDir == "")
+                App.context.filesDir
+            else
+                File(Environment.getExternalStorageDirectory().path, configDir)
+
+            return File(dir, "config.json")
+        }
 
     fun load() {
         if (configFile.exists())

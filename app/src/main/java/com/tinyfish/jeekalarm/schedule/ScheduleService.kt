@@ -1,20 +1,27 @@
 package com.tinyfish.jeekalarm.schedule
 
+import android.os.Environment
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.alarm.AlarmService
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
-import java.util.*
+import java.util.Calendar
 
 object ScheduleService {
     var scheduleList = mutableListOf<Schedule>()
     var nextScheduleId = 1
 
-    private val configFile: File by lazy {
-        File(App.context.filesDir, "schedule.cron")
-    }
+    val configFile: File
+        get() {
+            val dir = if (ConfigService.configDir == "")
+                App.context.filesDir
+            else
+                File(Environment.getExternalStorageDirectory().path, ConfigService.configDir)
+
+            return File(dir, "schedule.cron")
+        }
 
     fun load() {
         if (!configFile.exists())
@@ -23,8 +30,19 @@ object ScheduleService {
         scheduleList = ScheduleParser.loadFromFile(configFile)
     }
 
+    fun loadAndRefresh() {
+        load()
+
+        App.scheduleChangeTrigger++
+        setNextAlarm()
+    }
+
     fun save() {
         ScheduleParser.saveToFile(configFile, scheduleList)
+    }
+
+    fun saveAndRefresh() {
+        save()
 
         App.scheduleChangeTrigger++
         setNextAlarm()
@@ -78,7 +96,6 @@ object ScheduleService {
         }
 
         AlarmService.setAlarm(minTriggerTime)
-        ConfigService.save()
         App.startServiceAndUpdateInfo()
     }
 

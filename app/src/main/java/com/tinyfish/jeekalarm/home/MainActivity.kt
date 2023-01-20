@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.home
 
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
@@ -20,7 +21,11 @@ class MainActivity : AppCompatActivity() {
 
         instance = this
 
-        PermissionsService.checkExternalStoragePermission(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
+            PermissionsService.checkAndRequestAllFileAccessPermission(this)
+        else
+            PermissionsService.checkAndRequestExternalStoragePermission(this)
+
         FileSelector.init(this)
 
         setContent {

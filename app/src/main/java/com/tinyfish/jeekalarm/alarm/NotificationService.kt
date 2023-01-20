@@ -14,7 +14,7 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.home.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
-import java.util.*
+import java.util.Calendar
 
 
 object NotificationService {
@@ -164,7 +164,7 @@ object NotificationService {
             }
 
             if (modified)
-                ScheduleService.save()
+                ScheduleService.saveAndRefresh()
             else
                 ScheduleService.setNextAlarm()
 

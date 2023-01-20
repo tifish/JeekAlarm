@@ -8,7 +8,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -18,8 +23,16 @@ import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
-import com.tinyfish.ui.*
-import java.util.*
+import com.tinyfish.ui.HeightSpacer
+import com.tinyfish.ui.MyBottomBar
+import com.tinyfish.ui.MyFileSelector
+import com.tinyfish.ui.MyGroupBox
+import com.tinyfish.ui.MySwitch
+import com.tinyfish.ui.MyTopBar
+import com.tinyfish.ui.Observe
+import com.tinyfish.ui.SimpleVectorButton
+import com.tinyfish.ui.ToolButtonWidthSpacer
+import java.util.Calendar
 
 private lateinit var editingSchedule: Schedule
 private var isAdding = false
@@ -298,7 +311,7 @@ fun onEditScreenPressBack() {
         ScheduleService.scheduleList.add(editingSchedule)
     }
     ScheduleService.sort()
-    ScheduleService.save()
+    ScheduleService.saveAndRefresh()
 
     ScheduleService.stopPlaying()
     App.screen = ScreenType.HOME

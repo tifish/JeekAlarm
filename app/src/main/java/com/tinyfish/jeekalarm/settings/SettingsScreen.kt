@@ -1,16 +1,25 @@
 package com.tinyfish.jeekalarm.settings
 
+import android.app.AlertDialog
+import android.content.Context
+import android.content.DialogInterface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.RadioButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -20,7 +29,13 @@ import com.tinyfish.jeekalarm.home.NavigationBottomBar
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
-import com.tinyfish.ui.*
+import com.tinyfish.ui.HeightSpacer
+import com.tinyfish.ui.MyFileSelector
+import com.tinyfish.ui.MyGroupBox
+import com.tinyfish.ui.MyTopBar
+import com.tinyfish.ui.Observe
+import com.tinyfish.ui.WidthSpacer
+
 
 @Composable
 fun SettingsScreen() {
@@ -123,6 +138,57 @@ private fun Editor() {
         }
 
         HeightSpacer()
+
+        MyGroupBox {
+            Observe {
+                val fileSelectScope = currentRecomposeScope
+                val context = LocalContext.current
+
+                MyFileSelector("Config Folder:",
+                    ConfigService.configDir,
+                    onSelect = {
+                        FileSelector.openFolder {
+                            ConfigService.configDir = it.path?.substringAfter(':')!!
+                            fileSelectScope.invalidate()
+                            onConfigDirChanged(context)
+                        }
+                    },
+                    onClear = {
+                        ConfigService.configDir = ""
+                        fileSelectScope.invalidate()
+                        onConfigDirChanged(context)
+                    }
+                )
+            }
+        }
+
+        HeightSpacer()
+    }
+}
+
+private fun onConfigDirChanged(context: Context) {
+    if (ConfigService.configFile.exists() || ScheduleService.configFile.exists()) {
+        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+            when (which) {
+                DialogInterface.BUTTON_POSITIVE -> {
+                    ConfigService.save()
+                    ScheduleService.save()
+                }
+
+                DialogInterface.BUTTON_NEGATIVE -> {
+                    ConfigService.load()
+                    ScheduleService.loadAndRefresh()
+                }
+            }
+        }
+
+        AlertDialog.Builder(context).setMessage("Override existing config files?")
+            .setPositiveButton("Yes", dialogClickListener)
+            .setNegativeButton("No", dialogClickListener)
+            .show()
+    } else {
+        ConfigService.save()
+        ScheduleService.save()
     }
 }
 

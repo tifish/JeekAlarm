@@ -2,10 +2,25 @@ package com.tinyfish.jeekalarm.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.*
+import androidx.compose.material.BottomNavigation
+import androidx.compose.material.BottomNavigationItem
+import androidx.compose.material.Colors
+import androidx.compose.material.Divider
+import androidx.compose.material.FabPosition
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.material.Switch
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
@@ -25,8 +40,13 @@ import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.jeekalarm.start.getScreenName
-import com.tinyfish.ui.*
-import java.util.*
+import com.tinyfish.ui.DarkColorPalette
+import com.tinyfish.ui.HeightSpacer
+import com.tinyfish.ui.LightColorPalette
+import com.tinyfish.ui.MyTopBar
+import com.tinyfish.ui.SimpleVectorButton
+import com.tinyfish.ui.WidthSpacer
+import java.util.Calendar
 
 @Composable
 fun MainUI() {
@@ -122,7 +142,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 checked = schedule.enabled,
                 onCheckedChange = {
                     schedule.enabled = it
-                    ScheduleService.save()
+                    ScheduleService.saveAndRefresh()
                     boxScope.invalidate()
                 }
             )
@@ -164,7 +184,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 ) {
                     App.removingIndex = -1
                     ScheduleService.scheduleList.removeAt(index)
-                    ScheduleService.save()
+                    ScheduleService.saveAndRefresh()
                 }
 
                 WidthSpacer()

@@ -1,31 +1,46 @@
 package com.tinyfish.jeekalarm
 
 import android.Manifest.permission.READ_EXTERNAL_STORAGE
+import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
-import androidx.core.app.ActivityCompat.requestPermissions
+import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
+import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
 object PermissionsService {
-    private const val REQUEST_EXTERNAL_PERMISSION_CODE = 666
-
-    private val PERMISSIONS_EXTERNAL_STORAGE = arrayOf(
-        READ_EXTERNAL_STORAGE,
-    )
-
-    fun checkExternalStoragePermission(activity: Activity?): Boolean {
-        val readStoragePermissionState =
-            ContextCompat.checkSelfPermission(activity!!, READ_EXTERNAL_STORAGE)
-        val externalStoragePermissionGranted =
-            readStoragePermissionState == PackageManager.PERMISSION_GRANTED
-        if (!externalStoragePermissionGranted) {
-            requestPermissions(
+    fun checkAndRequestExternalStoragePermission(activity: Activity) {
+        if (ContextCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE)
+            != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
                 activity,
-                PERMISSIONS_EXTERNAL_STORAGE,
-                REQUEST_EXTERNAL_PERMISSION_CODE
+                arrayOf(
+                    READ_EXTERNAL_STORAGE,
+                    WRITE_EXTERNAL_STORAGE,
+                ),
+                666
             )
         }
-        return externalStoragePermissionGranted
     }
 
+    fun checkAndRequestAllFileAccessPermission(context: Context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R)
+            return
+        if (Environment.isExternalStorageManager())
+            return
+
+        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+        context.startActivity(
+            Intent(
+                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                uri
+            )
+        )
+    }
 }

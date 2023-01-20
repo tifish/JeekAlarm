@@ -11,7 +11,7 @@ import com.tinyfish.jeekalarm.start.App
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 import java.io.File
-import java.util.*
+import java.util.Calendar
 import kotlin.random.Random
 
 // A single cron schedule
@@ -139,18 +139,22 @@ data class Schedule(
                     resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
                     resultTime.set(Calendar.MINUTE, minTriggerMinute)
                 }
+
                 Calendar.MONTH -> {
                     resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
                     resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
                     resultTime.set(Calendar.MINUTE, minTriggerMinute)
                 }
+
                 Calendar.DAY_OF_MONTH -> {
                     resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
                     resultTime.set(Calendar.MINUTE, minTriggerMinute)
                 }
+
                 Calendar.HOUR_OF_DAY -> {
                     resultTime.set(Calendar.MINUTE, minTriggerMinute)
                 }
+
                 else -> throw Exception("not match")
             }
         }
@@ -162,22 +166,27 @@ data class Schedule(
                 Calendar.YEAR -> {
                     return Int.MIN_VALUE
                 }
+
                 Calendar.MONTH -> {
                     resultTime.add(Calendar.YEAR, 1)
                     setMinValueBelow(Calendar.YEAR)
                 }
+
                 Calendar.DAY_OF_MONTH -> {
                     resultTime.add(Calendar.MONTH, 1)
                     setMinValueBelow(Calendar.MONTH)
                 }
+
                 Calendar.DAY_OF_WEEK -> {
                     resultTime.add(Calendar.DAY_OF_MONTH, 1)
                     setMinValueBelow(Calendar.DAY_OF_MONTH)
                 }
+
                 Calendar.HOUR_OF_DAY -> {
                     resultTime.add(Calendar.DAY_OF_MONTH, 1)
                     setMinValueBelow(Calendar.DAY_OF_MONTH)
                 }
+
                 Calendar.MINUTE -> {
                     resultTime.add(Calendar.HOUR_OF_DAY, 1)
                     setMinValueBelow(Calendar.HOUR_OF_DAY)
@@ -226,6 +235,7 @@ data class Schedule(
                         MatchResult.Equals -> Calendar.MONTH
                     }
                 }
+
                 Calendar.MONTH -> {
                     matchingPart = when (findNextTriggerTimePart(
                         resultTime,
@@ -312,6 +322,7 @@ data class Schedule(
                     time.add(Calendar.MINUTE, 1)
                     MatchResult.Bigger
                 }
+
                 else -> MatchResult.Equals
             }
         }
@@ -338,9 +349,11 @@ data class Schedule(
                     isBigger -> {
                         return MatchResult.Bigger
                     }
+
                     isEqual -> {
                         return MatchResult.Equals
                     }
+
                     else -> {
                         assert(false)
                     }
@@ -371,11 +384,7 @@ data class Schedule(
     }
 
     private fun playMusic() {
-        val finalMusicFolder =
-            if (musicFolder.isEmpty())
-                ConfigService.data.defaultMusicFolder
-            else
-                musicFolder
+        val finalMusicFolder = musicFolder.ifEmpty { ConfigService.data.defaultMusicFolder }
 
         if (finalMusicFolder.isNotEmpty()) {
             val folder = File(Environment.getExternalStorageDirectory().path, finalMusicFolder)
