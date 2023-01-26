@@ -28,6 +28,16 @@ class MainActivity : AppCompatActivity() {
 
         FileSelector.init(this)
 
+        val alarmIds = intent.getIntArrayExtra("alarmIds")
+        if (alarmIds != null) {
+            App.notificationAlarmIds.addAll(alarmIds.toList())
+
+            if (App.screen != ScreenType.NOTIFICATION) {
+                App.screenBeforeNotification = App.screen
+                App.screen = ScreenType.NOTIFICATION
+            }
+        }
+
         setContent {
             MainUI()
         }

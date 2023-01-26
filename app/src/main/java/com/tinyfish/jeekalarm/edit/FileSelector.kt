@@ -10,6 +10,9 @@ object FileSelector {
     private var selectFolderResultLauncher: ActivityResultLauncher<Uri?>? = null
 
     fun init(activity: ComponentActivity) {
+        if (selectFileResultLauncher != null)
+            return
+
         val callback: (Uri?) -> Unit = {
             if (it != null)
                 onSelected(it)

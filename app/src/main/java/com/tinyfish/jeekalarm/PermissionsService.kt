@@ -15,18 +15,17 @@ import androidx.core.content.ContextCompat
 
 object PermissionsService {
     fun checkAndRequestExternalStoragePermission(activity: Activity) {
-        if (ContextCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE)
-            != PackageManager.PERMISSION_GRANTED
-        ) {
-            ActivityCompat.requestPermissions(
-                activity,
-                arrayOf(
-                    READ_EXTERNAL_STORAGE,
-                    WRITE_EXTERNAL_STORAGE,
-                ),
-                666
-            )
-        }
+        if (ContextCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
+            return
+
+        ActivityCompat.requestPermissions(
+            activity,
+            arrayOf(
+                READ_EXTERNAL_STORAGE,
+                WRITE_EXTERNAL_STORAGE,
+            ),
+            666
+        )
     }
 
     fun checkAndRequestAllFileAccessPermission(context: Context) {

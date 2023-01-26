@@ -51,16 +51,12 @@ object NotificationService {
     fun getInfoNotification(): Notification {
         initOnce()
 
-        val intent = Intent(App.context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+        val openIntent = Intent(App.context, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        val pendingIntent = PendingIntent.getActivity(
-            App.context, 0, intent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
+        val openPendingIntent = PendingIntent.getActivity(
+            App.context, 0, openIntent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
         var infoText = ""
@@ -80,7 +76,7 @@ object NotificationService {
             priority = NotificationCompat.PRIORITY_LOW
             setCategory(NotificationCompat.CATEGORY_STATUS)
             setSmallIcon(R.drawable.ic_launcher_foreground)
-            setContentIntent(pendingIntent)
+            setContentIntent(openPendingIntent)
             build()
         }
     }
@@ -97,36 +93,25 @@ object NotificationService {
             ScheduleService.scheduleList.filter { it.id in ScheduleService.nextAlarmIds }[0].play()
         }
 
-        val openIntent = Intent(App.context, NotificationClickReceiver::class.java).apply {
+        val openIntent = Intent(App.context, MainActivity::class.java).apply {
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra("alarmIds", alarmIds.toIntArray())
         }
-        val openPendingIntent = PendingIntent.getBroadcast(
-            App.context, 0, openIntent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
+        val openPendingIntent = PendingIntent.getActivity(
+            App.context, System.currentTimeMillis().toInt(), openIntent,
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
         val pausePendingIntent: PendingIntent = PendingIntent.getBroadcast(
             App.context, 0, pauseIntent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val dismissIntent = Intent(App.context, NotificationDismissReceiver::class.java)
         val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(
             App.context, 0, dismissIntent,
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
-            } else {
-                PendingIntent.FLAG_UPDATE_CURRENT
-            }
+            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmNames = getAlarmNames(alarmIds)

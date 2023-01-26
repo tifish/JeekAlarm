@@ -45,7 +45,6 @@
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
-        <receiver android:name=".alarm.NotificationClickReceiver" />
         <receiver android:name=".alarm.NotificationPauseReceiver" />
         <receiver android:name=".alarm.NotificationDismissReceiver" />
 
