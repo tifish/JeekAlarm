@@ -52,11 +52,11 @@ object NotificationService {
         initOnce()
 
         val openIntent = Intent(App.context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val openPendingIntent = PendingIntent.getActivity(
             App.context, 0, openIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         var infoText = ""
@@ -94,24 +94,24 @@ object NotificationService {
         }
 
         val openIntent = Intent(App.context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_CLEAR_TASK or Intent.FLAG_ACTIVITY_NEW_TASK)
+            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
             putExtra("alarmIds", alarmIds.toIntArray())
         }
         val openPendingIntent = PendingIntent.getActivity(
             App.context, System.currentTimeMillis().toInt(), openIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
         val pausePendingIntent: PendingIntent = PendingIntent.getBroadcast(
             App.context, 0, pauseIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val dismissIntent = Intent(App.context, NotificationDismissReceiver::class.java)
         val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(
             App.context, 0, dismissIntent,
-            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmNames = getAlarmNames(alarmIds)

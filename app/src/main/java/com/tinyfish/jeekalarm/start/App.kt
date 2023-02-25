@@ -11,7 +11,8 @@ import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
-import java.util.*
+import java.util.Calendar
+import java.util.Locale
 
 enum class ScreenType {
     HOME,
