@@ -4,40 +4,36 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.core.app.AlarmManagerCompat
 import com.tinyfish.jeekalarm.start.App
-import java.util.*
+import java.util.Calendar
 
 object AlarmService {
-    private var alarmManager: AlarmManager? = null
+    private val alarmManager: AlarmManager = App.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
     private var alarmIntent: PendingIntent? = null
 
     private fun initOnce() {
-        if (alarmManager != null)
+        if (alarmIntent != null)
             return
 
-        alarmManager = App.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(App.context, AlarmReceiver::class.java)
         alarmIntent =
             PendingIntent.getBroadcast(
                 App.context,
                 0,
                 intent,
-                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_CANCEL_CURRENT
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
     }
 
     fun setAlarm(calendar: Calendar) {
         initOnce()
-        alarmManager?.setExactAndAllowWhileIdle(
-            AlarmManager.RTC_WAKEUP,
-            calendar.timeInMillis,
-            alarmIntent
-        )
+        AlarmManagerCompat.setExactAndAllowWhileIdle(alarmManager, AlarmManager.RTC_WAKEUP, calendar.timeInMillis, alarmIntent!!)
     }
 
     fun cancelAlarm() {
         if (alarmIntent != null) {
-            alarmManager?.cancel(alarmIntent)
+            alarmManager.cancel(alarmIntent)
         }
     }
 }
