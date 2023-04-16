@@ -171,20 +171,20 @@ private fun onConfigDirChanged(context: Context) {
         val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> {
-                    ConfigService.save()
-                    ScheduleService.save()
+                    ConfigService.load()
+                    ScheduleService.loadAndRefresh()
                 }
 
                 DialogInterface.BUTTON_NEGATIVE -> {
-                    ConfigService.load()
-                    ScheduleService.loadAndRefresh()
+                    ConfigService.save()
+                    ScheduleService.save()
                 }
             }
         }
 
-        AlertDialog.Builder(context).setMessage("Override existing config files?")
-            .setPositiveButton("Yes", dialogClickListener)
-            .setNegativeButton("No", dialogClickListener)
+        AlertDialog.Builder(context).setMessage("Found config file in new location, load or overwrite them?")
+            .setPositiveButton("Load", dialogClickListener)
+            .setNegativeButton("Overwrite", dialogClickListener)
             .show()
     } else {
         ConfigService.save()
