@@ -41,7 +41,6 @@ class App : Application() {
 
         var editScheduleId = -1
         var screenBeforeNotification = ScreenType.HOME
-        val notificationAlarmIds = mutableListOf<Int>()
 
         var themeColorsChangeTrigger by mutableStateOf(0)
 

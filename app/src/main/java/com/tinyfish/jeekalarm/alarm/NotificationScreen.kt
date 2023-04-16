@@ -41,7 +41,7 @@ fun NotificationContent() {
     val textStyle = TextStyle(fontSize = 32.sp)
 
     Column {
-        for (alarmId in App.notificationAlarmIds) {
+        for (alarmId in NotificationService.currentAlarmIds) {
             val schedule = ScheduleService.scheduleList.firstOrNull { schedule -> schedule.id == alarmId }
                 ?: continue
 

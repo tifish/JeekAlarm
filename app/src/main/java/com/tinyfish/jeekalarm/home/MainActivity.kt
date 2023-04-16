@@ -6,6 +6,7 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.tinyfish.jeekalarm.PermissionsService
+import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.edit.onEditScreenPressBack
 import com.tinyfish.jeekalarm.settings.onSettingsScreenPressBack
@@ -24,10 +25,7 @@ class MainActivity : AppCompatActivity() {
         if (intent == null)
             return
 
-        val alarmIds = intent.getIntArrayExtra("alarmIds")
-        if (alarmIds != null) {
-            App.notificationAlarmIds.addAll(alarmIds.toList())
-
+        if (NotificationService.currentAlarmIds.isNotEmpty()) {
             if (App.screen != ScreenType.NOTIFICATION) {
                 App.screenBeforeNotification = App.screen
                 App.screen = ScreenType.NOTIFICATION

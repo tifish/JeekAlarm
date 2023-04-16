@@ -59,6 +59,7 @@ object ScheduleService {
             App.nextAlarmIds = value.toList()
         }
 
+    // Find and set next alarm, and save the ids to nextAlarmIds
     fun setNextAlarm() {
         AlarmService.cancelAlarm()
         if (scheduleList.size == 0) {

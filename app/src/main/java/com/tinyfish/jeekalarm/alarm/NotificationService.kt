@@ -81,21 +81,23 @@ object NotificationService {
         }
     }
 
-    private var lastAlarmIds = mutableListOf<Int>()
+    // Preserve the current triggered alarms for updating the notification
+    val currentAlarmIds = mutableListOf<Int>()
 
     fun showAlarm(alarmIds: List<Int>, isUpdating: Boolean = false) {
         initOnce()
 
         if (!isUpdating) {
-            lastAlarmIds.clear()
-            lastAlarmIds.addAll(alarmIds)
+            // Cache the triggered alarms and start playing the first one
+            currentAlarmIds.clear()
+            currentAlarmIds.addAll(alarmIds)
 
-            ScheduleService.scheduleList.filter { it.id in ScheduleService.nextAlarmIds }[0].play()
+            ScheduleService.scheduleList.filter { it.id in alarmIds }[0].play()
         }
 
+        // Show or update the notification
         val openIntent = Intent(App.context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-            putExtra("alarmIds", alarmIds.toIntArray())
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
         }
         val openPendingIntent = PendingIntent.getActivity(
             App.context, System.currentTimeMillis().toInt(), openIntent,
@@ -132,8 +134,10 @@ object NotificationService {
         notificationManager.notify(AlarmId, notification)
 
         if (!isUpdating) {
+            // Disable onlyOnce alarms
             var modified = false
-            for (alarmId in ScheduleService.nextAlarmIds) {
+
+            for (alarmId in alarmIds) {
                 val schedule = ScheduleService.scheduleList.filter { schedule -> schedule.id == alarmId }[0]
                 if (schedule.onlyOnce) {
                     schedule.enabled = false
@@ -151,7 +155,7 @@ object NotificationService {
     }
 
     fun updateAlarm() {
-        showAlarm(lastAlarmIds, true)
+        showAlarm(currentAlarmIds, true)
     }
 
     private fun getAlarmNames(alarmIds: List<Int>): List<String> {
@@ -172,7 +176,7 @@ object NotificationService {
         if (App.screen == ScreenType.NOTIFICATION)
             App.screen = App.screenBeforeNotification
 
-        App.notificationAlarmIds.clear()
+        currentAlarmIds.clear()
     }
 
 }
