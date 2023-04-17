@@ -22,9 +22,6 @@ class MainActivity : AppCompatActivity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        if (intent == null)
-            return
-
         if (NotificationService.currentAlarmIds.isNotEmpty()) {
             if (App.screen != ScreenType.NOTIFICATION) {
                 App.screenBeforeNotification = App.screen
