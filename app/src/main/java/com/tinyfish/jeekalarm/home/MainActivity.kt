@@ -19,15 +19,19 @@ class MainActivity : AppCompatActivity() {
         var instance: MainActivity? = null
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        super.onNewIntent(intent)
-
+    private fun showCurrentAlarms() {
         if (NotificationService.currentAlarmIds.isNotEmpty()) {
             if (App.screen != ScreenType.NOTIFICATION) {
                 App.screenBeforeNotification = App.screen
                 App.screen = ScreenType.NOTIFICATION
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        showCurrentAlarms()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,6 +45,8 @@ class MainActivity : AppCompatActivity() {
             PermissionsService.checkAndRequestExternalStoragePermission(this)
 
         FileSelector.init(this)
+
+        showCurrentAlarms()
 
         setContent {
             MainUI()
