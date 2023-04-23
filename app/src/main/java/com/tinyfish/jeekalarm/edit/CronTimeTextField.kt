@@ -2,7 +2,13 @@ package com.tinyfish.jeekalarm.edit
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.width
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
@@ -41,6 +47,11 @@ fun CronTimeTextField(
         }
 
         Observe {
+            val textModifier = if (isTimeConfig)
+                Modifier.width(160.dp)
+            else
+                Modifier.weight(1f, true)
+
             SimpleTextField(
                 hint = hint,
                 textFieldValue = TextFieldValue(textProp.get(), textRange),
@@ -53,7 +64,7 @@ fun CronTimeTextField(
                         }
                     }
                 },
-                textModifier = Modifier.width(160.dp),
+                textModifier = textModifier,
                 textStyle = TextStyle(fontSize = (20.sp)),
                 modifier = Modifier.weight(1f, true),
                 onTextChanged = {

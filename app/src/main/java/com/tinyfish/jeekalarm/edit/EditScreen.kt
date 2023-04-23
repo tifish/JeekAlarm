@@ -1,9 +1,11 @@
 package com.tinyfish.jeekalarm.edit
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.Surface
@@ -17,8 +19,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.openai.OpenAI
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
@@ -30,6 +35,7 @@ import com.tinyfish.ui.MyGroupBox
 import com.tinyfish.ui.MySwitch
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.Observe
+import com.tinyfish.ui.SimpleTextField
 import com.tinyfish.ui.SimpleVectorButton
 import com.tinyfish.ui.ToolButtonWidthSpacer
 import java.util.Calendar
@@ -84,29 +90,50 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                App.editEnabledChangeTrigger
+                App.editOptionsChangeTrigger
                 MySwitch("Enabled", editingSchedule::enabled)
+                MySwitch("Only Once", editingSchedule::onlyOnce)
             }
-            MySwitch("Only Once", editingSchedule::onlyOnce)
         }
 
         HeightSpacer()
 
         MyGroupBox {
+            var name by remember { mutableStateOf(TextFieldValue(editingSchedule.name)) }
+            SimpleTextField("Name: ", name, onTextChanged = {
+                name = it
+                editingSchedule.name = it.text
+            })
+            HeightSpacer()
+
+            if (ConfigService.data.openAIApiKey != "") {
+                Button(onClick = {
+                    val schedule = OpenAI.getAnswer(editingSchedule.name)
+                    if (schedule != null) {
+                        schedule.name = editingSchedule.name
+                        schedule.copyTo(editingSchedule)
+                        editingSchedule.timeConfigChanged()
+
+                        App.editOptionsChangeTrigger++
+                        App.editTimeConfigChanged++
+
+                        Toast.makeText(App.context, "Filled time automatically", Toast.LENGTH_SHORT).show()
+                    } else {
+                        Toast.makeText(App.context, "No time found in name", Toast.LENGTH_SHORT).show()
+                    }
+                }) {
+                    Text("Guess time from name")
+                }
+                HeightSpacer()
+            }
+
             val onChange = { _: String ->
                 if (!editingSchedule.enabled) {
                     editingSchedule.enabled = true
-                    App.editEnabledChangeTrigger++
+                    App.editOptionsChangeTrigger++
                 }
             }
 
-            CronTimeTextField(
-                "Name: ",
-                editingSchedule::name,
-                false,
-                onChange
-            )
-            HeightSpacer()
             CronTimeTextField(
                 "Hour: ",
                 editingSchedule::hourConfig,

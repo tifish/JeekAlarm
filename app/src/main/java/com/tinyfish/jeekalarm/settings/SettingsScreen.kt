@@ -17,9 +17,14 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -34,6 +39,7 @@ import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyGroupBox
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.Observe
+import com.tinyfish.ui.SimpleTextField
 import com.tinyfish.ui.WidthSpacer
 
 
@@ -97,11 +103,13 @@ private fun Editor() {
                     onSelect = {
                         FileSelector.openMusicFile {
                             ConfigService.data.defaultMusicFile = it.path?.substringAfter(':')!!
+                            ConfigService.save()
                             fileSelectScope.invalidate()
                         }
                     },
                     onClear = {
                         ConfigService.data.defaultMusicFile = ""
+                        ConfigService.save()
                         fileSelectScope.invalidate()
                     }
                 )
@@ -115,11 +123,13 @@ private fun Editor() {
                     onSelect = {
                         FileSelector.openFolder {
                             ConfigService.data.defaultMusicFolder = it.path?.substringAfter(':')!!
+                            ConfigService.save()
                             fileSelectScope.invalidate()
                         }
                     },
                     onClear = {
                         ConfigService.data.defaultMusicFolder = ""
+                        ConfigService.save()
                         fileSelectScope.invalidate()
                     }
                 )
@@ -138,6 +148,16 @@ private fun Editor() {
         }
 
         HeightSpacer()
+
+        MyGroupBox {
+            var openAIApiKey by remember { mutableStateOf(TextFieldValue(ConfigService.data.openAIApiKey)) }
+            SimpleTextField("OpenAI API key: ", openAIApiKey, onTextChanged = {
+                openAIApiKey = it
+                ConfigService.data.openAIApiKey = it.text
+                ConfigService.save()
+            })
+            HeightSpacer()
+        }
 
         MyGroupBox {
             Observe {

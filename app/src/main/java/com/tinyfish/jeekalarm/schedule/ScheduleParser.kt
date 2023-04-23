@@ -29,6 +29,22 @@ internal object ScheduleParser {
         )
     }
 
+    fun parseStandardCron(cron: String): Schedule? {
+        val parts = cron.split(' ')
+
+        if (parts.size != 5)
+            return null
+
+        return Schedule(
+            minuteConfig = parts[0],
+            hourConfig = parts[1],
+            dayConfig = parts[2],
+            monthConfig = parts[3],
+            weekDayConfig = parts[4],
+            yearConfig = "*",
+        )
+    }
+
     fun parseTimeConfig(schedule: Schedule) {
         schedule.hours = parseIndexes(Calendar.HOUR_OF_DAY, schedule.hourConfig)
         schedule.minutes = parseIndexes(Calendar.MINUTE, schedule.minuteConfig)
@@ -125,6 +141,7 @@ internal object ScheduleParser {
                         result.clear()
                         return result
                     }
+
                     part.contains("-") -> {
                         val beginEnd = part.split("-")
                         assert(beginEnd.size == 2)
@@ -134,6 +151,7 @@ internal object ScheduleParser {
                             result.add(i)
                         }
                     }
+
                     else -> {
                         result.add(ensureRange(part.toInt(), minCronValue, maxCronValue))
                     }

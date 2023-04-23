@@ -49,7 +49,7 @@ class App : Application() {
         var scheduleChangeTrigger by mutableStateOf(0)
         var isPlaying by mutableStateOf(false)
         var removingIndex by mutableStateOf(-1)
-        var editEnabledChangeTrigger by mutableStateOf(0)
+        var editOptionsChangeTrigger by mutableStateOf(0)
         var editTimeConfigChanged by mutableStateOf(0)
 
         fun startServiceAndUpdateInfo() {

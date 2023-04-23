@@ -16,7 +16,8 @@ object ConfigService {
     data class ConfigData(
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
-        var theme: String = "Dark"
+        var theme: String = "Dark",
+        var openAIApiKey: String = "",
     )
 
     private val sharedPrefs: SharedPreferences by lazy {
@@ -43,11 +44,22 @@ object ConfigService {
         }
 
     fun load() {
-        if (configFile.exists())
-            data = Json.decodeFromString(configFile.readText())
+        if (!configFile.exists())
+            return
+
+        data = Json.decodeFromString(configFile.readText())
+        if (data.openAIApiKey != "")
+            data.openAIApiKey = CryptoService.decrypt(data.openAIApiKey)
     }
 
     fun save() {
+        val originalKey = data.openAIApiKey
+        if (data.openAIApiKey != "")
+            data.openAIApiKey = CryptoService.encrypt(data.openAIApiKey)
+
         configFile.writeText(Json.encodeToString(data))
+
+        if (data.openAIApiKey != "")
+            data.openAIApiKey = originalKey
     }
 }
