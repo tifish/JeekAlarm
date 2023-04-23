@@ -213,6 +213,5 @@ private fun onConfigDirChanged(context: Context) {
 }
 
 fun onSettingsScreenPressBack() {
-    ConfigService.save()
     App.screen = ScreenType.HOME
 }
