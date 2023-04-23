@@ -42,15 +42,15 @@ class App : Application() {
         var editScheduleId = -1
         var screenBeforeNotification = ScreenType.HOME
 
-        var themeColorsChangeTrigger by mutableStateOf(0)
+        var themeColorsChangedTrigger by mutableStateOf(0)
 
         var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
-        var scheduleChangeTrigger by mutableStateOf(0)
+        var scheduleChangedTrigger by mutableStateOf(0)
         var isPlaying by mutableStateOf(false)
         var removingIndex by mutableStateOf(-1)
-        var editOptionsChangeTrigger by mutableStateOf(0)
-        var editTimeConfigChanged by mutableStateOf(0)
+        var editOptionsChangedTrigger by mutableStateOf(0)
+        var editTimeConfigChangedTrigger by mutableStateOf(0)
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)

@@ -82,7 +82,7 @@ private fun Editor() {
                         val onClick = {
                             ConfigService.data.theme = it
                             ConfigService.save()
-                            App.themeColorsChangeTrigger++
+                            App.themeColorsChangedTrigger++
                             themeScope.invalidate()
                         }
                         RadioButton(selected = ConfigService.data.theme == it, onClick = onClick)

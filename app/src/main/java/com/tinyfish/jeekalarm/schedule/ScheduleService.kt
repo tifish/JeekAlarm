@@ -33,7 +33,7 @@ object ScheduleService {
     fun loadAndRefresh() {
         load()
 
-        App.scheduleChangeTrigger++
+        App.scheduleChangedTrigger++
         setNextAlarm()
     }
 
@@ -44,7 +44,7 @@ object ScheduleService {
     fun saveAndRefresh() {
         save()
 
-        App.scheduleChangeTrigger++
+        App.scheduleChangedTrigger++
         setNextAlarm()
     }
 

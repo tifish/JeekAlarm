@@ -90,7 +90,7 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                App.editOptionsChangeTrigger
+                App.editOptionsChangedTrigger
                 MySwitch("Enabled", editingSchedule::enabled)
                 MySwitch("Only Once", editingSchedule::onlyOnce)
             }
@@ -114,8 +114,8 @@ private fun Editor() {
                         schedule.copyTo(editingSchedule)
                         editingSchedule.timeConfigChanged()
 
-                        App.editOptionsChangeTrigger++
-                        App.editTimeConfigChanged++
+                        App.editOptionsChangedTrigger++
+                        App.editTimeConfigChangedTrigger++
 
                         Toast.makeText(App.context, "Filled time automatically", Toast.LENGTH_SHORT).show()
                     } else {
@@ -130,7 +130,7 @@ private fun Editor() {
             val onChange = { _: String ->
                 if (!editingSchedule.enabled) {
                     editingSchedule.enabled = true
-                    App.editOptionsChangeTrigger++
+                    App.editOptionsChangedTrigger++
                 }
             }
 
@@ -301,7 +301,7 @@ fun BottomBar() {
                 editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
                 editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
                 editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                App.editTimeConfigChanged++
+                App.editTimeConfigChangedTrigger++
             }
         }
 

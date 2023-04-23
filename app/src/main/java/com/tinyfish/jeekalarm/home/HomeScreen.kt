@@ -50,7 +50,7 @@ import java.util.Calendar
 
 @Composable
 fun MainUI() {
-    App.themeColorsChangeTrigger
+    App.themeColorsChangedTrigger
 
     MaterialTheme(colors = getThemeFromConfig()) {
         when (App.screen) {
@@ -102,7 +102,7 @@ fun HomeScreen() {
 
 @Composable
 private fun ScheduleList() {
-    App.scheduleChangeTrigger
+    App.scheduleChangedTrigger
 
     if (ScheduleService.scheduleList.size == 0) {
         Box(Modifier.wrapContentSize()) {
@@ -116,7 +116,7 @@ private fun ScheduleList() {
         }
     } else {
         Column {
-            App.scheduleChangeTrigger
+            App.scheduleChangedTrigger
 
             val now = Calendar.getInstance()
             for (index in ScheduleService.scheduleList.indices) {
