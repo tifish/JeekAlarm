@@ -51,19 +51,23 @@ class CryptoService {
         }
 
         fun decrypt(encryptedText: String): String {
-            val secretKey = keyStore.getKey(alias, null) as SecretKey
-            val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+            try {
+                val secretKey = keyStore.getKey(alias, null) as SecretKey
+                val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
 
-            val encryptedData = Base64.decode(encryptedText, Base64.DEFAULT)
+                val encryptedData = Base64.decode(encryptedText, Base64.DEFAULT)
 
-            val ivBytes = encryptedData.copyOfRange(0, 16)
-            val encryptedBytes = encryptedData.copyOfRange(16, encryptedData.size)
+                val ivBytes = encryptedData.copyOfRange(0, 16)
+                val encryptedBytes = encryptedData.copyOfRange(16, encryptedData.size)
 
-            val ivParameterSpec = IvParameterSpec(ivBytes)
-            cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec)
+                val ivParameterSpec = IvParameterSpec(ivBytes)
+                cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec)
 
-            val decryptedBytes = cipher.doFinal(encryptedBytes)
-            return String(decryptedBytes, Charset.forName("UTF-8"))
+                val decryptedBytes = cipher.doFinal(encryptedBytes)
+                return String(decryptedBytes, Charset.forName("UTF-8"))
+            } catch (ex: Exception) {
+                return ""
+            }
         }
     }
 }
