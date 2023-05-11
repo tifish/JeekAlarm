@@ -150,10 +150,18 @@ private fun Editor() {
         HeightSpacer()
 
         MyGroupBox {
-            var openAIApiKey by remember { mutableStateOf(TextFieldValue(ConfigService.data.openAIApiKey)) }
+            var openAIApiKey by remember { mutableStateOf(TextFieldValue(ConfigService.data.openAiApiKey)) }
             SimpleTextField("OpenAI API key: ", openAIApiKey, onTextChanged = {
                 openAIApiKey = it
-                ConfigService.data.openAIApiKey = it.text
+                ConfigService.data.openAiApiKey = it.text
+                ConfigService.save()
+            })
+            HeightSpacer()
+
+            var iFlyAppId by remember { mutableStateOf(TextFieldValue(ConfigService.data.iFlyAppId)) }
+            SimpleTextField("IFly APP ID: ", iFlyAppId, onTextChanged = {
+                iFlyAppId = it
+                ConfigService.data.iFlyAppId = it.text
                 ConfigService.save()
             })
             HeightSpacer()

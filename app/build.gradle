@@ -63,8 +63,12 @@ dependencies {
 
     implementation 'androidx.appcompat:appcompat:1.6.1'
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1"
-    
+
     implementation "com.aallam.openai:openai-client:3.2.0"
     implementation "io.ktor:ktor-client-core:2.3.0"
     implementation "io.ktor:ktor-client-android:2.3.0"
+
+    implementation files('libs\\Msc.jar')
+
+    implementation "com.alibaba:fastjson:1.2.8"
 }

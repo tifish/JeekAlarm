@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
@@ -34,6 +35,7 @@ import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
+import com.tinyfish.jeekalarm.ifly.IFly
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.settings.SettingsScreen
@@ -74,6 +76,8 @@ fun getThemeFromConfig(): Colors {
 
 @Composable
 fun HomeScreen() {
+    val context = LocalContext.current
+
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
         content = {
@@ -91,6 +95,8 @@ fun HomeScreen() {
             FloatingActionButton(onClick = {
                 App.editScheduleId = -1
                 App.screen = ScreenType.EDIT
+                
+                IFly.showDialog(context)
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
             }

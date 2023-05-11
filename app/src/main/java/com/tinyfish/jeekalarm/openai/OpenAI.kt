@@ -36,7 +36,7 @@ class OpenAI {
 """
 
             runBlocking {
-                val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAIApiKey, LogLevel.All))
+                val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LogLevel.All))
 
                 val gpt35turbo = openAI.model(modelId = ModelId("gpt-3.5-turbo"))
 

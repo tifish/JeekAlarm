@@ -13,6 +13,7 @@ import android.provider.Settings
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 
+
 object PermissionsService {
     fun checkAndRequestExternalStoragePermission(activity: Activity) {
         if (ContextCompat.checkSelfPermission(activity, WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED)
@@ -41,5 +42,19 @@ object PermissionsService {
                 uri
             )
         )
+    }
+
+    fun checkAndRequestPermissions(permissions: Array<String>, activity: Activity) {
+        val toApplyList = ArrayList<String>()
+
+        for (perm in permissions) {
+            if (PackageManager.PERMISSION_GRANTED != ContextCompat.checkSelfPermission(activity, perm)) {
+                toApplyList.add(perm)
+            }
+        }
+        val tmpList = arrayOfNulls<String>(toApplyList.size)
+        if (toApplyList.isNotEmpty()) {
+            ActivityCompat.requestPermissions(activity, toApplyList.toArray(tmpList), 123)
+        }
     }
 }

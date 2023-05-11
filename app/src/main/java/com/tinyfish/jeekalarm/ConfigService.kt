@@ -17,7 +17,8 @@ object ConfigService {
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
         var theme: String = "Dark",
-        var openAIApiKey: String = "",
+        var openAiApiKey: String = "",
+        var iFlyAppId: String = "",
     )
 
     private val sharedPrefs: SharedPreferences by lazy {
@@ -48,18 +49,25 @@ object ConfigService {
             return
 
         data = Json.decodeFromString(configFile.readText())
-        if (data.openAIApiKey != "")
-            data.openAIApiKey = CryptoService.decrypt(data.openAIApiKey)
+        if (data.openAiApiKey != "")
+            data.openAiApiKey = CryptoService.decrypt(data.openAiApiKey)
+        if (data.iFlyAppId != "")
+            data.iFlyAppId = CryptoService.decrypt(data.iFlyAppId)
     }
 
     fun save() {
-        val originalKey = data.openAIApiKey
-        if (data.openAIApiKey != "")
-            data.openAIApiKey = CryptoService.encrypt(data.openAIApiKey)
+        val originalOpenAiApiKey = data.openAiApiKey
+        if (data.openAiApiKey != "")
+            data.openAiApiKey = CryptoService.encrypt(data.openAiApiKey)
+        val originalIFlyAppId = data.iFlyAppId
+        if (data.iFlyAppId != "")
+            data.iFlyAppId = CryptoService.encrypt(data.iFlyAppId)
 
         configFile.writeText(Json.encodeToString(data))
 
-        if (data.openAIApiKey != "")
-            data.openAIApiKey = originalKey
+        if (data.openAiApiKey != "")
+            data.openAiApiKey = originalOpenAiApiKey
+        if (data.iFlyAppId != "")
+            data.iFlyAppId = originalIFlyAppId
     }
 }

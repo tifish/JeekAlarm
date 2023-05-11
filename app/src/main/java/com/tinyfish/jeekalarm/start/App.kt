@@ -4,11 +4,14 @@ import android.app.Application
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.alarm.NotificationService
+import com.tinyfish.jeekalarm.openai.OpenAI
+import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -40,6 +43,8 @@ class App : Application() {
         }
 
         var editScheduleId = -1
+        lateinit var editingSchedule: Schedule
+
         var screenBeforeNotification = ScreenType.HOME
 
         var themeColorsChangedTrigger by mutableStateOf(0)
@@ -66,12 +71,29 @@ class App : Application() {
             val serviceIntent = Intent(context, StartService::class.java)
             context.stopService(serviceIntent)
         }
+
+        fun guessEditingScheduleFromName() {
+            val schedule = OpenAI.getAnswer(editingSchedule.name)
+            if (schedule != null) {
+                schedule.name = editingSchedule.name
+                schedule.copyTo(editingSchedule)
+                editingSchedule.timeConfigChanged()
+
+                editOptionsChangedTrigger++
+                editTimeConfigChangedTrigger++
+
+                Toast.makeText(context, "Filled time automatically", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(context, "No time found in name", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     override fun onCreate() {
         super.onCreate()
 
         context = applicationContext
+
         ConfigService.load()
         ScheduleService.load()
         ScheduleService.sort()

@@ -39,6 +39,15 @@ class MainActivity : AppCompatActivity() {
 
         instance = this
 
+        val permissions = arrayOf(
+            android.Manifest.permission.RECORD_AUDIO,
+            android.Manifest.permission.ACCESS_NETWORK_STATE,
+            android.Manifest.permission.INTERNET,
+            android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        )
+
+        PermissionsService.checkAndRequestPermissions(permissions, this)
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R)
             PermissionsService.checkAndRequestAllFileAccessPermission(this)
         else
