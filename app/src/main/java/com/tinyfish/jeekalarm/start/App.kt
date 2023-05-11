@@ -73,6 +73,9 @@ class App : Application() {
         }
 
         fun guessEditingScheduleFromName() {
+            if (ConfigService.data.openAiApiKey.isEmpty())
+                return
+            
             val schedule = OpenAI.getAnswer(editingSchedule.name)
             if (schedule != null) {
                 schedule.name = editingSchedule.name

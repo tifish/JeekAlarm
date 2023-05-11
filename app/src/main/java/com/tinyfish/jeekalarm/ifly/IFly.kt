@@ -60,6 +60,8 @@ class IFly {
                     result = result.trimEnd('。')
 
                     App.editingSchedule.name = result
+                    App.editTimeConfigChangedTrigger++
+
                     App.guessEditingScheduleFromName()
                 }
 
