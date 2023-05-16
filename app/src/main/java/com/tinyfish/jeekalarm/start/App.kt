@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.start
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
@@ -34,6 +35,8 @@ fun getScreenName(screenType: ScreenType): String {
 
 class App : Application() {
     companion object {
+        // Only 1 instance, leak is not a problem
+        @SuppressLint("StaticFieldLeak")
         lateinit var context: Context
 
         private val simpleDateFormat = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.CHINA)
