@@ -24,12 +24,7 @@ object VibrationService {
             waveList.add(1000)
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            vibrator.vibrate(VibrationEffect.createWaveform(waveList.toLongArray(), -1))
-        } else {
-            @Suppress("DEPRECATION")
-            vibrator.vibrate(waveList.toLongArray(), -1)
-        }
+        vibrator.vibrate(VibrationEffect.createWaveform(waveList.toLongArray(), -1))
     }
 
     fun stop() {

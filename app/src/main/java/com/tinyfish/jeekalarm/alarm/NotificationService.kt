@@ -6,7 +6,6 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.home.MainActivity
@@ -25,18 +24,13 @@ object NotificationService {
     const val AlarmChannel = "Alarm"
 
     private fun initOnce() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel(
-                InfoChannel, InfoChannel, NotificationManager.IMPORTANCE_LOW
-            )
-            createNotificationChannel(AlarmChannel, AlarmChannel, NotificationManager.IMPORTANCE_HIGH)
-        }
+        createNotificationChannel(
+            InfoChannel, InfoChannel, NotificationManager.IMPORTANCE_LOW
+        )
+        createNotificationChannel(AlarmChannel, AlarmChannel, NotificationManager.IMPORTANCE_HIGH)
     }
 
     private fun createNotificationChannel(channelId: String, channelName: String, importance: Int) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            return
-
         val channel = NotificationChannel(channelId, channelName, importance)
         notificationManager.createNotificationChannel(channel)
     }

@@ -3,7 +3,6 @@ package com.tinyfish.jeekalarm.start
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,10 +58,7 @@ class App : Application() {
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                context.startForegroundService(serviceIntent)
-            else
-                context.startService(serviceIntent)
+            context.startForegroundService(serviceIntent)
 
             NotificationService.updateInfo()
         }
@@ -75,7 +71,7 @@ class App : Application() {
         fun guessEditingScheduleFromName() {
             if (ConfigService.data.openAiApiKey.isEmpty())
                 return
-            
+
             val schedule = OpenAI.getAnswer(editingSchedule.name)
             if (schedule != null) {
                 schedule.name = editingSchedule.name
