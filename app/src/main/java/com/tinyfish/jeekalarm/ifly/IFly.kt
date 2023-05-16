@@ -30,10 +30,7 @@ class IFly {
             SpeechUtility.createUtility(App.context, SpeechConstant.APPID + "=" + ConfigService.data.iFlyAppId)
             Setting.setLocationEnable(false)
 
-            if (SpeechUtility.getUtility() == null)
-                return false
-
-            return true
+            return SpeechUtility.getUtility() != null
         }
 
         fun showDialog(context: Context) {

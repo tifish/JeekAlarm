@@ -95,7 +95,7 @@ fun HomeScreen() {
             FloatingActionButton(onClick = {
                 App.editScheduleId = -1
                 App.screen = ScreenType.EDIT
-                
+
                 IFly.showDialog(context)
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
