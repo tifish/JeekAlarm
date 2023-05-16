@@ -20,7 +20,7 @@ import com.tinyfish.jeekalarm.start.App
 
 class IFly {
     companion object {
-        fun init(): Boolean {
+        private fun initOnce(): Boolean {
             if (ConfigService.data.iFlyAppId == "")
                 return false
 
@@ -33,8 +33,8 @@ class IFly {
             return SpeechUtility.getUtility() != null
         }
 
-        fun showDialog(context: Context) {
-            if (!init())
+        fun showDialog(context: Context, onResult: (String) -> Unit) {
+            if (!initOnce())
                 return
 
             val initListener = InitListener { code ->
@@ -50,16 +50,15 @@ class IFly {
 
             recognizerDialog.setListener(object : RecognizerDialogListener {
                 override fun onResult(recognizerResult: com.iflytek.cloud.RecognizerResult?, b: Boolean) { //返回结果
-                    if (recognizerResult == null)
+                    if (recognizerResult == null) {
+                        onResult("")
                         return
+                    }
 
                     var result = parseResult(recognizerResult.resultString)
                     result = result.trimEnd('。')
 
-                    App.editingSchedule.name = result
-                    App.editTimeConfigChangedTrigger++
-
-                    App.guessEditingScheduleFromName()
+                    onResult(result)
                 }
 
                 override fun onError(speechError: SpeechError) {

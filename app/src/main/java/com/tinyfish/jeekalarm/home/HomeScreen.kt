@@ -96,7 +96,12 @@ fun HomeScreen() {
                 App.editScheduleId = -1
                 App.screen = ScreenType.EDIT
 
-                IFly.showDialog(context)
+                IFly.showDialog(context) {
+                    App.editingSchedule.name = it
+                    App.editTimeConfigChangedTrigger++
+
+                    App.guessEditingScheduleFromName()
+                }
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
             }
