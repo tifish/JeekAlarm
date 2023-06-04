@@ -56,8 +56,9 @@ class App : Application() {
         var scheduleChangedTrigger by mutableStateOf(0)
         var isPlaying by mutableStateOf(false)
         var removingIndex by mutableStateOf(-1)
-        var editOptionsChangedTrigger by mutableStateOf(0)
-        var editTimeConfigChangedTrigger by mutableStateOf(0)
+        var editingOptionsChangedTrigger by mutableStateOf(0)
+        var editingNameChangedTrigger by mutableStateOf(0)
+        var editingTimeConfigChangedTrigger by mutableStateOf(0)
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)
@@ -81,8 +82,8 @@ class App : Application() {
                 schedule.copyTo(editingSchedule)
                 editingSchedule.timeConfigChanged()
 
-                editOptionsChangedTrigger++
-                editTimeConfigChangedTrigger++
+                editingOptionsChangedTrigger++
+                editingTimeConfigChangedTrigger++
 
                 Toast.makeText(context, "Filled time automatically", Toast.LENGTH_SHORT).show()
             } else {

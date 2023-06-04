@@ -98,7 +98,7 @@ fun HomeScreen() {
 
                 IFly.showDialog(context) {
                     App.editingSchedule.name = it
-                    App.editTimeConfigChangedTrigger++
+                    App.editingNameChangedTrigger++
 
                     App.guessEditingScheduleFromName()
                 }
@@ -127,8 +127,6 @@ private fun ScheduleList() {
         }
     } else {
         Column {
-            App.scheduleChangedTrigger
-
             val now = Calendar.getInstance()
             for (index in ScheduleService.scheduleList.indices) {
                 val schedule = ScheduleService.scheduleList[index]

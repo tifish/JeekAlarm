@@ -83,7 +83,7 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                App.editOptionsChangedTrigger
+                App.editingOptionsChangedTrigger
                 MySwitch("Enabled", App.editingSchedule::enabled)
                 MySwitch("Only Once", App.editingSchedule::onlyOnce)
             }
@@ -93,7 +93,7 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                App.editTimeConfigChangedTrigger
+                App.editingNameChangedTrigger
 
                 var textRange by remember { mutableStateOf(TextRange(App.editingSchedule.name.length)) }
 
@@ -116,7 +116,7 @@ private fun Editor() {
             val onChange = { _: String ->
                 if (!App.editingSchedule.enabled) {
                     App.editingSchedule.enabled = true
-                    App.editOptionsChangedTrigger++
+                    App.editingOptionsChangedTrigger++
                 }
             }
 
@@ -249,7 +249,7 @@ fun BottomBar() {
                 App.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
                 App.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
                 App.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                App.editTimeConfigChangedTrigger++
+                App.editingTimeConfigChangedTrigger++
             }
         }
 

@@ -31,7 +31,7 @@ fun CronTimeTextField(
     onChange: (String) -> Unit = {}
 ) {
     Row(verticalAlignment = Alignment.CenterVertically) {
-        App.editTimeConfigChangedTrigger
+        App.editingTimeConfigChangedTrigger
 
         val cronTimeScope = currentRecomposeScope
 
