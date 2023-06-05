@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.edit
 
+import android.app.AlertDialog
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -17,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.TextFieldValue
@@ -223,6 +225,8 @@ private fun Editor() {
 
 @Composable
 fun BottomBar() {
+    val context = LocalContext.current
+
     MyBottomBar {
         SimpleVectorButton(
             ImageVector.vectorResource(R.drawable.ic_back), if (isAdding) "Add" else "Back"
@@ -230,12 +234,27 @@ fun BottomBar() {
             onEditScreenPressBack()
         }
 
+        ToolButtonWidthSpacer()
         if (isAdding) {
-            ToolButtonWidthSpacer()
             SimpleVectorButton(
                 ImageVector.vectorResource(R.drawable.ic_cancel), "Cancel"
             ) {
                 App.screen = ScreenType.HOME
+            }
+        } else {
+            SimpleVectorButton(
+                ImageVector.vectorResource(R.drawable.ic_remove), "Remove"
+            ) {
+                AlertDialog.Builder(context)
+                    .setTitle("Remove")
+                    .setMessage("Remove this schedule?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        ScheduleService.scheduleList.removeIf { it.id == App.editScheduleId }
+                        App.scheduleChangedTrigger++
+                        App.screen = ScreenType.HOME
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
             }
         }
 
