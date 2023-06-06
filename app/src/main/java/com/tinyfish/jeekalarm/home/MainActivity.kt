@@ -69,15 +69,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onBackPressed() {
-        if (App.screen == ScreenType.HOME) {
-            if (App.removingIndex > -1)
-                App.removingIndex = -1
-            else
+        when (App.screen) {
+            ScreenType.HOME -> {
                 super.onBackPressed()
-        } else if (App.screen == ScreenType.EDIT) {
-            onEditScreenPressBack()
-        } else if (App.screen == ScreenType.SETTINGS) {
-            onSettingsScreenPressBack()
+            }
+
+            ScreenType.EDIT -> {
+                onEditScreenPressBack()
+            }
+
+            ScreenType.SETTINGS -> {
+                onSettingsScreenPressBack()
+            }
+
+            ScreenType.NOTIFICATION -> {
+            }
         }
     }
 

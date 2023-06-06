@@ -1,6 +1,7 @@
 package com.tinyfish.jeekalarm.home
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,6 +14,8 @@ import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.Colors
 import androidx.compose.material.Divider
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.FabPosition
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
@@ -23,6 +26,10 @@ import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -140,6 +147,7 @@ private fun ScheduleList() {
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     Row(
@@ -159,15 +167,35 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         WidthSpacer()
 
+        var dropdownMenuExpanded by remember { mutableStateOf(false) }
+
+        DropdownMenu(
+            expanded = dropdownMenuExpanded,
+            onDismissRequest = { dropdownMenuExpanded = false }
+        ) {
+            DropdownMenuItem(
+                onClick = {
+                    dropdownMenuExpanded = false
+                    ScheduleService.scheduleList.removeAt(index)
+                    ScheduleService.saveAndRefresh()
+                    App.scheduleChangedTrigger++
+                }
+            ) {
+                Text("Remove")
+            }
+        }
+
         Column(
             Modifier
                 .weight(1f, true)
-                .clickable(onClick = {
-                    if (App.removingIndex == -1) {
+                .combinedClickable(
+                    onClick = {
                         App.editScheduleId = schedule.id
                         App.screen = ScreenType.EDIT
-                    }
-                })
+                    },
+                    onLongClick = {
+                        dropdownMenuExpanded = true
+                    })
         ) {
             Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "")
             Text(
@@ -178,32 +206,6 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 App.format(schedule.getNextTriggerTime(now)),
                 style = TextStyle(color = Color.Gray)
             )
-        }
-
-        Row(Modifier.align(Alignment.Bottom)) {
-            if (App.removingIndex == -1) {
-                SimpleVectorButton(ImageVector.vectorResource(R.drawable.ic_remove)) {
-                    App.removingIndex = index
-                }
-                WidthSpacer()
-            } else if (App.removingIndex == index) {
-                SimpleVectorButton(
-                    ImageVector.vectorResource(R.drawable.ic_done),
-                    "Remove"
-                ) {
-                    App.removingIndex = -1
-                    ScheduleService.scheduleList.removeAt(index)
-                    ScheduleService.saveAndRefresh()
-                }
-
-                WidthSpacer()
-                SimpleVectorButton(
-                    ImageVector.vectorResource(R.drawable.ic_back),
-                    "Cancel"
-                ) {
-                    App.removingIndex = -1
-                }
-            }
         }
     }
 }

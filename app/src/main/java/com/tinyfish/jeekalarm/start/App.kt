@@ -55,7 +55,6 @@ class App : Application() {
         var nextAlarmIds by mutableStateOf(listOf<Int>())
         var scheduleChangedTrigger by mutableStateOf(0)
         var isPlaying by mutableStateOf(false)
-        var removingIndex by mutableStateOf(-1)
         var editingOptionsChangedTrigger by mutableStateOf(0)
         var editingNameChangedTrigger by mutableStateOf(0)
         var editingTimeConfigChangedTrigger by mutableStateOf(0)
