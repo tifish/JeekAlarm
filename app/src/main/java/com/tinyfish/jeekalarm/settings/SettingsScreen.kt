@@ -9,12 +9,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
@@ -50,7 +49,6 @@ fun SettingsScreen() {
         content = {
             Surface(
                 modifier = Modifier.padding(it),
-                color = MaterialTheme.colors.background,
             ) {
                 Editor()
             }
@@ -196,7 +194,7 @@ private fun Editor() {
 
 private fun onConfigDirChanged(context: Context) {
     if (ConfigService.configFile.exists() || ScheduleService.configFile.exists()) {
-        val dialogClickListener = DialogInterface.OnClickListener { dialog, which ->
+        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> {
                     ConfigService.load()

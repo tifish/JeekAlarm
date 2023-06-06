@@ -10,15 +10,14 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
@@ -33,7 +32,6 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
@@ -66,7 +64,7 @@ fun SimpleSwitch(
             }
         )
 
-        WidthSpacer()
+        WidthSpacer(15.dp)
 
         Text(
             hint,
@@ -97,7 +95,7 @@ fun SimpleSwitch(
             }
         )
 
-        WidthSpacer()
+        WidthSpacer(15.dp)
 
         Text(
             hint,
@@ -137,7 +135,7 @@ fun SimpleTextField(
     hint: String,
     textFieldValue: TextFieldValue,
     modifier: Modifier = Modifier,
-    textModifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
     textStyle: TextStyle = LocalTextStyle.current,
     onTextFieldFocused: (Boolean) -> Unit = {},
     onTextChanged: (TextFieldValue) -> Unit = {}
@@ -150,12 +148,8 @@ fun SimpleTextField(
 
         var lastFocusState by remember { mutableStateOf(false) }
 
-        val colors = TextFieldDefaults.textFieldColors()
-        val textColor = colors.textColor(true).value
-        val newTextStyle = textStyle.copy(color = textColor)
-
-        BasicTextField(
-            modifier = textModifier
+        TextField(
+            modifier = textFieldModifier
                 .onFocusChanged { state ->
                     if (lastFocusState != state.hasFocus) {
                         onTextFieldFocused(state.hasFocus)
@@ -167,8 +161,7 @@ fun SimpleTextField(
             onValueChange = {
                 onTextChanged(it)
             },
-            textStyle = newTextStyle,
-            cursorBrush = SolidColor(colors.cursorColor(false).value)
+            textStyle = textStyle,
         )
     }
 }
@@ -188,11 +181,7 @@ fun SimpleIntField(
 
         var lastFocusState by remember { mutableStateOf(false) }
 
-        val colors = TextFieldDefaults.textFieldColors()
-        val textColor = colors.textColor(true).value
-        val newTextStyle = textStyle.copy(color = textColor)
-
-        BasicTextField(
+        TextField(
             modifier = modifier.onFocusChanged { state ->
                 if (lastFocusState != state.hasFocus) {
                     onTextFieldFocused(state.hasFocus)
@@ -203,8 +192,7 @@ fun SimpleIntField(
             onValueChange = {
                 onTextChanged(it)
             },
-            textStyle = newTextStyle,
-            cursorBrush = SolidColor(colors.cursorColor(false).value),
+            textStyle = textStyle,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
         )
     }
@@ -273,7 +261,7 @@ fun SimpleTextButton(
     height: Dp,
     modifier: Modifier = Modifier,
     shape: Shape = MaterialTheme.shapes.small,
-    backgroundColor: Color = MaterialTheme.colors.primary,
+    backgroundColor: Color = MaterialTheme.colorScheme.primary,
     onClick: () -> Unit
 ) {
     Surface(

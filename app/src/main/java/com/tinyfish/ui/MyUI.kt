@@ -11,12 +11,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -108,14 +108,15 @@ fun MyTextButton(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopBar(title: @Composable () -> Unit) {
     TopAppBar(
         title = title,
-        backgroundColor = MaterialTheme.colors.primary
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MyTopBar(@DrawableRes iconID: Int, title: String) {
     TopAppBar(
@@ -126,17 +127,12 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String) {
                 Text(title)
             }
         },
-        backgroundColor = MaterialTheme.colors.primary,
     )
 }
 
 @Composable
 fun MyBottomBar(buttons: @Composable () -> Unit) {
-    Surface(
-        Modifier.fillMaxWidth(),
-        elevation = 2.dp,
-        color = MaterialTheme.colors.primary,
-    ) {
+    Surface(Modifier.fillMaxWidth()) {
         Row(Modifier.height(60.dp), Arrangement.Center, Alignment.CenterVertically) {
             buttons()
         }
@@ -145,10 +141,7 @@ fun MyBottomBar(buttons: @Composable () -> Unit) {
 
 @Composable
 fun MyGroupBox(modifier: Modifier = Modifier, body: @Composable () -> Unit = {}) {
-    Card(
-        modifier.fillMaxWidth(),
-        backgroundColor = MaterialTheme.colors.primaryVariant
-    ) {
+    Card(modifier.fillMaxWidth()) {
         Column(Modifier.padding(10.dp)) {
             body()
         }

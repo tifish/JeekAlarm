@@ -5,11 +5,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Slider
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
@@ -30,15 +33,12 @@ import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.HeightSpacer
-import com.tinyfish.ui.MyBottomBar
 import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyGroupBox
 import com.tinyfish.ui.MySwitch
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
-import com.tinyfish.ui.SimpleVectorButton
-import com.tinyfish.ui.ToolButtonWidthSpacer
 import java.util.Calendar
 
 private var isAdding = false
@@ -49,29 +49,27 @@ fun EditScreen() {
     App.editingSchedule = if (isAdding) Schedule()
     else ScheduleService.scheduleList.filter { it.id == App.editScheduleId }[0]
 
-//    Scaffold(
-//        topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") },
-//        content = {
-//            Surface(
-//                color = MaterialTheme.colors.background,
-//            ) {
-//                Editor()
-//            }
-//        },
-//        bottomBar = { BottomBar() }
-//    )
+    Scaffold(
+        topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") },
+        content = {
+            Surface(Modifier.padding(it)) {
+                Editor()
+            }
+        },
+        bottomBar = { BottomBar() }
+    )
 
-    Column {
-        MyTopBar(
-            R.drawable.ic_edit, if (isAdding) "Add" else "Edit"
-        )
-        Surface(
-            color = MaterialTheme.colors.background, modifier = Modifier.weight(1f, true)
-        ) {
-            Editor()
-        }
-        BottomBar()
-    }
+//    Column {
+//        MyTopBar(
+//            R.drawable.ic_edit, if (isAdding) "Add" else "Edit"
+//        )
+//        Surface(
+//            color = MaterialTheme.colorScheme.background, modifier = Modifier.weight(1f, true)
+//        ) {
+//            Editor()
+//        }
+//        BottomBar()
+//    }
 }
 
 @Composable
@@ -227,67 +225,86 @@ private fun Editor() {
 fun BottomBar() {
     val context = LocalContext.current
 
-    MyBottomBar {
-        SimpleVectorButton(
-            ImageVector.vectorResource(R.drawable.ic_back), if (isAdding) "Add" else "Back"
-        ) {
-            onEditScreenPressBack()
-        }
-
-        ToolButtonWidthSpacer()
-        if (isAdding) {
-            SimpleVectorButton(
-                ImageVector.vectorResource(R.drawable.ic_cancel), "Cancel"
-            ) {
-                App.screen = ScreenType.HOME
-            }
-        } else {
-            SimpleVectorButton(
-                ImageVector.vectorResource(R.drawable.ic_remove), "Remove"
-            ) {
-                AlertDialog.Builder(context)
-                    .setTitle("Remove")
-                    .setMessage("Remove this schedule?")
-                    .setPositiveButton("Yes") { _, _ ->
-                        ScheduleService.scheduleList.removeIf { it.id == App.editScheduleId }
-                        App.scheduleChangedTrigger++
+    BottomAppBar(
+        actions = {
+            if (isAdding) {
+                NavigationBarItem(
+                    selected = false,
+                    onClick = {
                         App.screen = ScreenType.HOME
+                    },
+                    label = { Text("Cancel") },
+                    icon = { Icon(ImageVector.vectorResource(R.drawable.ic_cancel), null) }
+                )
+            } else {
+                NavigationBarItem(
+                    selected = false,
+                    onClick = {
+                        AlertDialog.Builder(context)
+                            .setTitle("Remove")
+                            .setMessage("Remove this schedule?")
+                            .setPositiveButton("Yes") { _, _ ->
+                                ScheduleService.scheduleList.removeIf { it.id == App.editScheduleId }
+                                App.scheduleChangedTrigger++
+                                App.screen = ScreenType.HOME
+                            }
+                            .setNegativeButton("No", null)
+                            .show()
+                    },
+                    label = { Text("Remove") },
+                    icon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) }
+                )
+            }
+
+            NavigationBarItem(
+                selected = false,
+                onClick = {
+                    onEditScreenPressBack()
+                },
+                label = { Text(if (isAdding) "Add" else "Apply") },
+                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) }
+            )
+
+            NavigationBarItem(
+                selected = false,
+                onClick = {
+                    Calendar.getInstance().apply {
+                        App.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
+                        App.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
+                        App.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
+                        App.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
+                        App.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
+                        App.editingTimeConfigChangedTrigger++
                     }
-                    .setNegativeButton("No", null)
-                    .show()
-            }
-        }
-
-        ToolButtonWidthSpacer()
-        SimpleVectorButton(
-            ImageVector.vectorResource(R.drawable.ic_access_time), "Now"
-        ) {
-            Calendar.getInstance().apply {
-                App.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
-                App.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
-                App.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
-                App.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
-                App.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                App.editingTimeConfigChangedTrigger++
-            }
-        }
-
-        ToolButtonWidthSpacer()
-        Observe {
-            val text = if (App.isPlaying) "Stop" else "Play"
-            val onClick = {
-                if (App.isPlaying) ScheduleService.stopPlaying()
-                else App.editingSchedule.play()
-            }
-
-            if (App.isPlaying) SimpleVectorButton(
-                ImageVector.vectorResource(R.drawable.ic_stop), text, onClick
+                },
+                label = { Text("Now") },
+                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) }
             )
-            else SimpleVectorButton(
-                ImageVector.vectorResource(R.drawable.ic_play_arrow), text, onClick
-            )
+
+            Observe {
+                val text = if (App.isPlaying) "Stop" else "Play"
+                val onClick = {
+                    if (App.isPlaying) ScheduleService.stopPlaying()
+                    else App.editingSchedule.play()
+                }
+
+                if (App.isPlaying)
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onClick,
+                        label = { Text(text) },
+                        icon = { Icon(ImageVector.vectorResource(R.drawable.ic_stop), null) }
+                    )
+                else
+                    NavigationBarItem(
+                        selected = false,
+                        onClick = onClick,
+                        label = { Text(text) },
+                        icon = { Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null) }
+                    )
+            }
         }
-    }
+    )
 }
 
 fun onEditScreenPressBack() {
