@@ -58,18 +58,6 @@ fun EditScreen() {
         },
         bottomBar = { BottomBar() }
     )
-
-//    Column {
-//        MyTopBar(
-//            R.drawable.ic_edit, if (isAdding) "Add" else "Edit"
-//        )
-//        Surface(
-//            color = MaterialTheme.colorScheme.background, modifier = Modifier.weight(1f, true)
-//        ) {
-//            Editor()
-//        }
-//        BottomBar()
-//    }
 }
 
 @Composable

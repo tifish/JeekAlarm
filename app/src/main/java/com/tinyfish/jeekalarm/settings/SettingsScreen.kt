@@ -66,8 +66,7 @@ private fun Editor() {
     ) {
         HeightSpacer()
 
-        MyGroupBox()
-        {
+        MyGroupBox {
             Text("Theme:")
             Observe {
                 val themeScope = currentRecomposeScope
