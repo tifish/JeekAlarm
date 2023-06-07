@@ -20,8 +20,6 @@ class OpenAI {
     companion object {
         @OptIn(BetaOpenAI::class)
         fun getAnswer(question: String): Schedule? {
-            var result = ""
-
             val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
             val systemContent = """
 你现在是一个转换器，输出给程序处理的字符串，请严格输出所需内容，不要添加任何描述文字：
@@ -34,6 +32,8 @@ class OpenAI {
 - 如果没有指定分钟，则默认为0。
 - 如果无法转换，则输出字符串`null`。
 """
+
+            var result: String
 
             runBlocking {
                 val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LogLevel.All))

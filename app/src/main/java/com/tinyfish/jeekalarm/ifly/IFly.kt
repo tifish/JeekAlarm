@@ -8,7 +8,6 @@ import com.alibaba.fastjson.JSONArray
 import com.alibaba.fastjson.JSONObject
 import com.iflytek.cloud.ErrorCode
 import com.iflytek.cloud.InitListener
-import com.iflytek.cloud.Setting
 import com.iflytek.cloud.SpeechConstant
 import com.iflytek.cloud.SpeechError
 import com.iflytek.cloud.SpeechUtility
@@ -28,7 +27,6 @@ class IFly {
                 return true
 
             SpeechUtility.createUtility(App.context, SpeechConstant.APPID + "=" + ConfigService.data.iFlyAppId)
-            Setting.setLocationEnable(false)
 
             return SpeechUtility.getUtility() != null
         }

@@ -3,6 +3,7 @@ package com.tinyfish.jeekalarm.home
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
+import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.tinyfish.jeekalarm.PermissionsService
@@ -57,6 +58,25 @@ class MainActivity : AppCompatActivity() {
 
         showCurrentAlarms()
 
+        onBackPressedDispatcher.addCallback(this) {
+            when (App.screen) {
+                ScreenType.HOME -> {
+                    onBackPressedDispatcher.onBackPressed()
+                }
+
+                ScreenType.EDIT -> {
+                    onEditScreenPressBack()
+                }
+
+                ScreenType.SETTINGS -> {
+                    onSettingsScreenPressBack()
+                }
+
+                ScreenType.NOTIFICATION -> {
+                }
+            }
+        }
+
         setContent {
             MainUI()
         }
@@ -67,24 +87,4 @@ class MainActivity : AppCompatActivity() {
 
         instance = null
     }
-
-    override fun onBackPressed() {
-        when (App.screen) {
-            ScreenType.HOME -> {
-                super.onBackPressed()
-            }
-
-            ScreenType.EDIT -> {
-                onEditScreenPressBack()
-            }
-
-            ScreenType.SETTINGS -> {
-                onSettingsScreenPressBack()
-            }
-
-            ScreenType.NOTIFICATION -> {
-            }
-        }
-    }
-
 }
