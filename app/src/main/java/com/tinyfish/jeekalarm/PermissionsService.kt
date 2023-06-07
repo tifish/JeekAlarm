@@ -35,7 +35,7 @@ object PermissionsService {
         if (Environment.isExternalStorageManager())
             return
 
-        val uri = Uri.parse("package:${BuildConfig.APPLICATION_ID}")
+        val uri = Uri.parse("package:${context.packageName}")
         context.startActivity(
             Intent(
                 Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
