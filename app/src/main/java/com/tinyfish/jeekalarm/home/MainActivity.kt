@@ -61,7 +61,12 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this) {
             when (App.screen) {
                 ScreenType.HOME -> {
-                    onBackPressedDispatcher.onBackPressed()
+                    isEnabled = false
+                    try {
+                        onBackPressedDispatcher.onBackPressed()
+                    } finally {
+                        isEnabled = true
+                    }
                 }
 
                 ScreenType.EDIT -> {
