@@ -69,17 +69,16 @@ dependencies {
     debugImplementation(libs.ui.tooling)
     debugImplementation(libs.ui.test.manifest)
 
-    implementation("androidx.appcompat:appcompat:1.6.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.1")
+    implementation(libs.androidx.appcompat)
+    implementation(libs.kotlinx.serialization.json)
 
-    implementation("io.ktor:ktor-client-core:2.3.0")
-    implementation("io.ktor:ktor-client-android:2.3.0")
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.android)
 
     // ChatGPT
-    implementation("com.aallam.openai:openai-client:3.2.0")
+    implementation(libs.openai.client)
 
     // iFlytek
     implementation(files("libs/Msc.jar"))
-
-    implementation("com.alibaba:fastjson:1.2.8")
+    implementation(libs.fastjson)
 }
