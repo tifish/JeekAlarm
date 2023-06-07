@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -156,38 +157,40 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
 
         WidthSpacer(15.dp)
 
-        var dropdownMenuExpanded by remember { mutableStateOf(false) }
+        Box(modifier = Modifier.weight(1f, true)) {
+            var dropdownMenuExpanded by remember { mutableStateOf(false) }
 
-        DropdownMenu(
-            expanded = dropdownMenuExpanded,
-            onDismissRequest = { dropdownMenuExpanded = false }
-        ) {
-            DropdownMenuItem(
-                text = { Text("Remove") },
-                onClick = {
-                    dropdownMenuExpanded = false
-                    ScheduleService.scheduleList.removeAt(index)
-                    ScheduleService.saveAndRefresh()
-                    App.scheduleChangedTrigger++
-                }
-            )
-        }
+            Column(
+                Modifier
+                    .combinedClickable(
+                        onClick = {
+                            App.editScheduleId = schedule.id
+                            App.screen = ScreenType.EDIT
+                        },
+                        onLongClick = {
+                            dropdownMenuExpanded = true
+                        })
+            ) {
+                Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "")
+                Text(schedule.timeConfig)
+                Text(App.format(schedule.getNextTriggerTime(now)))
+            }
 
-        Column(
-            Modifier
-                .weight(1f, true)
-                .combinedClickable(
+            DropdownMenu(
+                expanded = dropdownMenuExpanded,
+                onDismissRequest = { dropdownMenuExpanded = false },
+                offset = DpOffset(50.dp, (-10).dp)
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Remove") },
                     onClick = {
-                        App.editScheduleId = schedule.id
-                        App.screen = ScreenType.EDIT
-                    },
-                    onLongClick = {
-                        dropdownMenuExpanded = true
-                    })
-        ) {
-            Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "")
-            Text(schedule.timeConfig)
-            Text(App.format(schedule.getNextTriggerTime(now)))
+                        dropdownMenuExpanded = false
+                        ScheduleService.scheduleList.removeAt(index)
+                        ScheduleService.saveAndRefresh()
+                        App.scheduleChangedTrigger++
+                    }
+                )
+            }
         }
     }
 }
