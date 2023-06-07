@@ -7,6 +7,7 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
@@ -171,7 +172,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                             dropdownMenuExpanded = true
                         })
             ) {
-                Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "")
+                Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "", Modifier.fillMaxWidth())
                 Text(schedule.timeConfig)
                 Text(App.format(schedule.getNextTriggerTime(now)))
             }
