@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -49,15 +47,11 @@ fun EditScreen() {
     App.editingSchedule = if (isAdding) Schedule()
     else ScheduleService.scheduleList.filter { it.id == App.editScheduleId }[0]
 
-    Scaffold(
-        topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") },
-        content = {
-            Surface(Modifier.padding(it)) {
-                Editor()
-            }
-        },
-        bottomBar = { BottomBar() }
-    )
+    Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") }, content = {
+        Surface(Modifier.padding(it)) {
+            Editor()
+        }
+    }, bottomBar = { BottomBar() })
 }
 
 @Composable
@@ -83,11 +77,8 @@ private fun Editor() {
             Observe {
                 App.editingNameChangedTrigger
 
-                var textRange by remember { mutableStateOf(TextRange(App.editingSchedule.name.length)) }
-
-                SimpleTextField("Name: ", TextFieldValue(App.editingSchedule.name, textRange), onTextChanged = {
-                    App.editingSchedule.name = it.text
-                    textRange = it.selection
+                SimpleTextField("Name: ", App.editingSchedule.name, onTextChanged = {
+                    App.editingSchedule.name = it
                 })
             }
             HeightSpacer()
@@ -213,86 +204,53 @@ private fun Editor() {
 fun BottomBar() {
     val context = LocalContext.current
 
-    BottomAppBar(
-        actions = {
-            if (isAdding) {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        App.screen = ScreenType.HOME
-                    },
-                    label = { Text("Cancel") },
-                    icon = { Icon(ImageVector.vectorResource(R.drawable.ic_cancel), null) }
-                )
-            } else {
-                NavigationBarItem(
-                    selected = false,
-                    onClick = {
-                        AlertDialog.Builder(context)
-                            .setTitle("Remove")
-                            .setMessage("Remove this schedule?")
-                            .setPositiveButton("Yes") { _, _ ->
-                                ScheduleService.scheduleList.removeIf { it.id == App.editScheduleId }
-                                App.scheduleChangedTrigger++
-                                App.screen = ScreenType.HOME
-                            }
-                            .setNegativeButton("No", null)
-                            .show()
-                    },
-                    label = { Text("Remove") },
-                    icon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) }
-                )
-            }
-
-            NavigationBarItem(
-                selected = false,
-                onClick = {
-                    onEditScreenPressBack()
-                },
-                label = { Text(if (isAdding) "Add" else "Apply") },
-                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) }
-            )
-
-            NavigationBarItem(
-                selected = false,
-                onClick = {
-                    Calendar.getInstance().apply {
-                        App.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
-                        App.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
-                        App.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
-                        App.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
-                        App.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                        App.editingTimeConfigChangedTrigger++
-                    }
-                },
-                label = { Text("Now") },
-                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) }
-            )
-
-            Observe {
-                val text = if (App.isPlaying) "Stop" else "Play"
-                val onClick = {
-                    if (App.isPlaying) ScheduleService.stopPlaying()
-                    else App.editingSchedule.play()
-                }
-
-                if (App.isPlaying)
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = onClick,
-                        label = { Text(text) },
-                        icon = { Icon(ImageVector.vectorResource(R.drawable.ic_stop), null) }
-                    )
-                else
-                    NavigationBarItem(
-                        selected = false,
-                        onClick = onClick,
-                        label = { Text(text) },
-                        icon = { Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null) }
-                    )
-            }
+    BottomAppBar(actions = {
+        if (isAdding) {
+            NavigationBarItem(selected = false, onClick = {
+                App.screen = ScreenType.HOME
+            }, label = { Text("Cancel") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_cancel), null) })
+        } else {
+            NavigationBarItem(selected = false, onClick = {
+                AlertDialog.Builder(context).setTitle("Remove").setMessage("Remove this schedule?").setPositiveButton("Yes") { _, _ ->
+                    ScheduleService.scheduleList.removeIf { it.id == App.editScheduleId }
+                    App.scheduleChangedTrigger++
+                    App.screen = ScreenType.HOME
+                }.setNegativeButton("No", null).show()
+            }, label = { Text("Remove") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) })
         }
-    )
+
+        NavigationBarItem(selected = false, onClick = {
+            onEditScreenPressBack()
+        }, label = { Text(if (isAdding) "Add" else "Apply") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) })
+
+        NavigationBarItem(selected = false, onClick = {
+            Calendar.getInstance().apply {
+                App.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
+                App.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
+                App.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
+                App.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
+                App.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
+                App.editingTimeConfigChangedTrigger++
+            }
+        }, label = { Text("Now") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) })
+
+        Observe {
+            val text = if (App.isPlaying) "Stop" else "Play"
+            val onClick = {
+                if (App.isPlaying) ScheduleService.stopPlaying()
+                else App.editingSchedule.play()
+            }
+
+            if (App.isPlaying) NavigationBarItem(selected = false,
+                onClick = onClick,
+                label = { Text(text) },
+                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_stop), null) })
+            else NavigationBarItem(selected = false,
+                onClick = onClick,
+                label = { Text(text) },
+                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null) })
+        }
+    })
 }
 
 fun onEditScreenPressBack() {

@@ -167,6 +167,42 @@ fun SimpleTextField(
 }
 
 @Composable
+fun SimpleTextField(
+    hint: String,
+    value: String,
+    modifier: Modifier = Modifier,
+    textFieldModifier: Modifier = Modifier,
+    textStyle: TextStyle = LocalTextStyle.current,
+    onTextFieldFocused: (Boolean) -> Unit = {},
+    onTextChanged: (String) -> Unit = {}
+) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
+        val focusRequester = remember { FocusRequester() }
+
+        Text(hint, Modifier.clickable { focusRequester.requestFocus() })
+        WidthSpacer()
+
+        var lastFocusState by remember { mutableStateOf(false) }
+
+        TextField(
+            modifier = textFieldModifier
+                .onFocusChanged { state ->
+                    if (lastFocusState != state.hasFocus) {
+                        onTextFieldFocused(state.hasFocus)
+                    }
+                    lastFocusState = state.hasFocus
+                }
+                .focusRequester(focusRequester),
+            value = value,
+            onValueChange = {
+                onTextChanged(it)
+            },
+            textStyle = textStyle,
+        )
+    }
+}
+
+@Composable
 fun SimpleIntField(
     hint: String,
     textFieldValue: TextFieldValue,

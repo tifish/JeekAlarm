@@ -89,6 +89,8 @@ class App : Application() {
         var editingOptionsChangedTrigger by mutableStateOf(0)
         var editingNameChangedTrigger by mutableStateOf(0)
         var editingTimeConfigChangedTrigger by mutableStateOf(0)
+        var openAiApiKeyChangedTrigger by mutableStateOf(0)
+        var iFlyAppIdChangedTrigger by mutableStateOf(0)
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)

@@ -53,6 +53,9 @@ object ConfigService {
             data.openAiApiKey = CryptoService.decrypt(data.openAiApiKey)
         if (data.iFlyAppId != "")
             data.iFlyAppId = CryptoService.decrypt(data.iFlyAppId)
+
+        App.openAiApiKeyChangedTrigger++
+        App.iFlyAppIdChangedTrigger++
     }
 
     fun save() {

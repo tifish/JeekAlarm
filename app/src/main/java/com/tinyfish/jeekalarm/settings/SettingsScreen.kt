@@ -16,14 +16,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -41,20 +36,15 @@ import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
 import com.tinyfish.ui.WidthSpacer
 
-
 @Composable
 fun SettingsScreen() {
-    Scaffold(
-        topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
-        content = {
-            Surface(
-                modifier = Modifier.padding(it),
-            ) {
-                Editor()
-            }
-        },
-        bottomBar = { NavigationBottomBar(ScreenType.SETTINGS) }
-    )
+    Scaffold(topBar = { MyTopBar(R.drawable.ic_settings, "Settings") }, content = {
+        Surface(
+            modifier = Modifier.padding(it),
+        ) {
+            Editor()
+        }
+    }, bottomBar = { NavigationBottomBar(ScreenType.SETTINGS) })
 }
 
 @Composable
@@ -71,8 +61,7 @@ private fun Editor() {
             Observe {
                 val themeScope = currentRecomposeScope
                 Row(
-                    modifier = Modifier.padding(start = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.padding(start = 20.dp), verticalAlignment = Alignment.CenterVertically
                 ) {
                     val options = listOf("Auto", "Dark", "Light")
                     options.forEach {
@@ -95,41 +84,33 @@ private fun Editor() {
         MyGroupBox {
             Observe {
                 val fileSelectScope = currentRecomposeScope
-                MyFileSelector("Music File:",
-                    ConfigService.data.defaultMusicFile,
-                    onSelect = {
-                        FileSelector.openMusicFile {
-                            ConfigService.data.defaultMusicFile = it.path?.substringAfter(':')!!
-                            ConfigService.save()
-                            fileSelectScope.invalidate()
-                        }
-                    },
-                    onClear = {
-                        ConfigService.data.defaultMusicFile = ""
+                MyFileSelector("Music File:", ConfigService.data.defaultMusicFile, onSelect = {
+                    FileSelector.openMusicFile {
+                        ConfigService.data.defaultMusicFile = it.path?.substringAfter(':')!!
                         ConfigService.save()
                         fileSelectScope.invalidate()
                     }
-                )
+                }, onClear = {
+                    ConfigService.data.defaultMusicFile = ""
+                    ConfigService.save()
+                    fileSelectScope.invalidate()
+                })
             }
 
             HeightSpacer()
             Observe {
                 val fileSelectScope = currentRecomposeScope
-                MyFileSelector("Music Folder:",
-                    ConfigService.data.defaultMusicFolder,
-                    onSelect = {
-                        FileSelector.openFolder {
-                            ConfigService.data.defaultMusicFolder = it.path?.substringAfter(':')!!
-                            ConfigService.save()
-                            fileSelectScope.invalidate()
-                        }
-                    },
-                    onClear = {
-                        ConfigService.data.defaultMusicFolder = ""
+                MyFileSelector("Music Folder:", ConfigService.data.defaultMusicFolder, onSelect = {
+                    FileSelector.openFolder {
+                        ConfigService.data.defaultMusicFolder = it.path?.substringAfter(':')!!
                         ConfigService.save()
                         fileSelectScope.invalidate()
                     }
-                )
+                }, onClear = {
+                    ConfigService.data.defaultMusicFolder = ""
+                    ConfigService.save()
+                    fileSelectScope.invalidate()
+                })
             }
         }
 
@@ -138,8 +119,7 @@ private fun Editor() {
         Button(
             onClick = {
                 NotificationService.showAlarm(ScheduleService.nextAlarmIds)
-            },
-            Modifier.padding(5.dp)
+            }, Modifier.padding(5.dp)
         ) {
             Text("Test Next Alarm")
         }
@@ -147,18 +127,16 @@ private fun Editor() {
         HeightSpacer()
 
         MyGroupBox {
-            var openAIApiKey by remember { mutableStateOf(TextFieldValue(ConfigService.data.openAiApiKey)) }
-            SimpleTextField("OpenAI API key: ", openAIApiKey, onTextChanged = {
-                openAIApiKey = it
-                ConfigService.data.openAiApiKey = it.text
+            App.openAiApiKeyChangedTrigger
+            SimpleTextField("OpenAI API key: ", ConfigService.data.openAiApiKey, onTextChanged = {
+                ConfigService.data.openAiApiKey = it
                 ConfigService.save()
             })
             HeightSpacer()
 
-            var iFlyAppId by remember { mutableStateOf(TextFieldValue(ConfigService.data.iFlyAppId)) }
-            SimpleTextField("IFly APP ID: ", iFlyAppId, onTextChanged = {
-                iFlyAppId = it
-                ConfigService.data.iFlyAppId = it.text
+            App.iFlyAppIdChangedTrigger
+            SimpleTextField("IFly APP ID: ", ConfigService.data.iFlyAppId, onTextChanged = {
+                ConfigService.data.iFlyAppId = it
                 ConfigService.save()
             })
             HeightSpacer()
@@ -169,21 +147,17 @@ private fun Editor() {
                 val fileSelectScope = currentRecomposeScope
                 val context = LocalContext.current
 
-                MyFileSelector("Config Folder:",
-                    ConfigService.configDir,
-                    onSelect = {
-                        FileSelector.openFolder {
-                            ConfigService.configDir = it.path?.substringAfter(':')!!
-                            fileSelectScope.invalidate()
-                            onConfigDirChanged(context)
-                        }
-                    },
-                    onClear = {
-                        ConfigService.configDir = ""
+                MyFileSelector("Config Folder:", ConfigService.configDir, onSelect = {
+                    FileSelector.openFolder {
+                        ConfigService.configDir = it.path?.substringAfter(':')!!
                         fileSelectScope.invalidate()
                         onConfigDirChanged(context)
                     }
-                )
+                }, onClear = {
+                    ConfigService.configDir = ""
+                    fileSelectScope.invalidate()
+                    onConfigDirChanged(context)
+                })
             }
         }
 
@@ -208,9 +182,7 @@ private fun onConfigDirChanged(context: Context) {
         }
 
         AlertDialog.Builder(context).setMessage("Found config file in new location, load or overwrite them?")
-            .setPositiveButton("Load", dialogClickListener)
-            .setNegativeButton("Overwrite", dialogClickListener)
-            .show()
+            .setPositiveButton("Load", dialogClickListener).setNegativeButton("Overwrite", dialogClickListener).show()
     } else {
         ConfigService.save()
         ScheduleService.save()
