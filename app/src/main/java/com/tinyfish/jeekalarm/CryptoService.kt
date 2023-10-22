@@ -1,73 +1,90 @@
 package com.tinyfish.jeekalarm
 
-import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.util.Base64
-import java.nio.charset.Charset
-import java.security.KeyStore
+import java.io.UnsupportedEncodingException
+import java.security.InvalidKeyException
+import java.security.NoSuchAlgorithmException
+import javax.crypto.BadPaddingException
 import javax.crypto.Cipher
-import javax.crypto.KeyGenerator
-import javax.crypto.SecretKey
-import javax.crypto.spec.IvParameterSpec
+import javax.crypto.IllegalBlockSizeException
+import javax.crypto.NoSuchPaddingException
+import javax.crypto.ShortBufferException
+import javax.crypto.spec.SecretKeySpec
 
 class CryptoService {
     companion object {
-        private const val alias = "7b94fe97-b901-4341-9dc3-beb0f900d8d9"
-        private var keyStore: KeyStore = KeyStore.getInstance("AndroidKeyStore")
+        private const val aesKey = "7b94fe97-b901-43"
+        private var secretKey: SecretKeySpec? = null
+        private val cipher = Cipher.getInstance("AES/ECB/PKCS7Padding")
 
         init {
-            keyStore.load(null)
-            generateKey()
-        }
-
-        private fun generateKey() {
-            if (keyStore.containsAlias(alias))
-                return
-
-            val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
-            val keyGenParameterSpec = KeyGenParameterSpec.Builder(
-                alias, KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
-            ).setBlockModes(KeyProperties.BLOCK_MODE_CBC)
-                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_PKCS7)
-                .setUserAuthenticationRequired(false).build()
-
-            keyGenerator.init(keyGenParameterSpec)
-            keyGenerator.generateKey()
+            try {
+                val keyBytes = aesKey.toByteArray(charset("UTF8"))
+                secretKey = SecretKeySpec(keyBytes, "AES")
+            } catch (uee: UnsupportedEncodingException) {
+                uee.printStackTrace()
+            }
         }
 
         fun encrypt(plainText: String): String {
-            val secretKey = keyStore.getKey(alias, null) as SecretKey
-            val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
-            cipher.init(Cipher.ENCRYPT_MODE, secretKey)
+            try {
+                cipher.init(Cipher.ENCRYPT_MODE, secretKey)
 
-            val ivBytes = cipher.iv
-            val encryptedBytes = cipher.doFinal(plainText.toByteArray(Charset.forName("UTF-8")))
+                val input = plainText.toByteArray(Charsets.UTF_8)
+                val cipherText = ByteArray(cipher.getOutputSize(input.size))
+                var ctLength = cipher.update(
+                    input, 0, input.size,
+                    cipherText, 0
+                )
+                ctLength += cipher.doFinal(cipherText, ctLength)
 
-            val encryptedData = ByteArray(ivBytes.size + encryptedBytes.size)
-            System.arraycopy(ivBytes, 0, encryptedData, 0, ivBytes.size)
-            System.arraycopy(encryptedBytes, 0, encryptedData, ivBytes.size, encryptedBytes.size)
+                return Base64.encodeToString(cipherText, Base64.DEFAULT)
+            } catch (ex: UnsupportedEncodingException) {
+                ex.printStackTrace()
+            } catch (ex: IllegalBlockSizeException) {
+                ex.printStackTrace()
+            } catch (ex: BadPaddingException) {
+                ex.printStackTrace()
+            } catch (ex: InvalidKeyException) {
+                ex.printStackTrace()
+            } catch (ex: NoSuchPaddingException) {
+                ex.printStackTrace()
+            } catch (ex: NoSuchAlgorithmException) {
+                ex.printStackTrace()
+            } catch (ex: ShortBufferException) {
+                ex.printStackTrace()
+            }
 
-            return Base64.encodeToString(encryptedData, Base64.DEFAULT)
+            return ""
         }
 
         fun decrypt(encryptedText: String): String {
             try {
-                val secretKey = keyStore.getKey(alias, null) as SecretKey
-                val cipher = Cipher.getInstance("AES/CBC/PKCS7Padding")
+                cipher.init(Cipher.DECRYPT_MODE, secretKey)
 
-                val encryptedData = Base64.decode(encryptedText, Base64.DEFAULT)
+                val encryptedBytes = Base64.decode(encryptedText, Base64.DEFAULT)
+                val decryptedBytes = ByteArray(cipher.getOutputSize(encryptedBytes.size))
+                var ptLength = cipher.update(encryptedBytes, 0, encryptedBytes.size, decryptedBytes, 0)
+                ptLength += cipher.doFinal(decryptedBytes, ptLength)
 
-                val ivBytes = encryptedData.copyOfRange(0, 16)
-                val encryptedBytes = encryptedData.copyOfRange(16, encryptedData.size)
-
-                val ivParameterSpec = IvParameterSpec(ivBytes)
-                cipher.init(Cipher.DECRYPT_MODE, secretKey, ivParameterSpec)
-
-                val decryptedBytes = cipher.doFinal(encryptedBytes)
-                return String(decryptedBytes, Charset.forName("UTF-8"))
-            } catch (ex: Exception) {
-                return ""
+                return String(decryptedBytes, 0, ptLength)
+            } catch (ex: UnsupportedEncodingException) {
+                ex.printStackTrace()
+            } catch (ex: IllegalBlockSizeException) {
+                ex.printStackTrace()
+            } catch (ex: BadPaddingException) {
+                ex.printStackTrace()
+            } catch (ex: InvalidKeyException) {
+                ex.printStackTrace()
+            } catch (ex: NoSuchPaddingException) {
+                ex.printStackTrace()
+            } catch (ex: NoSuchAlgorithmException) {
+                ex.printStackTrace()
+            } catch (e: ShortBufferException) {
+                e.printStackTrace()
             }
+
+            return ""
         }
     }
 }
