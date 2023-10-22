@@ -33,7 +33,7 @@ object AlarmService {
 
     fun cancelAlarm() {
         if (alarmIntent != null) {
-            alarmManager.cancel(alarmIntent)
+            alarmManager.cancel(alarmIntent!!)
         }
     }
 }
