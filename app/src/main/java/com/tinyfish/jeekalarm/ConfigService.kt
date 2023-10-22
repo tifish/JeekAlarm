@@ -4,7 +4,6 @@ import android.content.SharedPreferences
 import android.os.Environment
 import com.tinyfish.jeekalarm.start.App
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -36,10 +35,11 @@ object ConfigService {
 
     val configFile: File
         get() {
-            val dir = if (configDir == "")
-                App.context.filesDir
-            else
-                File(Environment.getExternalStorageDirectory().path, configDir)
+            val dir =
+                if (configDir == "")
+                    App.context.filesDir
+                else
+                    File(Environment.getExternalStorageDirectory().path, configDir)
 
             return File(dir, "config.json")
         }
