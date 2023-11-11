@@ -40,7 +40,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
@@ -112,6 +114,11 @@ fun HomeScreen() {
 @Composable
 private fun ScheduleList() {
     App.scheduleChangedTrigger
+
+    if (LocalInspectionMode.current) {
+        ScheduleService.scheduleList.add(Schedule(name="Alarm1"))
+        ScheduleService.scheduleList.add(Schedule(name="Alarm2"))
+    }
 
     if (ScheduleService.scheduleList.size == 0) {
         Box(Modifier.wrapContentSize()) {
@@ -230,4 +237,12 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
             }
         },
     )
+}
+
+@Preview
+@Composable
+fun HomeScreenPreview() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        HomeScreen()
+    }
 }
