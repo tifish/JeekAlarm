@@ -8,11 +8,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
@@ -23,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -44,8 +47,10 @@ private var isAdding = false
 @Composable
 fun EditScreen() {
     isAdding = App.editScheduleId == -1
-    App.editingSchedule = if (isAdding) Schedule()
-    else ScheduleService.scheduleList.filter { it.id == App.editScheduleId }[0]
+    App.editingSchedule = if (isAdding)
+        Schedule()
+    else
+        ScheduleService.scheduleList.filter { it.id == App.editScheduleId }[0]
 
     Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") }, content = {
         Surface(Modifier.padding(it)) {
@@ -79,6 +84,7 @@ private fun Editor() {
 
                 SimpleTextField("Name: ", App.editingSchedule.name, onTextChanged = {
                     App.editingSchedule.name = it
+                    App.editingNameChangedTrigger++
                 })
             }
             HeightSpacer()
@@ -264,4 +270,12 @@ fun onEditScreenPressBack() {
 
     ScheduleService.stopPlaying()
     App.screen = ScreenType.HOME
+}
+
+@Preview
+@Composable
+fun EditScreenPreview() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        EditScreen()
+    }
 }

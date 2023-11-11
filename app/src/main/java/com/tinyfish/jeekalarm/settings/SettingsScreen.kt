@@ -10,15 +10,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
@@ -127,18 +131,24 @@ private fun Editor() {
         HeightSpacer()
 
         MyGroupBox {
-            App.openAiApiKeyChangedTrigger
-            SimpleTextField("OpenAI API key: ", ConfigService.data.openAiApiKey, onTextChanged = {
-                ConfigService.data.openAiApiKey = it
-                ConfigService.save()
-            })
+            Observe {
+                App.openAiApiKeyChangedTrigger
+                SimpleTextField("OpenAI API key: ", ConfigService.data.openAiApiKey, onTextChanged = {
+                    ConfigService.data.openAiApiKey = it
+                    ConfigService.save()
+                    App.openAiApiKeyChangedTrigger++
+                })
+            }
             HeightSpacer()
 
-            App.iFlyAppIdChangedTrigger
-            SimpleTextField("IFly APP ID: ", ConfigService.data.iFlyAppId, onTextChanged = {
-                ConfigService.data.iFlyAppId = it
-                ConfigService.save()
-            })
+            Observe {
+                App.iFlyAppIdChangedTrigger
+                SimpleTextField("IFly APP ID: ", ConfigService.data.iFlyAppId, onTextChanged = {
+                    ConfigService.data.iFlyAppId = it
+                    ConfigService.save()
+                    App.iFlyAppIdChangedTrigger++
+                })
+            }
             HeightSpacer()
         }
 
@@ -147,7 +157,13 @@ private fun Editor() {
                 val fileSelectScope = currentRecomposeScope
                 val context = LocalContext.current
 
-                MyFileSelector("Config Folder:", ConfigService.configDir, onSelect = {
+                val configDir =
+                    if (LocalInspectionMode.current)
+                        ""
+                    else
+                        ConfigService.configDir
+
+                MyFileSelector("Config Folder:", configDir, onSelect = {
                     FileSelector.openFolder {
                         ConfigService.configDir = it.path?.substringAfter(':')!!
                         fileSelectScope.invalidate()
@@ -191,4 +207,12 @@ private fun onConfigDirChanged(context: Context) {
 
 fun onSettingsScreenPressBack() {
     App.screen = ScreenType.HOME
+}
+
+@Preview
+@Composable
+fun SettingsScreenPreview() {
+    MaterialTheme(colorScheme = darkColorScheme()) {
+        SettingsScreen()
+    }
 }
