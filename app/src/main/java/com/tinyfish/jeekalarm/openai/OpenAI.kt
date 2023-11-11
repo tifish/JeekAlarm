@@ -6,6 +6,7 @@ import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
 import com.aallam.openai.api.logging.LogLevel
 import com.aallam.openai.api.model.ModelId
+import com.aallam.openai.client.LoggingConfig
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.tinyfish.jeekalarm.ConfigService
@@ -36,7 +37,7 @@ class OpenAI {
             var result: String
 
             runBlocking {
-                val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LogLevel.All))
+                val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LoggingConfig(LogLevel.All)))
 
                 val gpt35turbo = openAI.model(modelId = ModelId("gpt-3.5-turbo"))
 
@@ -53,7 +54,7 @@ class OpenAI {
                     temperature = 0.0,
                 )
                 LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                result = openAI.chatCompletion(completionRequest).choices[0].message?.content.orEmpty()
+                result = openAI.chatCompletion(completionRequest).choices[0].message.content.orEmpty()
             }
 
             if (result == "null")
