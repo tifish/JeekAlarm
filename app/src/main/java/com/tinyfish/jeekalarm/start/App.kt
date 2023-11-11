@@ -104,7 +104,7 @@ class App : Application() {
             context.stopService(serviceIntent)
         }
 
-        fun guessEditingScheduleFromName() {
+        suspend fun guessEditingScheduleFromName() {
             if (ConfigService.data.openAiApiKey.isEmpty())
                 return
 

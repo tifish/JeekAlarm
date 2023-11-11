@@ -12,15 +12,13 @@ import com.aallam.openai.client.OpenAIConfig
 import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleParser
-import kotlinx.coroutines.runBlocking
-import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
 class OpenAI {
     companion object {
         @OptIn(BetaOpenAI::class)
-        fun getAnswer(question: String): Schedule? {
+        suspend fun getAnswer(question: String): Schedule? {
             val now = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm"))
             val systemContent = """
 你现在是一个转换器，输出给程序处理的字符串，请严格输出所需内容，不要添加任何描述文字：
@@ -36,32 +34,30 @@ class OpenAI {
 
             var result: String
 
-            runBlocking {
-                val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LoggingConfig(LogLevel.All)))
+            val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LoggingConfig(LogLevel.All)))
 
-                val gpt35turbo = openAI.model(modelId = ModelId("gpt-3.5-turbo"))
+            val gpt35turbo = openAI.model(modelId = ModelId("gpt-3.5-turbo"))
 
-                val completionRequest = ChatCompletionRequest(
-                    model = gpt35turbo.id,
-                    messages = listOf(
-                        ChatMessage(
-                            role = ChatRole.System, content = systemContent
-                        ), ChatMessage(
-                            role = ChatRole.User, content = question
-                        )
-                    ),
-                    maxTokens = 32,
-                    temperature = 0.0,
-                )
-                LocalDate.now().format(DateTimeFormatter.ofPattern("dd-MM-yyyy"))
-                result = openAI.chatCompletion(completionRequest).choices[0].message.content.orEmpty()
-            }
+            val completionRequest = ChatCompletionRequest(
+                model = gpt35turbo.id,
+                messages = listOf(
+                    ChatMessage(
+                        role = ChatRole.System, content = systemContent
+                    ), ChatMessage(
+                        role = ChatRole.User, content = question
+                    )
+                ),
+                maxTokens = 32,
+                temperature = 0.0,
+            )
 
+            result = openAI.chatCompletion(completionRequest).choices[0].message.content.orEmpty()
             if (result == "null")
                 return null
 
             val schedule = ScheduleParser.parseStandardCron(result)
             schedule?.onlyOnce = !question.contains("每") && !question.contains("every")
+
             return schedule
         }
     }

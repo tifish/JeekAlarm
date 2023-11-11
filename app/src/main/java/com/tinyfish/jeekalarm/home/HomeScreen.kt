@@ -34,6 +34,7 @@ import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,10 @@ import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.SimpleVectorButton
 import com.tinyfish.ui.WidthSpacer
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Composable
@@ -116,8 +121,8 @@ private fun ScheduleList() {
     App.scheduleChangedTrigger
 
     if (LocalInspectionMode.current) {
-        ScheduleService.scheduleList.add(Schedule(name="Alarm1"))
-        ScheduleService.scheduleList.add(Schedule(name="Alarm2"))
+        ScheduleService.scheduleList.add(Schedule(name = "Alarm1"))
+        ScheduleService.scheduleList.add(Schedule(name = "Alarm2"))
     }
 
     if (ScheduleService.scheduleList.size == 0) {
@@ -203,6 +208,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     }
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun NavigationBottomBar(currentScreen: ScreenType) {
     BottomAppBar(
@@ -230,7 +236,9 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
                     App.editingSchedule.name = it
                     App.editingNameChangedTrigger++
 
-                    App.guessEditingScheduleFromName()
+                    GlobalScope.launch(Dispatchers.Main) {
+                        App.guessEditingScheduleFromName()
+                    }
                 }
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)

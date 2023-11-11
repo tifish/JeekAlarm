@@ -18,7 +18,7 @@ import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -40,6 +40,10 @@ import com.tinyfish.ui.MySwitch
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
+import kotlinx.coroutines.DelicateCoroutinesApi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 private var isAdding = false
@@ -59,6 +63,7 @@ fun EditScreen() {
     }, bottomBar = { BottomBar() })
 }
 
+@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun Editor() {
     Column(
@@ -91,7 +96,9 @@ private fun Editor() {
 
             if (ConfigService.data.openAiApiKey != "") {
                 Button(onClick = {
-                    App.guessEditingScheduleFromName()
+                    GlobalScope.launch(Dispatchers.Main) {
+                        App.guessEditingScheduleFromName()
+                    }
                 }) {
                     Text("Guess time from name")
                 }
@@ -181,7 +188,7 @@ private fun Editor() {
                     if (App.editingSchedule.vibration) {
                         HeightSpacer()
 
-                        var vibrationCount by remember { mutableStateOf(App.editingSchedule.vibrationCount.toFloat()) }
+                        var vibrationCount by remember { mutableFloatStateOf(App.editingSchedule.vibrationCount.toFloat()) }
 
                         Text(
                             vibrationCount.toInt().toString() + " times", modifier = Modifier.padding(start = 20.dp)
