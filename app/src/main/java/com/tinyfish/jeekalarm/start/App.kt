@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.ConfigService
@@ -80,17 +81,17 @@ class App : Application() {
 
         var screenBeforeNotification = ScreenType.HOME
 
-        var themeColorsChangedTrigger by mutableStateOf(0)
+        var themeColorsChangedTrigger by mutableIntStateOf(0)
 
         var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
-        var scheduleChangedTrigger by mutableStateOf(0)
+        var scheduleChangedTrigger by mutableIntStateOf(0)
         var isPlaying by mutableStateOf(false)
-        var editingOptionsChangedTrigger by mutableStateOf(0)
-        var editingNameChangedTrigger by mutableStateOf(0)
-        var editingTimeConfigChangedTrigger by mutableStateOf(0)
-        var openAiApiKeyChangedTrigger by mutableStateOf(0)
-        var iFlyAppIdChangedTrigger by mutableStateOf(0)
+        var editingOptionsChangedTrigger by mutableIntStateOf(0)
+        var editingNameChangedTrigger by mutableIntStateOf(0)
+        var editingTimeConfigChangedTrigger by mutableIntStateOf(0)
+        var openAiApiKeyChangedTrigger by mutableIntStateOf(0)
+        var iFlyAppIdChangedTrigger by mutableIntStateOf(0)
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)
