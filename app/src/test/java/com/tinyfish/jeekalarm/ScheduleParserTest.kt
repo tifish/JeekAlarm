@@ -9,7 +9,7 @@ class ScheduleParserTest {
     fun parseLine1() {
         val cronSchedule = ScheduleParser.parseTextLine("name * * * * * *")
         Assert.assertEquals("name", cronSchedule.name)
-        val emptyList = mutableListOf<Int>();
+        val emptyList = mutableListOf<Int>()
         Assert.assertEquals(emptyList, cronSchedule.minutes)
         Assert.assertEquals(emptyList, cronSchedule.hours)
         Assert.assertEquals(emptyList, cronSchedule.days)
