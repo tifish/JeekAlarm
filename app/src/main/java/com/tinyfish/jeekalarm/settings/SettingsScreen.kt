@@ -131,6 +131,36 @@ private fun Editor() {
         HeightSpacer()
 
         MyGroupBox {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Default AI: ")
+                Observe {
+                    App.defaultAiApiKeyChangedTrigger
+
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = ConfigService.data.defaultAi == "OpenAI",
+                            onClick = {
+                                ConfigService.data.defaultAi = "OpenAI"
+                                ConfigService.save()
+                                App.defaultAiApiKeyChangedTrigger++
+                            }
+                        )
+                        Text("OpenAI")
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        RadioButton(
+                            selected = ConfigService.data.defaultAi == "Gemini",
+                            onClick = {
+                                ConfigService.data.defaultAi = "Gemini"
+                                ConfigService.save()
+                                App.defaultAiApiKeyChangedTrigger++
+                            }
+                        )
+                        Text("Gemini")
+                    }
+                }
+            }
+
             Observe {
                 App.openAiApiKeyChangedTrigger
                 SimpleTextField("OpenAI API key: ", ConfigService.data.openAiApiKey, onTextChanged = {
@@ -142,6 +172,15 @@ private fun Editor() {
             HeightSpacer()
 
             Observe {
+                App.geminiApiKeyChangedTrigger
+                SimpleTextField("Gemini API key: ", ConfigService.data.geminiKey, onTextChanged = {
+                    ConfigService.data.geminiKey = it
+                    ConfigService.save()
+                    App.geminiApiKeyChangedTrigger++
+                })
+            }
+
+            Observe {
                 App.iFlyAppIdChangedTrigger
                 SimpleTextField("IFly APP ID: ", ConfigService.data.iFlyAppId, onTextChanged = {
                     ConfigService.data.iFlyAppId = it
@@ -151,6 +190,8 @@ private fun Editor() {
             }
             HeightSpacer()
         }
+
+        HeightSpacer()
 
         MyGroupBox {
             Observe {

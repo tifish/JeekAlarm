@@ -1,6 +1,5 @@
 package com.tinyfish.jeekalarm.schedule
 
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
@@ -32,7 +31,7 @@ internal object ScheduleParser {
     fun parseStandardCron(cron: String): Schedule? {
         val parts = cron.split(' ')
 
-        if (parts.size != 5)
+        if (parts.size < 5 || parts.size > 6)
             return null
 
         return Schedule(
@@ -41,7 +40,7 @@ internal object ScheduleParser {
             dayConfig = parts[2],
             monthConfig = parts[3],
             weekDayConfig = parts[4],
-            yearConfig = "*",
+            yearConfig = if (parts.size == 5) "*" else parts[5],
         )
     }
 

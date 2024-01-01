@@ -1,4 +1,4 @@
-package com.tinyfish.jeekalarm.openai
+package com.tinyfish.jeekalarm.ai
 
 import com.aallam.openai.api.BetaOpenAI
 import com.aallam.openai.api.chat.ChatCompletionRequest
@@ -26,18 +26,15 @@ class OpenAI {
 - 把每一句话中与时间有关的部分转换为 crontab 格式并输出，忽略与时间无关的部分。
 - 输出中仅包含 crontab 的时间部分，不要包含命令。
 - crontab 时间格式包含5个部分，以空格分隔，一定不要出现6个。示例：`21 9 9 5 *` 表示5月9日9点21分。
-- 如果是相对时间，例如“两小时以后”，那么结果应该是：`10 23 20 4 *`。
+- 如果是相对时间，例如遇到“10分钟后”，请根据当前时间进行计算。
 - 没有指定一天中的具体时间，则默认时间是12:00。例如“下个月9号提醒我”转换为`0 12 9 5 *`
 - 如果没有指定分钟，则默认为0。
 - 如果无法转换，则输出字符串`null`。
 """
 
             var result: String
-
             val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LoggingConfig(LogLevel.All)))
-
             val gpt35turbo = openAI.model(modelId = ModelId("gpt-3.5-turbo"))
-
             val completionRequest = ChatCompletionRequest(
                 model = gpt35turbo.id,
                 messages = listOf(
@@ -56,7 +53,7 @@ class OpenAI {
                 return null
 
             val schedule = ScheduleParser.parseStandardCron(result)
-            schedule?.onlyOnce = !question.contains("每") && !question.contains("every")
+            schedule?.onlyOnce = !question.contains("每") && !question.contains("every ")
 
             return schedule
         }

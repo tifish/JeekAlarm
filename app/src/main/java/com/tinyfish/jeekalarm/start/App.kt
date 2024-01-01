@@ -10,8 +10,9 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.ai.Gemini
+import com.tinyfish.jeekalarm.ai.OpenAI
 import com.tinyfish.jeekalarm.alarm.NotificationService
-import com.tinyfish.jeekalarm.openai.OpenAI
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
@@ -90,7 +91,9 @@ class App : Application() {
         var editingOptionsChangedTrigger by mutableIntStateOf(0)
         var editingNameChangedTrigger by mutableIntStateOf(0)
         var editingTimeConfigChangedTrigger by mutableIntStateOf(0)
+        var defaultAiApiKeyChangedTrigger by mutableIntStateOf(0)
         var openAiApiKeyChangedTrigger by mutableIntStateOf(0)
+        var geminiApiKeyChangedTrigger by mutableIntStateOf(0)
         var iFlyAppIdChangedTrigger by mutableIntStateOf(0)
 
         fun startServiceAndUpdateInfo() {
@@ -106,10 +109,15 @@ class App : Application() {
         }
 
         suspend fun guessEditingScheduleFromName() {
-            if (ConfigService.data.openAiApiKey.isEmpty())
+            var schedule: Schedule? = null
+            if (ConfigService.data.defaultAi == "Gemini" && ConfigService.data.geminiKey.isNotEmpty()) {
+                schedule = Gemini.getAnswer(editingSchedule.name)
+            } else if (ConfigService.data.defaultAi == "OpenAI" && ConfigService.data.openAiApiKey.isNotEmpty()) {
+                OpenAI.getAnswer(editingSchedule.name)
+            } else {
                 return
+            }
 
-            val schedule = OpenAI.getAnswer(editingSchedule.name)
             if (schedule != null) {
                 schedule.name = editingSchedule.name
                 schedule.copyTo(editingSchedule)

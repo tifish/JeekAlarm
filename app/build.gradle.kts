@@ -78,6 +78,9 @@ dependencies {
     // ChatGPT
     implementation(libs.openai.client)
 
+    // Gemini
+    implementation(libs.generativeai)
+
     // iFlytek
     implementation(files("libs/Msc.jar"))
     implementation(libs.fastjson)

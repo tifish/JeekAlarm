@@ -16,7 +16,9 @@ object ConfigService {
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
         var theme: String = "Dark",
+        var defaultAi: String = "OpenAI",
         var openAiApiKey: String = "",
+        var geminiKey: String = "",
         var iFlyAppId: String = "",
     )
 
@@ -51,10 +53,13 @@ object ConfigService {
         data = Json.decodeFromString(configFile.readText())
         if (data.openAiApiKey != "")
             data.openAiApiKey = CryptoService.decrypt(data.openAiApiKey)
+        if (data.geminiKey != "")
+            data.geminiKey = CryptoService.decrypt(data.geminiKey)
         if (data.iFlyAppId != "")
             data.iFlyAppId = CryptoService.decrypt(data.iFlyAppId)
 
         App.openAiApiKeyChangedTrigger++
+        App.geminiApiKeyChangedTrigger++
         App.iFlyAppIdChangedTrigger++
     }
 
@@ -62,6 +67,9 @@ object ConfigService {
         val originalOpenAiApiKey = data.openAiApiKey
         if (data.openAiApiKey != "")
             data.openAiApiKey = CryptoService.encrypt(data.openAiApiKey)
+        val originalGeminiKey = data.geminiKey
+        if (data.geminiKey != "")
+            data.geminiKey = CryptoService.encrypt(data.geminiKey)
         val originalIFlyAppId = data.iFlyAppId
         if (data.iFlyAppId != "")
             data.iFlyAppId = CryptoService.encrypt(data.iFlyAppId)
@@ -70,6 +78,8 @@ object ConfigService {
 
         if (data.openAiApiKey != "")
             data.openAiApiKey = originalOpenAiApiKey
+        if (data.geminiKey != "")
+            data.geminiKey = originalGeminiKey
         if (data.iFlyAppId != "")
             data.iFlyAppId = originalIFlyAppId
     }
