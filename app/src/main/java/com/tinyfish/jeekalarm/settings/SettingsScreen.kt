@@ -15,7 +15,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
@@ -165,8 +164,6 @@ private fun Editor() {
         }
 
         HeightSpacer()
-
-        TextField(value = "", onValueChange = {})
 
         MyGroupBox {
             Observe {
