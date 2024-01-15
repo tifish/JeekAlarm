@@ -2,7 +2,7 @@ package com.tinyfish.jeekalarm.ai
 
 import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.generationConfig
-import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleParser
 import java.time.LocalDateTime
@@ -19,7 +19,7 @@ class Gemini {
             }
             val generativeModel = GenerativeModel(
                 modelName = "gemini-pro",
-                apiKey = ConfigService.data.geminiKey,
+                apiKey = SettingsService.geminiKey,
                 generationConfig = config
             )
 

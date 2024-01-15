@@ -27,8 +27,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
@@ -94,7 +94,7 @@ private fun Editor() {
             }
             HeightSpacer()
 
-            if (ConfigService.data.openAiApiKey != "") {
+            if (SettingsService.openAiApiKey != "") {
                 Button(onClick = {
                     GlobalScope.launch(Dispatchers.Main) {
                         App.guessEditingScheduleFromName()

@@ -4,8 +4,8 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
-import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.MusicService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.start.App
 import kotlinx.serialization.Serializable
@@ -384,7 +384,7 @@ data class Schedule(
     }
 
     private fun playMusic() {
-        val finalMusicFolder = musicFolder.ifEmpty { ConfigService.data.defaultMusicFolder }
+        val finalMusicFolder = musicFolder.ifEmpty { SettingsService.defaultMusicFolder }
 
         if (finalMusicFolder.isNotEmpty()) {
             val folder = File(Environment.getExternalStorageDirectory().path, finalMusicFolder)
@@ -404,7 +404,7 @@ data class Schedule(
         } else {
             val finalMusicFile =
                 if (musicFile.isEmpty())
-                    ConfigService.data.defaultMusicFile
+                    SettingsService.defaultMusicFile
                 else
                     musicFile
 

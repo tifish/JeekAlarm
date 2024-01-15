@@ -9,7 +9,7 @@ import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.LoggingConfig
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
-import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleParser
 import java.time.LocalDateTime
@@ -33,7 +33,7 @@ class OpenAI {
 """
 
             var result: String
-            val openAI = OpenAI(OpenAIConfig(ConfigService.data.openAiApiKey, LoggingConfig(LogLevel.All)))
+            val openAI = OpenAI(OpenAIConfig(SettingsService.openAiApiKey, LoggingConfig(LogLevel.All)))
             val gpt35turbo = openAI.model(modelId = ModelId("gpt-3.5-turbo"))
             val completionRequest = ChatCompletionRequest(
                 model = gpt35turbo.id,

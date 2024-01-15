@@ -13,20 +13,20 @@ import com.iflytek.cloud.SpeechError
 import com.iflytek.cloud.SpeechUtility
 import com.iflytek.cloud.ui.RecognizerDialog
 import com.iflytek.cloud.ui.RecognizerDialogListener
-import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.start.App
 
 
 class IFly {
     companion object {
         private fun initOnce(): Boolean {
-            if (ConfigService.data.iFlyAppId == "")
+            if (SettingsService.iFlyAppId == "")
                 return false
 
             if (SpeechUtility.getUtility() != null)
                 return true
 
-            SpeechUtility.createUtility(App.context, SpeechConstant.APPID + "=" + ConfigService.data.iFlyAppId)
+            SpeechUtility.createUtility(App.context, SpeechConstant.APPID + "=" + SettingsService.iFlyAppId)
 
             return SpeechUtility.getUtility() != null
         }

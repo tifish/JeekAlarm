@@ -45,8 +45,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.ifly.IFly
@@ -68,9 +68,7 @@ import java.util.Calendar
 
 @Composable
 fun MainUI() {
-    App.themeColorsChangedTrigger
-
-    MaterialTheme(colorScheme = getThemeFromConfig()) {
+    MaterialTheme(colorScheme = getThemeFromConfig(SettingsService.theme)) {
         when (App.screen) {
             ScreenType.HOME -> HomeScreen()
             ScreenType.EDIT -> EditScreen()
@@ -81,8 +79,8 @@ fun MainUI() {
 }
 
 @Composable
-fun getThemeFromConfig(): ColorScheme {
-    val darkTheme = when (ConfigService.data.theme) {
+fun getThemeFromConfig(theme: String): ColorScheme {
+    val darkTheme = when (theme) {
         "Auto" -> isSystemInDarkTheme()
         "Dark" -> true
         "Light" -> false

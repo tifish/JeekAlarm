@@ -1,8 +1,8 @@
 package com.tinyfish.jeekalarm.schedule
 
 import android.os.Environment
-import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.MusicService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.alarm.AlarmService
 import com.tinyfish.jeekalarm.start.App
@@ -15,10 +15,10 @@ object ScheduleService {
 
     val configFile: File
         get() {
-            val dir = if (ConfigService.configDir == "")
+            val dir = if (SettingsService.settingsDir == "")
                 App.context.filesDir
             else
-                File(Environment.getExternalStorageDirectory().path, ConfigService.configDir)
+                File(Environment.getExternalStorageDirectory().path, SettingsService.settingsDir)
 
             return File(dir, "schedule.cron")
         }

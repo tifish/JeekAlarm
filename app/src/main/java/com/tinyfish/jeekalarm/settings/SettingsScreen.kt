@@ -15,6 +15,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.currentRecomposeScope
@@ -24,8 +25,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.tinyfish.jeekalarm.ConfigService
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.home.NavigationBottomBar
@@ -63,19 +64,15 @@ private fun Editor() {
         MyGroupBox {
             Text("Theme:")
             Observe {
-                val themeScope = currentRecomposeScope
                 Row(
                     modifier = Modifier.padding(start = 20.dp), verticalAlignment = Alignment.CenterVertically
                 ) {
                     val options = listOf("Auto", "Dark", "Light")
                     options.forEach {
                         val onClick = {
-                            ConfigService.data.theme = it
-                            ConfigService.save()
-                            App.themeColorsChangedTrigger++
-                            themeScope.invalidate()
+                            SettingsService.theme = it
                         }
-                        RadioButton(selected = ConfigService.data.theme == it, onClick = onClick)
+                        RadioButton(selected = SettingsService.theme == it, onClick = onClick)
                         Text(it, Modifier.clickable(onClick = onClick))
                         WidthSpacer()
                     }
@@ -87,33 +84,24 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                val fileSelectScope = currentRecomposeScope
-                MyFileSelector("Music File:", ConfigService.data.defaultMusicFile, onSelect = {
+                MyFileSelector("Music File:", SettingsService.defaultMusicFile, onSelect = {
                     FileSelector.openMusicFile {
-                        ConfigService.data.defaultMusicFile = it.path?.substringAfter(':')!!
-                        ConfigService.save()
-                        fileSelectScope.invalidate()
+                        SettingsService.defaultMusicFile = it.path?.substringAfter(':')!!
+                        SettingsService.save()
                     }
                 }, onClear = {
-                    ConfigService.data.defaultMusicFile = ""
-                    ConfigService.save()
-                    fileSelectScope.invalidate()
+                    SettingsService.defaultMusicFile = ""
                 })
             }
 
             HeightSpacer()
             Observe {
-                val fileSelectScope = currentRecomposeScope
-                MyFileSelector("Music Folder:", ConfigService.data.defaultMusicFolder, onSelect = {
+                MyFileSelector("Music Folder:", SettingsService.defaultMusicFolder, onSelect = {
                     FileSelector.openFolder {
-                        ConfigService.data.defaultMusicFolder = it.path?.substringAfter(':')!!
-                        ConfigService.save()
-                        fileSelectScope.invalidate()
+                        SettingsService.defaultMusicFolder = it.path?.substringAfter(':')!!
                     }
                 }, onClear = {
-                    ConfigService.data.defaultMusicFolder = ""
-                    ConfigService.save()
-                    fileSelectScope.invalidate()
+                    SettingsService.defaultMusicFolder = ""
                 })
             }
         }
@@ -134,26 +122,20 @@ private fun Editor() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Default AI: ")
                 Observe {
-                    App.defaultAiApiKeyChangedTrigger
-
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
-                            selected = ConfigService.data.defaultAi == "OpenAI",
+                            selected = SettingsService.defaultAi == "OpenAI",
                             onClick = {
-                                ConfigService.data.defaultAi = "OpenAI"
-                                ConfigService.save()
-                                App.defaultAiApiKeyChangedTrigger++
+                                SettingsService.defaultAi = "OpenAI"
                             }
                         )
                         Text("OpenAI")
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
-                            selected = ConfigService.data.defaultAi == "Gemini",
+                            selected = SettingsService.defaultAi == "Gemini",
                             onClick = {
-                                ConfigService.data.defaultAi = "Gemini"
-                                ConfigService.save()
-                                App.defaultAiApiKeyChangedTrigger++
+                                SettingsService.defaultAi = "Gemini"
                             }
                         )
                         Text("Gemini")
@@ -162,36 +144,29 @@ private fun Editor() {
             }
 
             Observe {
-                App.openAiApiKeyChangedTrigger
-                SimpleTextField("OpenAI API key: ", ConfigService.data.openAiApiKey, onTextChanged = {
-                    ConfigService.data.openAiApiKey = it
-                    ConfigService.save()
-                    App.openAiApiKeyChangedTrigger++
+                SimpleTextField("OpenAI API key: ", SettingsService.openAiApiKey, onTextChanged = {
+                    SettingsService.openAiApiKey = it
                 })
             }
             HeightSpacer()
 
             Observe {
-                App.geminiApiKeyChangedTrigger
-                SimpleTextField("Gemini API key: ", ConfigService.data.geminiKey, onTextChanged = {
-                    ConfigService.data.geminiKey = it
-                    ConfigService.save()
-                    App.geminiApiKeyChangedTrigger++
+                SimpleTextField("Gemini API key: ", SettingsService.geminiKey, onTextChanged = {
+                    SettingsService.geminiKey = it
                 })
             }
 
             Observe {
-                App.iFlyAppIdChangedTrigger
-                SimpleTextField("IFly APP ID: ", ConfigService.data.iFlyAppId, onTextChanged = {
-                    ConfigService.data.iFlyAppId = it
-                    ConfigService.save()
-                    App.iFlyAppIdChangedTrigger++
+                SimpleTextField("IFly APP ID: ", SettingsService.iFlyAppId, onTextChanged = {
+                    SettingsService.iFlyAppId = it
                 })
             }
             HeightSpacer()
         }
 
         HeightSpacer()
+
+        TextField(value = "", onValueChange = {})
 
         MyGroupBox {
             Observe {
@@ -202,16 +177,16 @@ private fun Editor() {
                     if (LocalInspectionMode.current)
                         ""
                     else
-                        ConfigService.configDir
+                        SettingsService.settingsDir
 
                 MyFileSelector("Config Folder:", configDir, onSelect = {
                     FileSelector.openFolder {
-                        ConfigService.configDir = it.path?.substringAfter(':')!!
+                        SettingsService.settingsDir = it.path?.substringAfter(':')!!
                         fileSelectScope.invalidate()
                         onConfigDirChanged(context)
                     }
                 }, onClear = {
-                    ConfigService.configDir = ""
+                    SettingsService.settingsDir = ""
                     fileSelectScope.invalidate()
                     onConfigDirChanged(context)
                 })
@@ -223,16 +198,16 @@ private fun Editor() {
 }
 
 private fun onConfigDirChanged(context: Context) {
-    if (ConfigService.configFile.exists() || ScheduleService.configFile.exists()) {
+    if (SettingsService.settingsFile.exists() || ScheduleService.configFile.exists()) {
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> {
-                    ConfigService.load()
+                    SettingsService.load()
                     ScheduleService.loadAndRefresh()
                 }
 
                 DialogInterface.BUTTON_NEGATIVE -> {
-                    ConfigService.save()
+                    SettingsService.save()
                     ScheduleService.save()
                 }
             }
@@ -241,7 +216,7 @@ private fun onConfigDirChanged(context: Context) {
         AlertDialog.Builder(context).setMessage("Found config file in new location, load or overwrite them?")
             .setPositiveButton("Load", dialogClickListener).setNegativeButton("Overwrite", dialogClickListener).show()
     } else {
-        ConfigService.save()
+        SettingsService.save()
         ScheduleService.save()
     }
 }

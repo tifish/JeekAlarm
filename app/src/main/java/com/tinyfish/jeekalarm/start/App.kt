@@ -9,7 +9,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.tinyfish.jeekalarm.ConfigService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.ai.Gemini
 import com.tinyfish.jeekalarm.ai.OpenAI
 import com.tinyfish.jeekalarm.alarm.NotificationService
@@ -82,8 +82,6 @@ class App : Application() {
 
         var screenBeforeNotification = ScreenType.HOME
 
-        var themeColorsChangedTrigger by mutableIntStateOf(0)
-
         var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
         var scheduleChangedTrigger by mutableIntStateOf(0)
@@ -91,10 +89,6 @@ class App : Application() {
         var editingOptionsChangedTrigger by mutableIntStateOf(0)
         var editingNameChangedTrigger by mutableIntStateOf(0)
         var editingTimeConfigChangedTrigger by mutableIntStateOf(0)
-        var defaultAiApiKeyChangedTrigger by mutableIntStateOf(0)
-        var openAiApiKeyChangedTrigger by mutableIntStateOf(0)
-        var geminiApiKeyChangedTrigger by mutableIntStateOf(0)
-        var iFlyAppIdChangedTrigger by mutableIntStateOf(0)
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)
@@ -110,9 +104,9 @@ class App : Application() {
 
         suspend fun guessEditingScheduleFromName() {
             var schedule: Schedule? = null
-            if (ConfigService.data.defaultAi == "Gemini" && ConfigService.data.geminiKey.isNotEmpty()) {
+            if (SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty()) {
                 schedule = Gemini.getAnswer(editingSchedule.name)
-            } else if (ConfigService.data.defaultAi == "OpenAI" && ConfigService.data.openAiApiKey.isNotEmpty()) {
+            } else if (SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty()) {
                 OpenAI.getAnswer(editingSchedule.name)
             } else {
                 return
@@ -138,7 +132,7 @@ class App : Application() {
 
         context = applicationContext
 
-        ConfigService.load()
+        SettingsService.load()
         ScheduleService.load()
         ScheduleService.sort()
         ScheduleService.setNextAlarm()
