@@ -110,28 +110,15 @@ object SettingsService {
         data.theme = theme
         data.defaultAi = defaultAi
 
-        val originalOpenAiApiKey = data.openAiApiKey
-        if (data.openAiApiKey != "")
-            data.openAiApiKey = CryptoService.encrypt(data.openAiApiKey)
+        if (openAiApiKey != "")
+            data.openAiApiKey = CryptoService.encrypt(openAiApiKey)
 
-        val originalGeminiKey = data.geminiKey
-        if (data.geminiKey != "")
-            data.geminiKey = CryptoService.encrypt(data.geminiKey)
+        if (geminiKey != "")
+            data.geminiKey = CryptoService.encrypt(geminiKey)
 
-        val originalIFlyAppId = data.iFlyAppId
-        if (data.iFlyAppId != "")
-            data.iFlyAppId = CryptoService.encrypt(data.iFlyAppId)
+        if (iFlyAppId != "")
+            data.iFlyAppId = CryptoService.encrypt(iFlyAppId)
 
         settingsFile.writeText(Json.encodeToString(data))
-
-        if (data.openAiApiKey != "")
-            data.openAiApiKey = originalOpenAiApiKey
-
-        if (data.geminiKey != "")
-            data.geminiKey = originalGeminiKey
-
-        if (data.iFlyAppId != "")
-            data.iFlyAppId = originalIFlyAppId
-
     }
 }
