@@ -4,16 +4,12 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.SettingsService
-import com.tinyfish.jeekalarm.ai.Gemini
-import com.tinyfish.jeekalarm.ai.OpenAI
 import com.tinyfish.jeekalarm.alarm.NotificationService
-import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -77,18 +73,12 @@ class App : Application() {
             return "$dateString $timeString $weekString"
         }
 
-        var editScheduleId = -1
-        lateinit var editingSchedule: Schedule
-
         var screenBeforeNotification = ScreenType.HOME
 
         var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
         var scheduleChangedTrigger by mutableIntStateOf(0)
         var isPlaying by mutableStateOf(false)
-        var editingOptionsChangedTrigger by mutableIntStateOf(0)
-        var editingNameChangedTrigger by mutableIntStateOf(0)
-        var editingTimeConfigChangedTrigger by mutableIntStateOf(0)
 
         fun startServiceAndUpdateInfo() {
             val serviceIntent = Intent(context, StartService::class.java)
@@ -100,30 +90,6 @@ class App : Application() {
         fun stopService() {
             val serviceIntent = Intent(context, StartService::class.java)
             context.stopService(serviceIntent)
-        }
-
-        suspend fun guessEditingScheduleFromName() {
-            var schedule: Schedule? = null
-            if (SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty()) {
-                schedule = Gemini.getAnswer(editingSchedule.name)
-            } else if (SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty()) {
-                OpenAI.getAnswer(editingSchedule.name)
-            } else {
-                return
-            }
-
-            if (schedule != null) {
-                schedule.name = editingSchedule.name
-                schedule.copyTo(editingSchedule)
-                editingSchedule.timeConfigChanged()
-
-                editingOptionsChangedTrigger++
-                editingTimeConfigChangedTrigger++
-
-                Toast.makeText(context, "Filled time automatically", Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(context, "No time found in name", Toast.LENGTH_SHORT).show()
-            }
         }
     }
 

@@ -26,7 +26,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
-import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun HeightSpacer(height: Dp = 10.dp) {
@@ -67,24 +66,9 @@ fun MyFileSelector(hint: String, text: String, onSelect: () -> Unit, onClear: ()
 @Composable
 fun MySwitch(
     hint: String,
-    booleanProp: KMutableProperty0<Boolean>,
-    textStyle: TextStyle = TextStyle.Default,
-    onCheckedChange: (Boolean) -> Unit = {}
-) {
-    SimpleSwitch(
-        hint = hint,
-        booleanProp = booleanProp,
-        textStyle = textStyle,
-        onCheckedChange = onCheckedChange,
-    )
-}
-
-@Composable
-fun MySwitch(
-    hint: String,
     value: Boolean,
+    onCheckedChange: (Boolean) -> Unit = {},
     textStyle: TextStyle = TextStyle.Default,
-    onCheckedChange: (Boolean) -> Unit = {}
 ) {
     SimpleSwitch(
         hint = hint,

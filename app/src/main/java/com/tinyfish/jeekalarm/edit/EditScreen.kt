@@ -16,7 +16,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +28,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
-import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
@@ -46,17 +44,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-private var isAdding = false
-
 @Composable
 fun EditScreen() {
-    isAdding = App.editScheduleId == -1
-    App.editingSchedule = if (isAdding)
-        Schedule()
-    else
-        ScheduleService.scheduleList.filter { it.id == App.editScheduleId }[0]
+    EditViewModel.isAdding = EditViewModel.editScheduleId == -1
+    EditViewModel.initEditingSchedule()
 
-    Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (isAdding) "Add" else "Edit") }, content = {
+    Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (EditViewModel.isAdding) "Add" else "Edit") }, content = {
         Surface(Modifier.padding(it)) {
             Editor()
         }
@@ -75,9 +68,8 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                App.editingOptionsChangedTrigger
-                MySwitch("Enabled", App.editingSchedule::enabled)
-                MySwitch("Only Once", App.editingSchedule::onlyOnce)
+                MySwitch("Enabled", EditViewModel.editingScheduleEnabled, { EditViewModel.editingScheduleEnabled = it })
+                MySwitch("Only Once", EditViewModel.editingScheduleOnlyOnce, { EditViewModel.editingScheduleOnlyOnce = it })
             }
         }
 
@@ -85,11 +77,8 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                App.editingNameChangedTrigger
-
-                SimpleTextField("Name: ", App.editingSchedule.name, onTextChanged = {
-                    App.editingSchedule.name = it
-                    App.editingNameChangedTrigger++
+                SimpleTextField("Name: ", EditViewModel.editingScheduleName, onTextChanged = {
+                    EditViewModel.editingScheduleName = it
                 })
             }
             HeightSpacer()
@@ -97,7 +86,7 @@ private fun Editor() {
             if (SettingsService.openAiApiKey != "") {
                 Button(onClick = {
                     GlobalScope.launch(Dispatchers.Main) {
-                        App.guessEditingScheduleFromName()
+                        EditViewModel.guessEditingScheduleFromName()
                     }
                 }) {
                     Text("Guess time from name")
@@ -106,34 +95,33 @@ private fun Editor() {
             }
 
             val onChange = { _: String ->
-                if (!App.editingSchedule.enabled) {
-                    App.editingSchedule.enabled = true
-                    App.editingOptionsChangedTrigger++
+                if (!EditViewModel.editingScheduleEnabled) {
+                    EditViewModel.editingScheduleEnabled = true
                 }
             }
 
             CronTimeTextField(
-                "Hour: ", App.editingSchedule::hourConfig, true, onChange
+                "Hour: ", EditViewModel.editingSchedule::hourConfig, true, onChange
             )
             HeightSpacer()
             CronTimeTextField(
-                "Minute: ", App.editingSchedule::minuteConfig, true, onChange
+                "Minute: ", EditViewModel.editingSchedule::minuteConfig, true, onChange
             )
             HeightSpacer()
             CronTimeTextField(
-                "WeekDay: ", App.editingSchedule::weekDayConfig, true, onChange
+                "WeekDay: ", EditViewModel.editingSchedule::weekDayConfig, true, onChange
             )
             HeightSpacer()
             CronTimeTextField(
-                "Month: ", App.editingSchedule::monthConfig, true, onChange
+                "Month: ", EditViewModel.editingSchedule::monthConfig, true, onChange
             )
             HeightSpacer()
             CronTimeTextField(
-                "Day: ", App.editingSchedule::dayConfig, true, onChange
+                "Day: ", EditViewModel.editingSchedule::dayConfig, true, onChange
             )
             HeightSpacer()
             CronTimeTextField(
-                "Year: ", App.editingSchedule::yearConfig, true, onChange
+                "Year: ", EditViewModel.editingSchedule::yearConfig, true, onChange
             )
         }
 
@@ -141,39 +129,31 @@ private fun Editor() {
 
         MyGroupBox {
             Observe {
-                val playScope = currentRecomposeScope
+                MySwitch(hint = "Play Music:", EditViewModel.editingSchedulePlayMusic, { EditViewModel.editingSchedulePlayMusic = it })
 
-                MySwitch(hint = "Play Music:", booleanProp = App.editingSchedule::playMusic, onCheckedChange = { playScope.invalidate() })
-
-                if (App.editingSchedule.playMusic) {
+                if (EditViewModel.editingSchedulePlayMusic) {
                     Column(Modifier.padding(start = 20.dp)) {
                         HeightSpacer()
 
                         Observe {
-                            val fileSelectScope = currentRecomposeScope
-                            MyFileSelector("Music File:", App.editingSchedule.musicFile, onSelect = {
+                            MyFileSelector("Music File:", EditViewModel.editingScheduleMusicFile, onSelect = {
                                 FileSelector.openMusicFile {
-                                    App.editingSchedule.musicFile = it.path?.substringAfter(':')!!
-                                    fileSelectScope.invalidate()
+                                    EditViewModel.editingScheduleMusicFile = it.path?.substringAfter(':')!!
                                 }
                             }, onClear = {
-                                App.editingSchedule.musicFile = ""
-                                fileSelectScope.invalidate()
+                                EditViewModel.editingScheduleMusicFile = ""
                             })
                         }
 
                         HeightSpacer()
 
                         Observe {
-                            val fileSelectScope = currentRecomposeScope
-                            MyFileSelector("Music Folder:", App.editingSchedule.musicFolder, onSelect = {
+                            MyFileSelector("Music Folder:", EditViewModel.editingScheduleMusicFolder, onSelect = {
                                 FileSelector.openFolder {
-                                    App.editingSchedule.musicFolder = it.path?.substringAfter(':')!!
-                                    fileSelectScope.invalidate()
+                                    EditViewModel.editingScheduleMusicFolder = it.path?.substringAfter(':')!!
                                 }
                             }, onClear = {
-                                App.editingSchedule.musicFolder = ""
-                                fileSelectScope.invalidate()
+                                EditViewModel.editingScheduleMusicFolder = ""
                             })
                         }
                     }
@@ -182,13 +162,15 @@ private fun Editor() {
                 HeightSpacer()
 
                 Observe {
-                    val vibrationScope = currentRecomposeScope
-                    MySwitch("Vibration", App.editingSchedule::vibration, onCheckedChange = { vibrationScope.invalidate() })
+                    MySwitch(
+                        "Vibration",
+                        EditViewModel.editingScheduleVibration,
+                        onCheckedChange = { EditViewModel.editingScheduleVibration = it })
 
-                    if (App.editingSchedule.vibration) {
+                    if (EditViewModel.editingScheduleVibration) {
                         HeightSpacer()
 
-                        var vibrationCount by remember { mutableFloatStateOf(App.editingSchedule.vibrationCount.toFloat()) }
+                        var vibrationCount by remember { mutableFloatStateOf(EditViewModel.editingScheduleVibrationCount.toFloat()) }
 
                         Text(
                             vibrationCount.toInt().toString() + " times", modifier = Modifier.padding(start = 20.dp)
@@ -197,8 +179,7 @@ private fun Editor() {
                             value = vibrationCount,
                             onValueChange = {
                                 vibrationCount = it
-                                App.editingSchedule.vibrationCount = vibrationCount.toInt()
-                                vibrationScope.invalidate()
+                                EditViewModel.editingScheduleVibrationCount = vibrationCount.toInt()
                             },
                             modifier = Modifier.padding(start = 20.dp, end = 20.dp),
                             steps = 30,
@@ -218,32 +199,36 @@ fun BottomBar() {
     val context = LocalContext.current
 
     BottomAppBar(actions = {
-        if (isAdding) {
+        if (EditViewModel.isAdding) {
             NavigationBarItem(selected = false, onClick = {
                 App.screen = ScreenType.HOME
             }, label = { Text("Cancel") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_cancel), null) })
         } else {
             NavigationBarItem(selected = false, onClick = {
                 AlertDialog.Builder(context).setTitle("Remove").setMessage("Remove this schedule?").setPositiveButton("Yes") { _, _ ->
-                    ScheduleService.scheduleList.removeIf { it.id == App.editScheduleId }
+                    ScheduleService.scheduleList.removeIf { it.id == EditViewModel.editScheduleId }
                     App.scheduleChangedTrigger++
                     App.screen = ScreenType.HOME
                 }.setNegativeButton("No", null).show()
             }, label = { Text("Remove") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) })
         }
 
-        NavigationBarItem(selected = false, onClick = {
-            onEditScreenPressBack()
-        }, label = { Text(if (isAdding) "Add" else "Apply") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) })
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                onEditScreenPressBack()
+            },
+            label = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) })
 
         NavigationBarItem(selected = false, onClick = {
             Calendar.getInstance().apply {
-                App.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
-                App.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
-                App.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
-                App.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
-                App.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                App.editingTimeConfigChangedTrigger++
+                EditViewModel.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
+                EditViewModel.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
+                EditViewModel.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
+                EditViewModel.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
+                EditViewModel.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
+                EditViewModel.editingTimeConfigChangedTrigger++
             }
         }, label = { Text("Now") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) })
 
@@ -251,7 +236,7 @@ fun BottomBar() {
             val text = if (App.isPlaying) "Stop" else "Play"
             val onClick = {
                 if (App.isPlaying) ScheduleService.stopPlaying()
-                else App.editingSchedule.play()
+                else EditViewModel.editingSchedule.play()
             }
 
             if (App.isPlaying) NavigationBarItem(selected = false,
@@ -267,13 +252,7 @@ fun BottomBar() {
 }
 
 fun onEditScreenPressBack() {
-    App.editingSchedule.timeConfigChanged()
-    if (isAdding) {
-        App.editingSchedule.id = ScheduleService.nextScheduleId++
-        ScheduleService.scheduleList.add(App.editingSchedule)
-    }
-    ScheduleService.sort()
-    ScheduleService.saveAndRefresh()
+    EditViewModel.saveEditingSchedule()
 
     ScheduleService.stopPlaying()
     App.screen = ScreenType.HOME

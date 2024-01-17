@@ -19,7 +19,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,45 +37,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun Observe(body: @Composable () -> Unit) = body()
-
-@Composable
-fun SimpleSwitch(
-    hint: String,
-    booleanProp: KMutableProperty0<Boolean>,
-    modifier: Modifier = Modifier,
-    textStyle: TextStyle = TextStyle.Default,
-    textModifier: Modifier = Modifier,
-    onCheckedChange: (Boolean) -> Unit = {}
-) {
-    Row(modifier, verticalAlignment = Alignment.CenterVertically) {
-        val rowScope = currentRecomposeScope
-
-        Switch(
-            checked = booleanProp.get(),
-            onCheckedChange = {
-                booleanProp.set(it)
-                onCheckedChange(it)
-                rowScope.invalidate()
-            }
-        )
-
-        WidthSpacer(15.dp)
-
-        Text(
-            hint,
-            style = textStyle,
-            modifier = textModifier.clickable(
-                onClick = {
-                    booleanProp.set(!booleanProp.get())
-                    rowScope.invalidate()
-                })
-        )
-    }
-}
 
 @Composable
 fun SimpleSwitch(
@@ -94,8 +57,6 @@ fun SimpleSwitch(
                 onCheckedChange(it)
             }
         )
-
-        WidthSpacer(15.dp)
 
         Text(
             hint,

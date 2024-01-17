@@ -15,7 +15,6 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
-import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.ui.MyTextButton
 import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
@@ -30,7 +29,7 @@ fun CronTimeTextField(
     onChange: (String) -> Unit = {}
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        App.editingTimeConfigChangedTrigger
+        EditViewModel.editingTimeConfigChangedTrigger
 
         val cronTimeScope = currentRecomposeScope
 

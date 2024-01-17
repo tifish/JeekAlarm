@@ -49,6 +49,7 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
 import com.tinyfish.jeekalarm.edit.EditScreen
+import com.tinyfish.jeekalarm.edit.EditViewModel
 import com.tinyfish.jeekalarm.ifly.IFly
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
@@ -128,7 +129,7 @@ private fun ScheduleList() {
                 ImageVector.vectorResource(R.drawable.ic_add),
                 "Add"
             ) {
-                App.editScheduleId = -1
+                EditViewModel.editScheduleId = -1
                 App.screen = ScreenType.EDIT
             }
         }
@@ -174,7 +175,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 Modifier
                     .combinedClickable(
                         onClick = {
-                            App.editScheduleId = schedule.id
+                            EditViewModel.editScheduleId = schedule.id
                             App.screen = ScreenType.EDIT
                         },
                         onLongClick = {
@@ -226,15 +227,14 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
             val context = LocalContext.current
 
             FloatingActionButton(onClick = {
-                App.editScheduleId = -1
+                EditViewModel.editScheduleId = -1
                 App.screen = ScreenType.EDIT
 
                 IFly.showDialog(context) {
-                    App.editingSchedule.name = it
-                    App.editingNameChangedTrigger++
+                    EditViewModel.editingScheduleName = it
 
                     GlobalScope.launch(Dispatchers.Main) {
-                        App.guessEditingScheduleFromName()
+                        EditViewModel.guessEditingScheduleFromName()
                     }
                 }
             }) {
