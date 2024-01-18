@@ -19,22 +19,18 @@ import com.tinyfish.ui.MyTextButton
 import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
 import com.tinyfish.ui.WidthSpacer
-import kotlin.reflect.KMutableProperty0
 
 @Composable
 fun CronTimeTextField(
     hint: String,
-    textProp: KMutableProperty0<String>,
-    isTimeConfig: Boolean = false,
+    text: String,
     onChange: (String) -> Unit = {}
 ) {
     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        EditViewModel.editingTimeConfigChangedTrigger
-
         val cronTimeScope = currentRecomposeScope
 
         var focusedState by remember { mutableStateOf(false) }
-        var textRange by remember { mutableStateOf(TextRange(textProp.get().length)) }
+        var textRange by remember { mutableStateOf(TextRange(text.length)) }
         var keepWholeSelection by remember { mutableStateOf(false) }
         if (keepWholeSelection) {
             // in case onValueChange was not called immediately after onFocusChanged
@@ -47,12 +43,12 @@ fun CronTimeTextField(
         Observe {
             SimpleTextField(
                 hint = hint,
-                textFieldValue = TextFieldValue(textProp.get(), textRange),
+                textFieldValue = TextFieldValue(text, textRange),
                 onTextFieldFocused = { focused ->
                     if (focusedState != focused) {
                         focusedState = focused
                         if (focused) {
-                            textRange = TextRange(0, textProp.get().length)
+                            textRange = TextRange(0, text.length)
                             keepWholeSelection = true
                         }
                     }
@@ -61,8 +57,7 @@ fun CronTimeTextField(
                 textStyle = TextStyle(fontSize = (20.sp)),
                 modifier = Modifier.weight(1f, true),
                 onTextChanged = {
-                    if (textProp.get() != it.text) {
-                        textProp.set(it.text)
+                    if (text != it.text) {
                         onChange(it.text)
                     }
 
@@ -76,12 +71,11 @@ fun CronTimeTextField(
             )
         }
 
-        if (isTimeConfig && focusedState) {
+        if (focusedState) {
             MyTextButton("*") {
-                if (textProp.get() != "*") {
-                    textProp.set("*")
-                    textRange = TextRange(1, 1)
+                if (text != "*") {
                     onChange("*")
+                    textRange = TextRange(1, 1)
                     cronTimeScope.invalidate()
                 }
             }
@@ -89,8 +83,7 @@ fun CronTimeTextField(
             WidthSpacer()
 
             MyTextButton("0") {
-                if (textProp.get() != "0") {
-                    textProp.set("0")
+                if (text != "0") {
                     textRange = TextRange(1, 1)
                     onChange("0")
                     cronTimeScope.invalidate()
@@ -100,8 +93,7 @@ fun CronTimeTextField(
             WidthSpacer()
 
             MyTextButton("1-3") {
-                if (textProp.get() != "1-3") {
-                    textProp.set("1-3")
+                if (text != "1-3") {
                     textRange = TextRange(3, 3)
                     onChange("0")
                     onChange("1-3")
@@ -112,8 +104,7 @@ fun CronTimeTextField(
             WidthSpacer()
 
             MyTextButton("1,3") {
-                if (textProp.get() != "1,3") {
-                    textProp.set("1,3")
+                if (text != "1,3") {
                     textRange = TextRange(3, 3)
                     onChange("1,3")
                     cronTimeScope.invalidate()
@@ -123,8 +114,7 @@ fun CronTimeTextField(
             WidthSpacer()
 
             MyTextButton("*/3") {
-                if (textProp.get() != "*/3") {
-                    textProp.set("*/3")
+                if (text != "*/3") {
                     textRange = TextRange(3, 3)
                     onChange("*/3")
                     cronTimeScope.invalidate()

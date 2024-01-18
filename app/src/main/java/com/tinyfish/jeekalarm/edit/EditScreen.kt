@@ -100,29 +100,45 @@ private fun Editor() {
                 }
             }
 
-            CronTimeTextField(
-                "Hour: ", EditViewModel.editingSchedule::hourConfig, true, onChange
-            )
+            CronTimeTextField("Hour: ", EditViewModel.editingScheduleHourConfig) {
+                EditViewModel.editingScheduleHourConfig = it
+                onChange(it)
+            }
+
             HeightSpacer()
-            CronTimeTextField(
-                "Minute: ", EditViewModel.editingSchedule::minuteConfig, true, onChange
-            )
+
+            CronTimeTextField("Minute: ", EditViewModel.editingScheduleMinuteConfig) {
+                EditViewModel.editingScheduleMinuteConfig = it
+                onChange(it)
+            }
+
             HeightSpacer()
-            CronTimeTextField(
-                "WeekDay: ", EditViewModel.editingSchedule::weekDayConfig, true, onChange
-            )
+
+            CronTimeTextField("WeekDay: ", EditViewModel.editingScheduleWeekDayConfig) {
+                EditViewModel.editingScheduleWeekDayConfig = it
+                onChange(it)
+            }
+
             HeightSpacer()
-            CronTimeTextField(
-                "Month: ", EditViewModel.editingSchedule::monthConfig, true, onChange
-            )
+
+            CronTimeTextField("Month: ", EditViewModel.editingScheduleMonthConfig) {
+                EditViewModel.editingScheduleMonthConfig = it
+                onChange(it)
+            }
+
             HeightSpacer()
-            CronTimeTextField(
-                "Day: ", EditViewModel.editingSchedule::dayConfig, true, onChange
-            )
+
+            CronTimeTextField("Day: ", EditViewModel.editingScheduleDayConfig) {
+                EditViewModel.editingScheduleDayConfig = it
+                onChange(it)
+            }
+
             HeightSpacer()
-            CronTimeTextField(
-                "Year: ", EditViewModel.editingSchedule::yearConfig, true, onChange
-            )
+
+            CronTimeTextField("Year: ", EditViewModel.editingScheduleYearConfig) {
+                EditViewModel.editingScheduleYearConfig = it
+                onChange(it)
+            }
         }
 
         HeightSpacer()
@@ -221,22 +237,18 @@ fun BottomBar() {
             label = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
             icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) })
 
-        NavigationBarItem(selected = false, onClick = {
-            Calendar.getInstance().apply {
-                EditViewModel.editingSchedule.minuteConfig = get(Calendar.MINUTE).toString()
-                EditViewModel.editingSchedule.hourConfig = get(Calendar.HOUR_OF_DAY).toString()
-                EditViewModel.editingSchedule.dayConfig = get(Calendar.DAY_OF_MONTH).toString()
-                EditViewModel.editingSchedule.monthConfig = (get(Calendar.MONTH) + 1).toString()
-                EditViewModel.editingSchedule.yearConfig = (get(Calendar.YEAR)).toString()
-                EditViewModel.editingTimeConfigChangedTrigger++
-            }
-        }, label = { Text("Now") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) })
+        NavigationBarItem(
+            selected = false,
+            onClick = { EditViewModel.setEditingScheduleTime(Calendar.getInstance()) },
+            label = { Text("Now") },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) },
+        )
 
         Observe {
             val text = if (App.isPlaying) "Stop" else "Play"
             val onClick = {
                 if (App.isPlaying) ScheduleService.stopPlaying()
-                else EditViewModel.editingSchedule.play()
+                else EditViewModel.play()
             }
 
             if (App.isPlaying) NavigationBarItem(selected = false,
