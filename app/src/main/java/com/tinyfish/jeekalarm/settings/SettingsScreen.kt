@@ -144,20 +144,20 @@ private fun Editor() {
 
             Observe {
                 SimpleTextField("OpenAI API key: ", SettingsService.openAiApiKey, onTextChanged = {
-                    SettingsService.openAiApiKey = it
+                    SettingsService.openAiApiKey = it.trim()
                 })
             }
             HeightSpacer()
 
             Observe {
                 SimpleTextField("Gemini API key: ", SettingsService.geminiKey, onTextChanged = {
-                    SettingsService.geminiKey = it
+                    SettingsService.geminiKey = it.trim()
                 })
             }
 
             Observe {
                 SimpleTextField("IFly APP ID: ", SettingsService.iFlyAppId, onTextChanged = {
-                    SettingsService.iFlyAppId = it
+                    SettingsService.iFlyAppId = it.trim()
                 })
             }
             HeightSpacer()
