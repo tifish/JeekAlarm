@@ -11,7 +11,7 @@ ktor-client-android = { module = "io.ktor:ktor-client-android", version = "2.3.1
 ktor-client-core = { module = "io.ktor:ktor-client-core", version = "2.3.5" }
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.7.0" }
 activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.8.2" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2024.02.00" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2024.01.00" }
 openai-client = { module = "com.aallam.openai:openai-client", version = "3.5.1" }
 ui = { group = "androidx.compose.ui", name = "ui" }
 ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
