@@ -87,11 +87,13 @@ fun getThemeFromConfig(theme: String): ColorScheme {
         "Light" -> false
         else -> throw Exception("Unexpected theme")
     }
+
     // Dynamic color is available on Android 12+
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val context = LocalContext.current
     return when {
-        dynamicColor && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
-        dynamicColor && !darkTheme -> dynamicLightColorScheme(LocalContext.current)
+        dynamicColor && darkTheme -> dynamicDarkColorScheme(context)
+        dynamicColor && !darkTheme -> dynamicLightColorScheme(context)
         darkTheme -> darkColorScheme()
         else -> lightColorScheme()
     }
