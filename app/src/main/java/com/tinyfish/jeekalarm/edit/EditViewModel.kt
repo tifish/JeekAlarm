@@ -70,7 +70,7 @@ object EditViewModel : ViewModel() {
         if (SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty()) {
             schedule = Gemini.getAnswer(editingSchedule.name)
         } else if (SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty()) {
-            OpenAI.getAnswer(editingSchedule.name)
+            schedule = OpenAI.getAnswer(editingSchedule.name)
         } else {
             return
         }
