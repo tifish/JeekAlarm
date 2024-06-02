@@ -6,7 +6,7 @@ import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 
 object FileSelector {
-    private var selectFileResultLauncher: ActivityResultLauncher<String?>? = null
+    private var selectFileResultLauncher: ActivityResultLauncher<String>? = null
     private var selectFolderResultLauncher: ActivityResultLauncher<Uri?>? = null
 
     fun init(activity: ComponentActivity) {

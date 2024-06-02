@@ -66,7 +66,7 @@ object EditViewModel : ViewModel() {
     }
 
     suspend fun guessEditingScheduleFromName() {
-        var schedule: Schedule? = null
+        val schedule: Schedule?
         if (SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty()) {
             schedule = Gemini.getAnswer(editingSchedule.name)
         } else if (SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty()) {
