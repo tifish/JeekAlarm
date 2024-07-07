@@ -46,9 +46,9 @@ class OpenAI {
 """
 
             val openAI = OpenAI(OpenAIConfig(SettingsService.openAiApiKey, LoggingConfig(LogLevel.All)))
-            val gpt35turbo = openAI.model(modelId = ModelId("gpt-4o"))
+            val gpt = openAI.model(modelId = ModelId("gpt-4-turbo"))
             val completionRequest = ChatCompletionRequest(
-                model = gpt35turbo.id,
+                model = gpt.id,
                 messages = listOf(
                     ChatMessage(
                         role = ChatRole.System, content = systemContent
@@ -215,7 +215,15 @@ class OpenAI {
                     onlyOnce = true,
                 )
             } else {
-                return null
+                return Schedule(
+                    yearConfig = if (yearPart.value == 0) "*" else yearPart.value.toString(),
+                    monthConfig = if (monthPart.value == 0) "*" else monthPart.value.toString(),
+                    dayConfig = if (dayPart.value == 0) "*" else dayPart.value.toString(),
+                    hourConfig = if (hourPart.value == 0) "*" else hourPart.value.toString(),
+                    minuteConfig = if (minutePart.value == 0) "*" else minutePart.value.toString(),
+                    weekDayConfig = if (weekDayPart.value == 0) "*" else weekDayPart.value.toString(),
+                    onlyOnce = true,
+                )
             }
         }
 
