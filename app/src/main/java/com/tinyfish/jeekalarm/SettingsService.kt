@@ -15,8 +15,8 @@ object SettingsService {
     var defaultMusicFile by SettingsItemState("")
     var defaultMusicFolder by SettingsItemState("")
     var theme by SettingsItemState("Dark")
-    var defaultAi by SettingsItemState("OpenAI")
-    var openAiApiKey by SettingsItemState("")
+    var defaultAi by SettingsItemState("DeepSeek")
+    var deepSeekApiKey by SettingsItemState("")
     var geminiKey by SettingsItemState("")
     var iFlyAppId by SettingsItemState("")
 
@@ -62,13 +62,14 @@ object SettingsService {
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
         var theme: String = "Dark",
-        var defaultAi: String = "OpenAI",
-        var openAiApiKey: String = "",
+        var defaultAi: String = "DeepSeek",
+        var deepSeekApiKey: String = "",
         var geminiKey: String = "",
         var iFlyAppId: String = "",
     )
 
     private var _isLoading = false
+    private val json = Json { ignoreUnknownKeys = true }
 
     fun load() {
         if (!settingsFile.exists())
@@ -76,16 +77,17 @@ object SettingsService {
 
         _isLoading = true
         try {
-            val data = Json.decodeFromString<SettingsData>(settingsFile.readText())
+
+            val data = json.decodeFromString<SettingsData>(settingsFile.readText())
 
             defaultMusicFile = data.defaultMusicFile
             defaultMusicFolder = data.defaultMusicFolder
             theme = data.theme
             defaultAi = data.defaultAi
 
-            if (data.openAiApiKey != "")
-                data.openAiApiKey = CryptoService.decrypt(data.openAiApiKey)
-            openAiApiKey = data.openAiApiKey
+            if (data.deepSeekApiKey != "")
+                data.deepSeekApiKey = CryptoService.decrypt(data.deepSeekApiKey)
+            deepSeekApiKey = data.deepSeekApiKey
 
             if (data.geminiKey != "")
                 data.geminiKey = CryptoService.decrypt(data.geminiKey)
@@ -110,8 +112,8 @@ object SettingsService {
         data.theme = theme
         data.defaultAi = defaultAi
 
-        if (openAiApiKey != "")
-            data.openAiApiKey = CryptoService.encrypt(openAiApiKey)
+        if (deepSeekApiKey != "")
+            data.deepSeekApiKey = CryptoService.encrypt(deepSeekApiKey)
 
         if (geminiKey != "")
             data.geminiKey = CryptoService.encrypt(geminiKey)
@@ -119,6 +121,6 @@ object SettingsService {
         if (iFlyAppId != "")
             data.iFlyAppId = CryptoService.encrypt(iFlyAppId)
 
-        settingsFile.writeText(Json.encodeToString(data))
+        settingsFile.writeText(json.encodeToString(data))
     }
 }

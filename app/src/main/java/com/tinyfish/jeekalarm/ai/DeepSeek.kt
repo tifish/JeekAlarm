@@ -1,6 +1,5 @@
 package com.tinyfish.jeekalarm.ai
 
-import com.aallam.openai.api.BetaOpenAI
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
@@ -9,13 +8,13 @@ import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.LoggingConfig
 import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
+import com.aallam.openai.client.OpenAIHost
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.Schedule
 import java.time.LocalDateTime
 
-class OpenAI {
+class DeepSeek {
     companion object {
-        @OptIn(BetaOpenAI::class)
         suspend fun getAnswer(question: String): Schedule? {
             val systemContent = """
 你现在是一个转换器，输出给程序处理的字符串，不要输出任何多余的信息：
@@ -45,10 +44,16 @@ class OpenAI {
     - 一周后中午请客: 0 0 0 0 0 2 +1 0
 """
 
-            val openAI = OpenAI(OpenAIConfig(SettingsService.openAiApiKey, LoggingConfig(LogLevel.All)))
-            val gpt = openAI.model(modelId = ModelId("gpt-4-turbo"))
+            val deepSeek = OpenAI(
+                OpenAIConfig(
+                    SettingsService.deepSeekApiKey,
+                    LoggingConfig(LogLevel.All),
+                    host = OpenAIHost("https://api.deepseek.com/")
+                )
+            )
+            val model = deepSeek.model(modelId = ModelId("deepseek-chat"))
             val completionRequest = ChatCompletionRequest(
-                model = gpt.id,
+                model = model.id,
                 messages = listOf(
                     ChatMessage(
                         role = ChatRole.System, content = systemContent
@@ -60,7 +65,7 @@ class OpenAI {
                 temperature = 0.0,
             )
 
-            val result = openAI.chatCompletion(completionRequest).choices[0].message.content.orEmpty()
+            val result = deepSeek.chatCompletion(completionRequest).choices[0].message.content.orEmpty()
             return parseGptResult(result)
         }
 

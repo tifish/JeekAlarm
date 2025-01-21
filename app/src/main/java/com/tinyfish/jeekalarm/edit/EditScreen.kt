@@ -83,7 +83,7 @@ private fun Editor() {
             }
             HeightSpacer()
 
-            if (SettingsService.openAiApiKey != "") {
+            if (SettingsService.deepSeekApiKey != "") {
                 Button(onClick = {
                     GlobalScope.launch(Dispatchers.Main) {
                         EditViewModel.guessEditingScheduleFromName()
