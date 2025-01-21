@@ -14,10 +14,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ColorScheme
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBarItem
@@ -142,7 +142,7 @@ private fun ScheduleList() {
                 val schedule = ScheduleService.scheduleList[index]
                 HeightSpacer()
                 ScheduleItem(index, schedule, now)
-                Divider(color = Color.DarkGray)
+                HorizontalDivider(color = Color.DarkGray)
             }
 
             HeightSpacer(100.dp)
