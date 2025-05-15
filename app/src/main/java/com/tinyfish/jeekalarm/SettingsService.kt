@@ -15,8 +15,10 @@ object SettingsService {
     var defaultMusicFile by SettingsItemState("")
     var defaultMusicFolder by SettingsItemState("")
     var theme by SettingsItemState("Dark")
-    var defaultAi by SettingsItemState("DeepSeek")
-    var deepSeekApiKey by SettingsItemState("")
+    var defaultAi by SettingsItemState("OpenAI")
+    var openAiApiUrl by SettingsItemState("")
+    var openAiApiKey by SettingsItemState("")
+    var openAiApiModel by SettingsItemState("")
     var geminiKey by SettingsItemState("")
     var iFlyAppId by SettingsItemState("")
 
@@ -62,8 +64,10 @@ object SettingsService {
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
         var theme: String = "Dark",
-        var defaultAi: String = "DeepSeek",
-        var deepSeekApiKey: String = "",
+        var defaultAi: String = "OpenAI",
+        var openAiApiUrl: String = "",
+        var openAiApiKey: String = "",
+        var openAiApiModel: String = "",
         var geminiKey: String = "",
         var iFlyAppId: String = "",
     )
@@ -85,9 +89,12 @@ object SettingsService {
             theme = data.theme
             defaultAi = data.defaultAi
 
-            if (data.deepSeekApiKey != "")
-                data.deepSeekApiKey = CryptoService.decrypt(data.deepSeekApiKey)
-            deepSeekApiKey = data.deepSeekApiKey
+            openAiApiUrl = data.openAiApiUrl
+            openAiApiModel = data.openAiApiModel
+
+            if (data.openAiApiKey != "")
+                data.openAiApiKey = CryptoService.decrypt(data.openAiApiKey)
+            openAiApiKey = data.openAiApiKey
 
             if (data.geminiKey != "")
                 data.geminiKey = CryptoService.decrypt(data.geminiKey)
@@ -111,9 +118,11 @@ object SettingsService {
         data.defaultMusicFolder = defaultMusicFolder
         data.theme = theme
         data.defaultAi = defaultAi
+        data.openAiApiUrl = openAiApiUrl
+        data.openAiApiModel = openAiApiModel
 
-        if (deepSeekApiKey != "")
-            data.deepSeekApiKey = CryptoService.encrypt(deepSeekApiKey)
+        if (openAiApiKey != "")
+            data.openAiApiKey = CryptoService.encrypt(openAiApiKey)
 
         if (geminiKey != "")
             data.geminiKey = CryptoService.encrypt(geminiKey)

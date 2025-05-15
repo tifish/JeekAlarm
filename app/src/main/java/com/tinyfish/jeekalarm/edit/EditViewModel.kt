@@ -3,8 +3,8 @@ package com.tinyfish.jeekalarm.edit
 import android.widget.Toast
 import androidx.lifecycle.ViewModel
 import com.tinyfish.jeekalarm.SettingsService
-import com.tinyfish.jeekalarm.ai.DeepSeek
 import com.tinyfish.jeekalarm.ai.Gemini
+import com.tinyfish.jeekalarm.ai.OpenAi
 import com.tinyfish.jeekalarm.globalStateOf
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
@@ -69,8 +69,8 @@ object EditViewModel : ViewModel() {
         val schedule: Schedule?
         if (SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty()) {
             schedule = Gemini.getAnswer(editingSchedule.name)
-        } else if (SettingsService.defaultAi == "DeepSeek" && SettingsService.deepSeekApiKey.isNotEmpty()) {
-            schedule = DeepSeek.getAnswer(editingSchedule.name)
+        } else if (SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty()) {
+            schedule = OpenAi.getAnswer(editingSchedule.name)
         } else {
             return
         }

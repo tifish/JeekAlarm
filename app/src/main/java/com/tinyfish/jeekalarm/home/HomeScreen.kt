@@ -125,7 +125,7 @@ private fun ScheduleList() {
         ScheduleService.scheduleList.add(Schedule(name = "Alarm2"))
     }
 
-    if (ScheduleService.scheduleList.size == 0) {
+    if (ScheduleService.scheduleList.isEmpty()) {
         Box(Modifier.wrapContentSize()) {
             SimpleVectorButton(
                 ImageVector.vectorResource(R.drawable.ic_add),

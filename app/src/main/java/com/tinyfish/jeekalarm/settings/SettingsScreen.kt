@@ -123,12 +123,12 @@ private fun Editor() {
                 Observe {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
-                            selected = SettingsService.defaultAi == "DeepSeek",
+                            selected = SettingsService.defaultAi == "OpenAI",
                             onClick = {
-                                SettingsService.defaultAi = "DeepSeek"
+                                SettingsService.defaultAi = "OpenAI"
                             }
                         )
-                        Text("DeepSeek")
+                        Text("OpenAI")
                     }
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         RadioButton(
@@ -143,8 +143,22 @@ private fun Editor() {
             }
 
             Observe {
-                SimpleTextField("DeepSeek API key: ", SettingsService.deepSeekApiKey, onTextChanged = {
-                    SettingsService.deepSeekApiKey = it.trim()
+                SimpleTextField("OpenAI API URL: ", SettingsService.openAiApiUrl, onTextChanged = {
+                    SettingsService.openAiApiUrl = it.trim()
+                })
+            }
+            HeightSpacer()
+
+            Observe {
+                SimpleTextField("OpenAI API Model: ", SettingsService.openAiApiModel, onTextChanged = {
+                    SettingsService.openAiApiModel = it.trim()
+                })
+            }
+            HeightSpacer()
+
+            Observe {
+                SimpleTextField("OpenAI API key: ", SettingsService.openAiApiKey, onTextChanged = {
+                    SettingsService.openAiApiKey = it.trim()
                 })
             }
             HeightSpacer()

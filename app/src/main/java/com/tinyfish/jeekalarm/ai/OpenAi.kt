@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.ai
 
+import android.util.Log
 import com.aallam.openai.api.chat.ChatCompletionRequest
 import com.aallam.openai.api.chat.ChatMessage
 import com.aallam.openai.api.chat.ChatRole
@@ -7,13 +8,12 @@ import com.aallam.openai.api.logging.LogLevel
 import com.aallam.openai.api.model.ModelId
 import com.aallam.openai.client.LoggingConfig
 import com.aallam.openai.client.OpenAI
-import com.aallam.openai.client.OpenAIConfig
 import com.aallam.openai.client.OpenAIHost
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.Schedule
 import java.time.LocalDateTime
 
-class DeepSeek {
+class OpenAi {
     companion object {
         suspend fun getAnswer(question: String): Schedule? {
             val systemContent = """
@@ -44,16 +44,13 @@ class DeepSeek {
     - 一周后中午请客: 0 0 0 0 0 2 +1 0
 """
 
-            val deepSeek = OpenAI(
-                OpenAIConfig(
-                    SettingsService.deepSeekApiKey,
-                    LoggingConfig(LogLevel.All),
-                    host = OpenAIHost("https://api.deepseek.com/")
-                )
+            val openAi = OpenAI(
+                host = OpenAIHost(SettingsService.openAiApiUrl),
+                token = SettingsService.openAiApiKey,
+                logging = LoggingConfig(LogLevel.All),
             )
-            val model = deepSeek.model(modelId = ModelId("deepseek-chat"))
             val completionRequest = ChatCompletionRequest(
-                model = model.id,
+                model = ModelId(SettingsService.openAiApiModel),
                 messages = listOf(
                     ChatMessage(
                         role = ChatRole.System, content = systemContent
@@ -61,12 +58,18 @@ class DeepSeek {
                         role = ChatRole.User, content = question
                     )
                 ),
-                maxTokens = 32,
+                maxTokens = 64,
                 temperature = 0.0,
             )
 
-            val result = deepSeek.chatCompletion(completionRequest).choices[0].message.content.orEmpty()
-            return parseGptResult(result)
+            try {
+                var chatCompletions = openAi.chatCompletion(completionRequest)
+                val result = chatCompletions.choices[0].message.content.orEmpty()
+                return parseGptResult(result)
+            } catch (ex: Exception) {
+                Log.e("OpenAI", ex.message.toString())
+                return null
+            }
         }
 
         private fun parseGptResult(gptResult: String): Schedule? {

@@ -83,7 +83,7 @@ private fun Editor() {
             }
             HeightSpacer()
 
-            if (SettingsService.deepSeekApiKey != "") {
+            if (SettingsService.openAiApiKey != "") {
                 Button(onClick = {
                     GlobalScope.launch(Dispatchers.Main) {
                         EditViewModel.guessEditingScheduleFromName()
@@ -251,11 +251,13 @@ fun BottomBar() {
                 else EditViewModel.play()
             }
 
-            if (App.isPlaying) NavigationBarItem(selected = false,
+            if (App.isPlaying) NavigationBarItem(
+                selected = false,
                 onClick = onClick,
                 label = { Text(text) },
                 icon = { Icon(ImageVector.vectorResource(R.drawable.ic_stop), null) })
-            else NavigationBarItem(selected = false,
+            else NavigationBarItem(
+                selected = false,
                 onClick = onClick,
                 label = { Text(text) },
                 icon = { Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null) })
