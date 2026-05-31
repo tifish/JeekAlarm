@@ -1,10 +1,12 @@
 package com.tinyfish.jeekalarm.settings
 
+import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -25,8 +27,9 @@ import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
+import com.tinyfish.jeekalarm.PermissionsService
 import com.tinyfish.jeekalarm.SettingsService
-import com.tinyfish.jeekalarm.alarm.NotificationService
+import com.tinyfish.jeekalarm.alarm.AlarmRingingService
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.home.NavigationBottomBar
 import com.tinyfish.jeekalarm.schedule.ScheduleService
@@ -81,11 +84,15 @@ private fun Editor() {
 
         HeightSpacer()
 
+        PermissionHealthGroup()
+
+        HeightSpacer()
+
         MyGroupBox {
             Observe {
                 MyFileSelector("Music File:", SettingsService.defaultMusicFile, onSelect = {
                     FileSelector.openMusicFile {
-                        SettingsService.defaultMusicFile = it.path?.substringAfter(':')!!
+                        SettingsService.defaultMusicFile = it.toString()
                         SettingsService.save()
                     }
                 }, onClear = {
@@ -97,7 +104,7 @@ private fun Editor() {
             Observe {
                 MyFileSelector("Music Folder:", SettingsService.defaultMusicFolder, onSelect = {
                     FileSelector.openFolder {
-                        SettingsService.defaultMusicFolder = it.path?.substringAfter(':')!!
+                        SettingsService.defaultMusicFolder = it.toString()
                     }
                 }, onClear = {
                     SettingsService.defaultMusicFolder = ""
@@ -109,7 +116,7 @@ private fun Editor() {
 
         Button(
             onClick = {
-                NotificationService.showAlarm(ScheduleService.nextAlarmIds)
+                AlarmRingingService.start(context = App.context, alarmIds = ScheduleService.nextAlarmIds)
             }, Modifier.padding(5.dp)
         ) {
             Text("Test Next Alarm")
@@ -192,7 +199,7 @@ private fun Editor() {
 
                 MyFileSelector("Config Folder:", configDir, onSelect = {
                     FileSelector.openFolder {
-                        SettingsService.settingsDir = it.path?.substringAfter(':')!!
+                        SettingsService.settingsDir = it.toString()
                         fileSelectScope.invalidate()
                         onConfigDirChanged(context)
                     }
@@ -208,8 +215,100 @@ private fun Editor() {
     }
 }
 
+@Composable
+private fun PermissionHealthGroup() {
+    App.permissionChangedTrigger
+
+    val context = LocalContext.current
+    val activity = context as? Activity
+    val inspectionMode = LocalInspectionMode.current
+    val notificationAllowed = inspectionMode || PermissionsService.canPostNotifications(context)
+    val exactAlarmAllowed = inspectionMode || PermissionsService.canScheduleExactAlarms()
+    val batteryUnrestricted = inspectionMode || PermissionsService.isIgnoringBatteryOptimizations(context)
+
+    MyGroupBox {
+        Text("Permissions:")
+        HeightSpacer()
+
+        PermissionStatusRow(
+            name = "Notifications",
+            status = if (notificationAllowed) "Allowed" else "Required",
+            actionText = if (notificationAllowed) "Settings" else "Allow",
+            onClick = {
+                if (activity != null && !notificationAllowed)
+                    PermissionsService.requestNotificationPermission(activity)
+                else
+                    PermissionsService.openAppNotificationSettings(context)
+            }
+        )
+
+        HeightSpacer()
+
+        PermissionStatusRow(
+            name = "Exact alarms",
+            status = if (exactAlarmAllowed) "Allowed" else "Required",
+            actionText = if (exactAlarmAllowed) "Settings" else "Allow",
+            onClick = {
+                if (exactAlarmAllowed)
+                    PermissionsService.openAppDetailsSettings(context)
+                else
+                    PermissionsService.requestExactAlarmPermission(context)
+            }
+        )
+
+        HeightSpacer()
+
+        PermissionStatusRow(
+            name = "Battery optimization",
+            status = if (batteryUnrestricted) "Unrestricted" else "May be restricted",
+            actionText = if (batteryUnrestricted) "Settings" else "Allow",
+            onClick = {
+                if (batteryUnrestricted)
+                    PermissionsService.openBatteryOptimizationSettings(context)
+                else
+                    PermissionsService.requestIgnoreBatteryOptimizations(context)
+            }
+        )
+
+        HeightSpacer()
+
+        PermissionStatusRow(
+            name = "Autostart / lock screen",
+            status = "Device setting",
+            actionText = "Open",
+            onClick = {
+                PermissionsService.openAppDetailsSettings(context)
+            }
+        )
+    }
+}
+
+@Composable
+private fun PermissionStatusRow(
+    name: String,
+    status: String,
+    actionText: String,
+    onClick: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column(Modifier.weight(1f, true)) {
+            Text(name)
+            Text(status, style = MaterialTheme.typography.bodySmall)
+        }
+
+        WidthSpacer()
+
+        Button(onClick = onClick) {
+            Text(actionText)
+        }
+    }
+}
+
 private fun onConfigDirChanged(context: Context) {
-    if (SettingsService.settingsFile.exists() || ScheduleService.configFile.exists()) {
+    if (SettingsService.configExists("config.json") || SettingsService.configExists("schedule.cron")) {
         val dialogClickListener = DialogInterface.OnClickListener { _, which ->
             when (which) {
                 DialogInterface.BUTTON_POSITIVE -> {

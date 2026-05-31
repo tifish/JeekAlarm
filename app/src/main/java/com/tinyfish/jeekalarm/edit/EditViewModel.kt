@@ -16,8 +16,18 @@ object EditViewModel : ViewModel() {
 
     var editScheduleId = -1
     private lateinit var editingSchedule: Schedule
+    private var initializedEditScheduleId: Int? = null
+
+    fun startEditing(scheduleId: Int) {
+        editScheduleId = scheduleId
+        initializedEditScheduleId = null
+    }
 
     fun initEditingSchedule() {
+        if (::editingSchedule.isInitialized && initializedEditScheduleId == editScheduleId)
+            return
+
+        isAdding = editScheduleId == -1
         editingSchedule =
             if (isAdding)
                 Schedule()
@@ -38,6 +48,7 @@ object EditViewModel : ViewModel() {
         editingScheduleMusicFolder = editingSchedule.musicFolder
         editingScheduleVibration = editingSchedule.vibration
         editingScheduleVibrationCount = editingSchedule.vibrationCount
+        initializedEditScheduleId = editScheduleId
     }
 
     var editingScheduleName by globalStateOf("") { editingSchedule.name = it }
@@ -58,11 +69,12 @@ object EditViewModel : ViewModel() {
     fun saveEditingSchedule() {
         editingSchedule.timeConfigChanged()
         if (isAdding) {
-            editingSchedule.id = ScheduleService.nextScheduleId++
+            editingSchedule.id = ScheduleService.createScheduleId()
             ScheduleService.scheduleList.add(editingSchedule)
         }
         ScheduleService.sort()
         ScheduleService.saveAndRefresh()
+        initializedEditScheduleId = null
     }
 
     suspend fun guessEditingScheduleFromName() {

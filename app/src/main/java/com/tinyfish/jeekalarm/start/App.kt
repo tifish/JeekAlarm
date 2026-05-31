@@ -3,13 +3,11 @@ package com.tinyfish.jeekalarm.start
 import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
-import android.content.Intent
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.SettingsService
-import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -78,19 +76,8 @@ class App : Application() {
         var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
         var scheduleChangedTrigger by mutableIntStateOf(0)
+        var permissionChangedTrigger by mutableIntStateOf(0)
         var isPlaying by mutableStateOf(false)
-
-        fun startServiceAndUpdateInfo() {
-            val serviceIntent = Intent(context, StartService::class.java)
-            context.startForegroundService(serviceIntent)
-
-            NotificationService.updateInfo()
-        }
-
-        fun stopService() {
-            val serviceIntent = Intent(context, StartService::class.java)
-            context.stopService(serviceIntent)
-        }
     }
 
     override fun onCreate() {

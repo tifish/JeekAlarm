@@ -27,8 +27,6 @@ import com.tinyfish.ui.SimpleVectorButton
 
 @Composable
 fun NotificationScreen() {
-    ScheduleService.pausePlaying()
-
     Surface(Modifier.fillMaxSize()) {
         Box(Modifier.wrapContentSize()) {
             NotificationContent()
@@ -68,6 +66,7 @@ fun NotificationContent() {
                     ScheduleService.pausePlaying()
                 else
                     ScheduleService.resumePlaying()
+                NotificationService.updateAlarm()
             }
             if (App.isPlaying)
                 SimpleVectorButton(

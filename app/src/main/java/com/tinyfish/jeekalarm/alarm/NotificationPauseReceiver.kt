@@ -8,6 +8,9 @@ import com.tinyfish.jeekalarm.start.App
 
 class NotificationPauseReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
+        if (NotificationService.currentAlarmIds.isEmpty())
+            return
+
         if (App.isPlaying)
             ScheduleService.pausePlaying()
         else

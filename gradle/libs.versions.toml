@@ -14,6 +14,7 @@ androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-man
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
 androidx-material3 = { group = "androidx.compose.material3", name = "material3" }
 androidx-appcompat = { module = "androidx.appcompat:appcompat", version = "1.7.0" }
+androidx-documentfile = { module = "androidx.documentfile:documentfile", version = "1.0.1" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.7.3" }
 generativeai = { module = "com.google.ai.client.generativeai:generativeai", version = "0.9.0" }
 fastjson = { module = "com.alibaba:fastjson", version = "2.0.33" }

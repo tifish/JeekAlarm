@@ -46,7 +46,6 @@ import java.util.Calendar
 
 @Composable
 fun EditScreen() {
-    EditViewModel.isAdding = EditViewModel.editScheduleId == -1
     EditViewModel.initEditingSchedule()
 
     Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (EditViewModel.isAdding) "Add" else "Edit") }, content = {
@@ -154,7 +153,7 @@ private fun Editor() {
                         Observe {
                             MyFileSelector("Music File:", EditViewModel.editingScheduleMusicFile, onSelect = {
                                 FileSelector.openMusicFile {
-                                    EditViewModel.editingScheduleMusicFile = it.path?.substringAfter(':')!!
+                                    EditViewModel.editingScheduleMusicFile = it.toString()
                                 }
                             }, onClear = {
                                 EditViewModel.editingScheduleMusicFile = ""
@@ -166,7 +165,7 @@ private fun Editor() {
                         Observe {
                             MyFileSelector("Music Folder:", EditViewModel.editingScheduleMusicFolder, onSelect = {
                                 FileSelector.openFolder {
-                                    EditViewModel.editingScheduleMusicFolder = it.path?.substringAfter(':')!!
+                                    EditViewModel.editingScheduleMusicFolder = it.toString()
                                 }
                             }, onClear = {
                                 EditViewModel.editingScheduleMusicFolder = ""
@@ -223,7 +222,7 @@ fun BottomBar() {
             NavigationBarItem(selected = false, onClick = {
                 AlertDialog.Builder(context).setTitle("Remove").setMessage("Remove this schedule?").setPositiveButton("Yes") { _, _ ->
                     ScheduleService.scheduleList.removeIf { it.id == EditViewModel.editScheduleId }
-                    App.scheduleChangedTrigger++
+                    ScheduleService.saveAndRefresh()
                     App.screen = ScreenType.HOME
                 }.setNegativeButton("No", null).show()
             }, label = { Text("Remove") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) })

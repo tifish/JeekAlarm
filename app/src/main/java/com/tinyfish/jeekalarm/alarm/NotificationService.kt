@@ -14,7 +14,6 @@ import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
 import java.util.Calendar
 
-
 object NotificationService {
     private val notificationManager: NotificationManager by lazy {
         App.context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
@@ -22,51 +21,63 @@ object NotificationService {
 
     const val InfoChannel = "Info"
     const val AlarmChannel = "Alarm"
-
-    private fun initOnce() {
-        createNotificationChannel(
-            InfoChannel, InfoChannel, NotificationManager.IMPORTANCE_LOW
-        )
-        createNotificationChannel(AlarmChannel, AlarmChannel, NotificationManager.IMPORTANCE_HIGH)
-    }
-
-    private fun createNotificationChannel(channelId: String, channelName: String, importance: Int) {
-        val channel = NotificationChannel(channelId, channelName, importance)
-        notificationManager.createNotificationChannel(channel)
-    }
-
     const val InfoId = 1
     const val AlarmId = 2
 
-    fun updateInfo() {
-        notificationManager.notify(InfoId, getInfoNotification())
+    private fun initOnce() {
+        val infoChannel = NotificationChannel(InfoChannel, InfoChannel, NotificationManager.IMPORTANCE_LOW).apply {
+            description = "Next alarm status"
+            setShowBadge(false)
+        }
+        notificationManager.createNotificationChannel(infoChannel)
+
+        val alarmChannel = NotificationChannel(AlarmChannel, AlarmChannel, NotificationManager.IMPORTANCE_HIGH).apply {
+            description = "Ringing alarm notifications"
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+        }
+        notificationManager.createNotificationChannel(alarmChannel)
     }
 
-    fun getInfoNotification(): Notification {
+    fun updateInfo() {
+        val notification = getInfoNotification()
+        if (notification == null) {
+            notificationManager.cancel(InfoId)
+            return
+        }
+
+        notificationManager.notify(InfoId, notification)
+    }
+
+    private fun getInfoNotification(): Notification? {
         initOnce()
 
-        val openIntent = Intent(App.context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val alarmIds = ScheduleService.nextAlarmIds
+        if (alarmIds.isEmpty())
+            return null
+
+        val schedules = alarmIds.mapNotNull { ScheduleService.findSchedule(it) }
+        if (schedules.isEmpty())
+            return null
+
         val openPendingIntent = PendingIntent.getActivity(
-            App.context, 0, openIntent,
+            App.context,
+            2,
+            Intent(App.context, MainActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_NEW_TASK)
+            },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        var infoText = ""
-        if (ScheduleService.nextAlarmIds.size > 0) {
-            val alarmNames = getAlarmNames(ScheduleService.nextAlarmIds)
-            val schedule = ScheduleService.scheduleList.filter { it.id in ScheduleService.nextAlarmIds }[0]
-            val nextAlarmDateString =
-                App.format(schedule.getNextTriggerTime(Calendar.getInstance()))
-            infoText = "Next: ${alarmNames.joinToString("; ")} $nextAlarmDateString"
-        }
-
+        val nextAlarmDateString = App.format(schedules.first().getNextTriggerTime(Calendar.getInstance()))
+        val alarmNames = schedules.joinToString("; ") { it.name }
+        val infoText = "Next: $alarmNames $nextAlarmDateString"
         return NotificationCompat.Builder(App.context, InfoChannel).run {
-            setContentTitle("JeekAlarm standby:")
+            setContentTitle("JeekAlarm standby")
             setContentText(infoText)
+            setStyle(NotificationCompat.BigTextStyle().bigText(infoText))
             setOngoing(true)
             setAutoCancel(false)
+            setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_LOW
             setCategory(NotificationCompat.CATEGORY_STATUS)
             setSmallIcon(R.drawable.ic_launcher_foreground)
@@ -75,90 +86,73 @@ object NotificationService {
         }
     }
 
-    // Preserve the current triggered alarms for updating the notification
     val currentAlarmIds = mutableListOf<Int>()
 
-    fun showAlarm(alarmIds: List<Int>, isUpdating: Boolean = false) {
+    fun setCurrentAlarmIds(alarmIds: List<Int>) {
+        currentAlarmIds.clear()
+        currentAlarmIds.addAll(alarmIds)
+    }
+
+    fun getAlarmNotification(alarmIds: List<Int> = currentAlarmIds): Notification {
         initOnce()
 
-        if (!isUpdating) {
-            // Cache the triggered alarms and start playing the first one
-            currentAlarmIds.clear()
-            currentAlarmIds.addAll(alarmIds)
-
-            ScheduleService.scheduleList.filter { it.id in alarmIds }[0].play()
-        }
-
-        // Show or update the notification
         val openIntent = Intent(App.context, MainActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT)
+            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK)
         }
         val openPendingIntent = PendingIntent.getActivity(
-            App.context, System.currentTimeMillis().toInt(), openIntent,
+            App.context,
+            0,
+            openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val pauseIntent = Intent(App.context, NotificationPauseReceiver::class.java)
-        val pausePendingIntent: PendingIntent = PendingIntent.getBroadcast(
-            App.context, 0, pauseIntent,
+        val pausePendingIntent = PendingIntent.getBroadcast(
+            App.context,
+            0,
+            Intent(App.context, NotificationPauseReceiver::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val dismissIntent = Intent(App.context, NotificationDismissReceiver::class.java)
-        val dismissPendingIntent: PendingIntent = PendingIntent.getBroadcast(
-            App.context, 0, dismissIntent,
+        val dismissPendingIntent = PendingIntent.getBroadcast(
+            App.context,
+            1,
+            Intent(App.context, NotificationDismissReceiver::class.java),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmNames = getAlarmNames(alarmIds)
-        val notification = NotificationCompat.Builder(App.context, AlarmChannel).run {
-            setContentTitle("JeekAlarm triggered:")
-            setContentText(alarmNames.joinToString("\n"))
+        val alarmText = alarmNames.joinToString("\n")
+        return NotificationCompat.Builder(App.context, AlarmChannel).run {
+            setContentTitle("JeekAlarm")
+            setContentText(alarmNames.joinToString("; "))
+            setStyle(NotificationCompat.BigTextStyle().bigText(alarmText))
             setOngoing(true)
             setAutoCancel(false)
+            setOnlyAlertOnce(true)
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(NotificationCompat.CATEGORY_ALARM)
+            setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             setSmallIcon(R.drawable.ic_launcher_foreground)
             setContentIntent(openPendingIntent)
+            setFullScreenIntent(openPendingIntent, true)
+            setDeleteIntent(dismissPendingIntent)
             addAction(R.drawable.ic_pause, if (App.isPlaying) "Pause" else "Play", pausePendingIntent)
             addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
             build()
         }
-
-        notificationManager.notify(AlarmId, notification)
-
-        if (!isUpdating) {
-            // Disable onlyOnce alarms
-            var modified = false
-
-            for (alarmId in alarmIds) {
-                val schedule = ScheduleService.scheduleList.filter { schedule -> schedule.id == alarmId }[0]
-                if (schedule.onlyOnce) {
-                    schedule.enabled = false
-                    modified = true
-                }
-            }
-
-            if (modified)
-                ScheduleService.saveAndRefresh()
-            else
-                ScheduleService.setNextAlarm()
-
-            ScheduleService.sort()
-        }
     }
 
     fun updateAlarm() {
-        showAlarm(currentAlarmIds, true)
+        if (currentAlarmIds.isEmpty())
+            return
+
+        notificationManager.notify(AlarmId, getAlarmNotification(currentAlarmIds))
     }
 
     private fun getAlarmNames(alarmIds: List<Int>): List<String> {
-        val alarmNames = mutableListOf<String>()
-        for (alarmId in alarmIds) {
-            val schedule = ScheduleService.scheduleList.filter { schedule -> schedule.id == alarmId }[0]
-            alarmNames.add(schedule.name)
+        return alarmIds.map { alarmId ->
+            ScheduleService.findSchedule(alarmId)?.name ?: "Alarm #$alarmId"
         }
-        return alarmNames
     }
 
     fun cancelAlarm() {
@@ -171,6 +165,6 @@ object NotificationService {
             App.screen = App.screenBeforeNotification
 
         currentAlarmIds.clear()
+        AlarmRingingService.stop()
     }
-
 }

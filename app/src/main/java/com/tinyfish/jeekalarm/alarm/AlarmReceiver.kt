@@ -7,7 +7,13 @@ import com.tinyfish.jeekalarm.schedule.ScheduleService
 
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        // Alarm is triggered, show the notification
-        NotificationService.showAlarm(ScheduleService.nextAlarmIds)
+        val alarmIds = AlarmService.getAlarmIds(intent)
+        if (alarmIds.isEmpty()) {
+            ScheduleService.setNextAlarm()
+            return
+        }
+
+        AlarmRingingService.start(context, alarmIds)
+        ScheduleService.completeTriggeredAlarms(alarmIds)
     }
 }

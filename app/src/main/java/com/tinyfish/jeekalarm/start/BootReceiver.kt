@@ -3,9 +3,13 @@ package com.tinyfish.jeekalarm.start
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import com.tinyfish.jeekalarm.SettingsService
+import com.tinyfish.jeekalarm.schedule.ScheduleService
 
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        // App has already been initialized
+        SettingsService.load()
+        ScheduleService.load()
+        ScheduleService.setNextAlarm()
     }
 }

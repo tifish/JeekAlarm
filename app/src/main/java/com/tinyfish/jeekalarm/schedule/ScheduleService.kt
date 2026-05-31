@@ -5,52 +5,83 @@ import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.alarm.AlarmService
+import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.util.Calendar
 
 object ScheduleService {
+    private const val ScheduleFileName = "schedule.cron"
+
     var scheduleList = mutableListOf<Schedule>()
     var nextScheduleId = 1
 
     val configFile: File
         get() {
-            val dir = if (SettingsService.settingsDir == "")
+            val dir = if (SettingsService.settingsDir == "" || SettingsService.settingsDir.startsWith("content://"))
                 App.context.filesDir
             else
                 File(Environment.getExternalStorageDirectory().path, SettingsService.settingsDir)
 
-            return File(dir, "schedule.cron")
+            return File(dir, ScheduleFileName)
         }
 
     fun load() {
-        if (!configFile.exists())
-            return
-
-        scheduleList = ScheduleParser.loadFromFile(configFile)
+        scheduleList =
+            if (SettingsService.configExists(ScheduleFileName))
+                ScheduleParser.loadFromLines(SettingsService.readConfigLines(ScheduleFileName))
+            else
+                mutableListOf()
+        sort()
     }
 
     fun loadAndRefresh() {
         load()
-
         setNextAlarm()
         App.scheduleChangedTrigger++
     }
 
     fun save() {
-        ScheduleParser.saveToFile(configFile, scheduleList)
+        ensureStableIds()
+        SettingsService.writeConfigText(ScheduleFileName, ScheduleParser.saveToString(scheduleList))
     }
 
     fun saveAndRefresh() {
         save()
-
         setNextAlarm()
         App.scheduleChangedTrigger++
     }
 
     fun sort() {
         val now = Calendar.getInstance()
-        scheduleList.sortWith { s1, s2 -> s1.getNextTriggerTime(now)!!.compareTo(s2.getNextTriggerTime(now)!!) }
+        scheduleList.sortWith(
+            compareBy<Schedule> { schedule ->
+                if (schedule.enabled && schedule.isValid)
+                    schedule.getNextTriggerTime(now)?.timeInMillis ?: Long.MAX_VALUE
+                else
+                    Long.MAX_VALUE
+            }.thenBy { it.id }
+        )
+    }
+
+    fun createScheduleId(): Int {
+        val usedIds = scheduleList.map { it.id }.toSet()
+        while (nextScheduleId <= 0 || nextScheduleId in usedIds)
+            nextScheduleId++
+        return nextScheduleId++
+    }
+
+    fun findSchedule(id: Int): Schedule? {
+        return scheduleList.firstOrNull { it.id == id }
+    }
+
+    private fun ensureStableIds() {
+        val usedIds = mutableSetOf<Int>()
+        for (schedule in scheduleList) {
+            if (schedule.id <= 0 || schedule.id in usedIds)
+                schedule.id = createScheduleId()
+            usedIds.add(schedule.id)
+        }
     }
 
     var nextAlarmIds = mutableListOf<Int>()
@@ -59,45 +90,72 @@ object ScheduleService {
             App.nextAlarmIds = value.toList()
         }
 
-    // Find and set next alarm, and save the ids to nextAlarmIds
-    fun setNextAlarm() {
-        AlarmService.cancelAlarm()
-        if (scheduleList.size == 0) {
-            if (nextAlarmIds.size > 0)
-                nextAlarmIds = mutableListOf()
-            App.stopService()
-            return
-        }
+    private data class NextAlarm(
+        val triggerTime: Calendar,
+        val scheduleIds: MutableList<Int>,
+    )
 
-        var minTriggerTime = Calendar.getInstance().apply { set(9999, 12, 30) }
+    private fun findNextAlarm(now: Calendar = Calendar.getInstance()): NextAlarm? {
+        var minTriggerTime: Calendar? = null
         val minScheduleIds = mutableListOf<Int>()
-        val now = Calendar.getInstance()
 
-        for (index in scheduleList.indices) {
-            val schedule = scheduleList[index]
+        for (schedule in scheduleList) {
             if (!schedule.enabled || !schedule.isValid)
                 continue
 
             val currentTriggerTime = schedule.getNextTriggerTime(now) ?: continue
-            if (currentTriggerTime == minTriggerTime) {
-                minScheduleIds.add(schedule.id)
-            } else if (currentTriggerTime < minTriggerTime) {
-                minTriggerTime = currentTriggerTime
-                minScheduleIds.clear()
-                minScheduleIds.add(schedule.id)
+            val currentMinTriggerTime = minTriggerTime
+            when {
+                currentMinTriggerTime == null || currentTriggerTime < currentMinTriggerTime -> {
+                    minTriggerTime = currentTriggerTime
+                    minScheduleIds.clear()
+                    minScheduleIds.add(schedule.id)
+                }
+
+                currentTriggerTime.timeInMillis == currentMinTriggerTime.timeInMillis -> {
+                    minScheduleIds.add(schedule.id)
+                }
             }
         }
 
-        if (nextAlarmIds != minScheduleIds)
-            nextAlarmIds = minScheduleIds
+        val triggerTime = minTriggerTime ?: return null
+        return NextAlarm(triggerTime, minScheduleIds)
+    }
 
-        if (minScheduleIds.isEmpty()) {
-            App.stopService()
+    fun setNextAlarm() {
+        AlarmService.cancelAlarm()
+
+        val nextAlarm = findNextAlarm()
+        if (nextAlarm == null) {
+            if (nextAlarmIds.isNotEmpty())
+                nextAlarmIds = mutableListOf()
+            NotificationService.updateInfo()
             return
         }
 
-        AlarmService.setAlarm(minTriggerTime)
-        App.startServiceAndUpdateInfo()
+        if (nextAlarmIds != nextAlarm.scheduleIds)
+            nextAlarmIds = nextAlarm.scheduleIds
+
+        AlarmService.setAlarm(nextAlarm.triggerTime, nextAlarm.scheduleIds)
+        NotificationService.updateInfo()
+    }
+
+    fun completeTriggeredAlarms(alarmIds: List<Int>) {
+        var modified = false
+        for (alarmId in alarmIds) {
+            val schedule = findSchedule(alarmId) ?: continue
+            if (schedule.onlyOnce && schedule.enabled) {
+                schedule.enabled = false
+                modified = true
+            }
+        }
+
+        if (modified)
+            save()
+
+        sort()
+        setNextAlarm()
+        App.scheduleChangedTrigger++
     }
 
     fun stopPlaying() {

@@ -4,6 +4,7 @@ import android.os.Environment
 import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
+import androidx.documentfile.provider.DocumentFile
 import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.VibrationService
@@ -17,6 +18,7 @@ import kotlin.random.Random
 // A single cron schedule
 @Serializable
 data class Schedule(
+    var id: Int = 0,
     var name: String = "Alarm",
     var minuteConfig: String = "*",
     var hourConfig: String = "*",
@@ -72,10 +74,6 @@ data class Schedule(
             years.clear()
         }
     }
-
-    /// Unique ID at runtime
-    @Transient
-    var id: Int = 0
 
     /// Time config to display in UI
     @Transient
@@ -374,7 +372,7 @@ data class Schedule(
 
     fun play() {
         if (playMusic) {
-            playMusic()
+            runCatching { playMusic() }
         }
 
         if (vibration)
@@ -387,6 +385,19 @@ data class Schedule(
         val finalMusicFolder = musicFolder.ifEmpty { SettingsService.defaultMusicFolder }
 
         if (finalMusicFolder.isNotEmpty()) {
+            if (finalMusicFolder.startsWith("content://")) {
+                val folder = DocumentFile.fromTreeUri(App.context, android.net.Uri.parse(finalMusicFolder))
+                val musicFiles = folder?.listFiles()
+                    ?.filter { it.isFile && it.type?.startsWith("audio/") == true }
+                    ?: return
+                if (musicFiles.isEmpty())
+                    return
+
+                val randomIndex = Random.nextInt(musicFiles.size)
+                MusicService.play(musicFiles[randomIndex].uri)
+                return
+            }
+
             val folder = File(Environment.getExternalStorageDirectory().path, finalMusicFolder)
             val musicFiles = mutableListOf<File>()
             for (file in folder.listFiles() ?: return) {

@@ -71,31 +71,52 @@ internal object ScheduleParser {
 
     @Throws(IOException::class)
     fun loadFromFile(configFile: File): MutableList<Schedule> {
-        val result = mutableListOf<Schedule>()
         if (!configFile.exists())
-            return result
+            return mutableListOf()
+        return loadFromLines(configFile.readLines())
+    }
 
-        configFile.forEachLine {
-            val line = it.trim()
+    fun loadFromLines(lines: List<String>): MutableList<Schedule> {
+        val result = mutableListOf<Schedule>()
+        val usedIds = mutableSetOf<Int>()
+        var nextId = 1
+
+        for (rawLine in lines) {
+            val line = rawLine.trim()
             if (line.isNotEmpty()) {
                 val schedule = parseJsonLine(line)
                 if (schedule != null) {
-                    schedule.id = ScheduleService.nextScheduleId++
+                    if (schedule.id <= 0 || schedule.id in usedIds) {
+                        while (nextId in usedIds)
+                            nextId++
+                        schedule.id = nextId++
+                    }
+                    usedIds.add(schedule.id)
+                    if (schedule.id >= nextId)
+                        nextId = schedule.id + 1
                     result.add(schedule)
                 }
             }
         }
 
+        ScheduleService.nextScheduleId = nextId
         return result
     }
 
     fun saveToFile(configFile: File, schedules: MutableList<Schedule>) {
+        configFile.parentFile?.mkdirs()
         if (!configFile.exists())
             configFile.createNewFile()
         configFile.bufferedWriter().use {
+            it.write(saveToString(schedules))
+        }
+    }
+
+    fun saveToString(schedules: List<Schedule>): String {
+        return buildString {
             for (schedule in schedules) {
-                it.write(Json.encodeToString(schedule))
-                it.newLine()
+                append(Json.encodeToString(schedule))
+                appendLine()
             }
         }
     }

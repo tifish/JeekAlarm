@@ -131,7 +131,7 @@ private fun ScheduleList() {
                 ImageVector.vectorResource(R.drawable.ic_add),
                 "Add"
             ) {
-                EditViewModel.editScheduleId = -1
+                EditViewModel.startEditing(-1)
                 App.screen = ScreenType.EDIT
             }
         }
@@ -177,7 +177,7 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                 Modifier
                     .combinedClickable(
                         onClick = {
-                            EditViewModel.editScheduleId = schedule.id
+                            EditViewModel.startEditing(schedule.id)
                             App.screen = ScreenType.EDIT
                         },
                         onLongClick = {
@@ -229,7 +229,7 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
             val context = LocalContext.current
 
             FloatingActionButton(onClick = {
-                EditViewModel.editScheduleId = -1
+                EditViewModel.startEditing(-1)
                 App.screen = ScreenType.EDIT
 
                 IFly.showDialog(context) {
