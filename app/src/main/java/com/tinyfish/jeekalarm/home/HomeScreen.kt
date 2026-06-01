@@ -1,23 +1,28 @@
 package com.tinyfish.jeekalarm.home
 
+import android.content.Context
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -33,8 +38,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -71,27 +79,9 @@ fun MainUI() {
 
 @Composable
 fun HomeScreen() {
-    val context = LocalContext.current
-
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
         bottomBar = { NavigationBottomBar(ScreenType.HOME) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    EditViewModel.startEditing(-1)
-                    App.screen = ScreenType.EDIT
-
-                    IFly.showDialog(context) { recognizedName ->
-                        EditViewModel.update { it.copy(name = recognizedName) }
-                        EditViewModel.guessFromName()
-                    }
-                },
-                containerColor = MaterialTheme.colorScheme.primary,
-            ) {
-                Icon(ImageVector.vectorResource(R.drawable.ic_add), "Add alarm")
-            }
-        },
     ) { padding ->
         ScheduleList(Modifier.padding(padding))
     }
@@ -115,8 +105,6 @@ private fun ScheduleList(modifier: Modifier = Modifier) {
         items(schedules, key = { it.id }) { schedule ->
             ScheduleItem(schedule, now)
         }
-        // 给悬浮按钮留出底部空间，避免遮挡最后一项
-        item { HeightSpacer(80.dp) }
     }
 }
 
@@ -245,16 +233,65 @@ private fun NextBadge() {
 
 @Composable
 fun NavigationBottomBar(currentScreen: ScreenType) {
-    NavigationBar {
-        val items = listOf(ScreenType.HOME, ScreenType.SETTINGS)
-        val icons = listOf(R.drawable.ic_home, R.drawable.ic_settings)
+    val context = LocalContext.current
 
-        items.forEachIndexed { index, item ->
-            NavigationBarItem(
-                selected = item == currentScreen,
-                onClick = { App.screen = item },
-                label = { Text(getScreenName(item)) },
-                icon = { Icon(ImageVector.vectorResource(icons[index]), getScreenName(item)) },
+    NavigationBar {
+        NavigationBarItem(
+            selected = currentScreen == ScreenType.HOME,
+            onClick = { App.screen = ScreenType.HOME },
+            label = { Text(getScreenName(ScreenType.HOME)) },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_home), getScreenName(ScreenType.HOME)) },
+        )
+
+        AddNavItem(context)
+
+        NavigationBarItem(
+            selected = currentScreen == ScreenType.SETTINGS,
+            onClick = { App.screen = ScreenType.SETTINGS },
+            label = { Text(getScreenName(ScreenType.SETTINGS)) },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_settings), getScreenName(ScreenType.SETTINGS)) },
+        )
+    }
+}
+
+// 单击直接进入编辑页手动添加，按住则先进编辑页再弹出语音识别。
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun RowScope.AddNavItem(context: Context) {
+    val haptic = LocalHapticFeedback.current
+
+    Box(
+        Modifier
+            .weight(1f)
+            .height(64.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Box(
+            Modifier
+                .size(48.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+                .combinedClickable(
+                    onClick = {
+                        EditViewModel.startEditing(-1)
+                        App.screen = ScreenType.EDIT
+                    },
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        EditViewModel.startEditing(-1)
+                        App.screen = ScreenType.EDIT
+                        IFly.showDialog(context) { recognizedName ->
+                            EditViewModel.update { it.copy(name = recognizedName) }
+                            EditViewModel.guessFromName()
+                        }
+                    },
+                ),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                ImageVector.vectorResource(R.drawable.ic_add),
+                "Add alarm",
+                tint = MaterialTheme.colorScheme.onPrimary,
             )
         }
     }
