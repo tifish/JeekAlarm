@@ -117,18 +117,6 @@ private fun Editor(modifier: Modifier = Modifier) {
         }
 
         SectionCard(title = "AI assistant") {
-            Text("Default provider", style = MaterialTheme.typography.bodyMedium)
-            val ais = listOf("OpenAI", "Gemini")
-            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                ais.forEachIndexed { index, label ->
-                    SegmentedButton(
-                        selected = SettingsService.defaultAi == label,
-                        onClick = { SettingsService.defaultAi = label },
-                        shape = SegmentedButtonDefaults.itemShape(index, ais.size),
-                    ) { Text(label) }
-                }
-            }
-
             LabeledTextField("OpenAI API URL", SettingsService.openAiApiUrl) {
                 SettingsService.openAiApiUrl = it.trim()
             }
@@ -137,9 +125,6 @@ private fun Editor(modifier: Modifier = Modifier) {
             }
             LabeledTextField("OpenAI API key", SettingsService.openAiApiKey) {
                 SettingsService.openAiApiKey = it.trim()
-            }
-            LabeledTextField("Gemini API key", SettingsService.geminiKey) {
-                SettingsService.geminiKey = it.trim()
             }
             LabeledTextField("iFlytek App ID", SettingsService.iFlyAppId) {
                 SettingsService.iFlyAppId = it.trim()

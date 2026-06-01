@@ -17,11 +17,9 @@ object SettingsService {
     var defaultMusicFile by SettingsItemState("")
     var defaultMusicFolder by SettingsItemState("")
     var theme by SettingsItemState("Dark")
-    var defaultAi by SettingsItemState("OpenAI")
     var openAiApiUrl by SettingsItemState("")
     var openAiApiKey by SettingsItemState("")
     var openAiApiModel by SettingsItemState("")
-    var geminiKey by SettingsItemState("")
     var iFlyAppId by SettingsItemState("")
 
     class SettingsItemState<T>(initial: T) : ReadWriteProperty<SettingsService, T> {
@@ -172,11 +170,9 @@ object SettingsService {
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
         var theme: String = "Dark",
-        var defaultAi: String = "OpenAI",
         var openAiApiUrl: String = "",
         var openAiApiKey: String = "",
         var openAiApiModel: String = "",
-        var geminiKey: String = "",
         var iFlyAppId: String = "",
     )
 
@@ -196,7 +192,6 @@ object SettingsService {
             defaultMusicFile = data.defaultMusicFile
             defaultMusicFolder = data.defaultMusicFolder
             theme = data.theme
-            defaultAi = data.defaultAi
 
             openAiApiUrl = data.openAiApiUrl
             openAiApiModel = data.openAiApiModel
@@ -204,10 +199,6 @@ object SettingsService {
             if (data.openAiApiKey != "")
                 data.openAiApiKey = CryptoService.decrypt(data.openAiApiKey)
             openAiApiKey = data.openAiApiKey
-
-            if (data.geminiKey != "")
-                data.geminiKey = CryptoService.decrypt(data.geminiKey)
-            geminiKey = data.geminiKey
 
             if (data.iFlyAppId != "")
                 data.iFlyAppId = CryptoService.decrypt(data.iFlyAppId)
@@ -226,15 +217,11 @@ object SettingsService {
         data.defaultMusicFile = defaultMusicFile
         data.defaultMusicFolder = defaultMusicFolder
         data.theme = theme
-        data.defaultAi = defaultAi
         data.openAiApiUrl = openAiApiUrl
         data.openAiApiModel = openAiApiModel
 
         if (openAiApiKey != "")
             data.openAiApiKey = CryptoService.encrypt(openAiApiKey)
-
-        if (geminiKey != "")
-            data.geminiKey = CryptoService.encrypt(geminiKey)
 
         if (iFlyAppId != "")
             data.iFlyAppId = CryptoService.encrypt(iFlyAppId)

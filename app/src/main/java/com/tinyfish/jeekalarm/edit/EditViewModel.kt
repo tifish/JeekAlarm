@@ -5,7 +5,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.SettingsService
-import com.tinyfish.jeekalarm.ai.Gemini
 import com.tinyfish.jeekalarm.ai.OpenAi
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
@@ -64,15 +63,10 @@ object EditViewModel {
     }
 
     private suspend fun guess() {
-        val schedule: Schedule? = when {
-            SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty() ->
-                Gemini.getAnswer(editing.name)
+        if (SettingsService.openAiApiKey.isEmpty())
+            return
 
-            SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty() ->
-                OpenAi.getAnswer(editing.name)
-
-            else -> return
-        }
+        val schedule = OpenAi.getAnswer(editing.name)
 
         if (schedule != null) {
             editing = editing.copy(

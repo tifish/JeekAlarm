@@ -68,9 +68,6 @@ dependencies {
     implementation(libs.openai.client)
     runtimeOnly(libs.ktor.client.okhttp)
 
-    // Gemini
-    implementation(libs.generativeai)
-
     // iFlytek
     implementation(files("libs/Msc.jar"))
     implementation(libs.fastjson)
