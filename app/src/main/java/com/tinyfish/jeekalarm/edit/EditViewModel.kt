@@ -66,7 +66,12 @@ object EditViewModel {
         if (SettingsService.openAiApiKey.isEmpty())
             return
 
-        val schedule = OpenAi.getAnswer(editing.name)
+        val schedule = try {
+            OpenAi.getAnswer(editing.name)
+        } catch (ex: Exception) {
+            Toast.makeText(App.context, "AI request failed: ${ex.message}", Toast.LENGTH_LONG).show()
+            return
+        }
 
         if (schedule != null) {
             editing = editing.copy(

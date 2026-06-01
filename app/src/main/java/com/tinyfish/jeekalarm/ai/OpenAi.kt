@@ -58,18 +58,19 @@ class OpenAi {
                         role = ChatRole.User, content = question
                     )
                 ),
-                maxTokens = 64,
+                // 推理（thinking）模型会先输出大段 reasoning_content 再给 content，
+                // token 太小会被推理吃光导致 content 为空，所以留足空间。
+                maxTokens = 2048,
                 temperature = 0.0,
             )
 
-            try {
-                var chatCompletions = openAi.chatCompletion(completionRequest)
-                val result = chatCompletions.choices[0].message.content.orEmpty()
-                return parseGptResult(result)
-            } catch (ex: Exception) {
-                Log.e("OpenAI", ex.message.toString())
-                return null
+            val chatCompletions = openAi.chatCompletion(completionRequest)
+            val result = chatCompletions.choices[0].message.content.orEmpty().trim()
+            if (result.isEmpty()) {
+                Log.e("OpenAI", "Empty content, finish_reason=${chatCompletions.choices[0].finishReason}")
+                throw IllegalStateException("AI returned empty content (finish_reason=${chatCompletions.choices[0].finishReason})")
             }
+            return parseGptResult(result)
         }
 
         private fun parseGptResult(gptResult: String): Schedule? {
