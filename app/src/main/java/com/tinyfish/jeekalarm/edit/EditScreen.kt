@@ -1,24 +1,28 @@
 package com.tinyfish.jeekalarm.edit
 
 import android.app.AlertDialog
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
@@ -182,11 +186,11 @@ fun BottomBar() {
     BottomAppBar(
         actions = {
             if (EditViewModel.isAdding) {
-                IconButton(onClick = { App.screen = ScreenType.HOME }) {
-                    Icon(ImageVector.vectorResource(R.drawable.ic_cancel), "Cancel")
+                LabeledAction(R.drawable.ic_cancel, "Cancel") {
+                    App.screen = ScreenType.HOME
                 }
             } else {
-                IconButton(onClick = {
+                LabeledAction(R.drawable.ic_remove, "Remove") {
                     AlertDialog.Builder(context)
                         .setTitle("Remove")
                         .setMessage("Remove this schedule?")
@@ -197,38 +201,50 @@ fun BottomBar() {
                         }
                         .setNegativeButton("No", null)
                         .show()
-                }) {
-                    Icon(ImageVector.vectorResource(R.drawable.ic_remove), "Remove")
                 }
             }
 
-            IconButton(onClick = { EditViewModel.setEditingScheduleTime(Calendar.getInstance()) }) {
-                Icon(ImageVector.vectorResource(R.drawable.ic_access_time), "Set to now")
+            LabeledAction(R.drawable.ic_access_time, "Now") {
+                EditViewModel.setEditingScheduleTime(Calendar.getInstance())
             }
 
             val isPlaying = App.isPlaying
-            IconButton(onClick = {
+            LabeledAction(
+                if (isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow,
+                if (isPlaying) "Stop" else "Play",
+            ) {
                 if (isPlaying) ScheduleService.stopPlaying()
                 else EditViewModel.play()
-            }) {
-                Icon(
-                    ImageVector.vectorResource(if (isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow),
-                    if (isPlaying) "Stop" else "Play",
-                )
             }
         },
         floatingActionButton = {
-            FloatingActionButton(
+            ExtendedFloatingActionButton(
+                text = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
+                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) },
                 onClick = { onEditScreenPressBack() },
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
-            ) {
-                Icon(
-                    ImageVector.vectorResource(R.drawable.ic_done),
-                    if (EditViewModel.isAdding) "Add" else "Apply",
-                )
-            }
+            )
         },
     )
+}
+
+/** 底部栏的图标 + 文字按钮，文字在图标下方，便于理解按钮含义。 */
+@Composable
+private fun LabeledAction(
+    @DrawableRes iconID: Int,
+    label: String,
+    onClick: () -> Unit,
+) {
+    Column(
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Icon(ImageVector.vectorResource(iconID), null)
+        Text(label, style = MaterialTheme.typography.labelSmall)
+    }
 }
 
 fun onEditScreenPressBack() {
