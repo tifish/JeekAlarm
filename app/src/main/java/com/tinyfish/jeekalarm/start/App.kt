@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.SettingsService
@@ -75,8 +74,6 @@ class App : Application() {
 
         var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
-        var scheduleChangedTrigger by mutableIntStateOf(0)
-        var permissionChangedTrigger by mutableIntStateOf(0)
         var isPlaying by mutableStateOf(false)
     }
 

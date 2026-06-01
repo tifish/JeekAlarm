@@ -6,8 +6,8 @@ import android.content.Context
 import android.content.DialogInterface
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -19,13 +19,19 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.PermissionsService
 import com.tinyfish.jeekalarm.SettingsService
@@ -39,7 +45,6 @@ import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyGroupBox
 import com.tinyfish.ui.MyTopBar
-import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
 import com.tinyfish.ui.WidthSpacer
 
@@ -65,19 +70,17 @@ private fun Editor() {
 
         MyGroupBox {
             Text("Theme:")
-            Observe {
-                Row(
-                    modifier = Modifier.padding(start = 20.dp), verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val options = listOf("Auto", "Dark", "Light")
-                    options.forEach {
-                        val onClick = {
-                            SettingsService.theme = it
-                        }
-                        RadioButton(selected = SettingsService.theme == it, onClick = onClick)
-                        Text(it, Modifier.clickable(onClick = onClick))
-                        WidthSpacer()
+            Row(
+                modifier = Modifier.padding(start = 20.dp), verticalAlignment = Alignment.CenterVertically
+            ) {
+                val options = listOf("Auto", "Dark", "Light")
+                options.forEach {
+                    val onClick = {
+                        SettingsService.theme = it
                     }
+                    RadioButton(selected = SettingsService.theme == it, onClick = onClick)
+                    Text(it, Modifier.clickable(onClick = onClick))
+                    WidthSpacer()
                 }
             }
         }
@@ -89,27 +92,24 @@ private fun Editor() {
         HeightSpacer()
 
         MyGroupBox {
-            Observe {
-                MyFileSelector("Music File:", SettingsService.defaultMusicFile, onSelect = {
-                    FileSelector.openMusicFile {
-                        SettingsService.defaultMusicFile = it.toString()
-                        SettingsService.save()
-                    }
-                }, onClear = {
-                    SettingsService.defaultMusicFile = ""
-                })
-            }
+            MyFileSelector("Music File:", SettingsService.defaultMusicFile, onSelect = {
+                FileSelector.openMusicFile {
+                    SettingsService.defaultMusicFile = it.toString()
+                    SettingsService.save()
+                }
+            }, onClear = {
+                SettingsService.defaultMusicFile = ""
+            })
 
             HeightSpacer()
-            Observe {
-                MyFileSelector("Music Folder:", SettingsService.defaultMusicFolder, onSelect = {
-                    FileSelector.openFolder {
-                        SettingsService.defaultMusicFolder = it.toString()
-                    }
-                }, onClear = {
-                    SettingsService.defaultMusicFolder = ""
-                })
-            }
+
+            MyFileSelector("Music Folder:", SettingsService.defaultMusicFolder, onSelect = {
+                FileSelector.openFolder {
+                    SettingsService.defaultMusicFolder = it.toString()
+                }
+            }, onClear = {
+                SettingsService.defaultMusicFolder = ""
+            })
         }
 
         HeightSpacer()
@@ -127,88 +127,72 @@ private fun Editor() {
         MyGroupBox {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Text("Default AI: ")
-                Observe {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = SettingsService.defaultAi == "OpenAI",
-                            onClick = {
-                                SettingsService.defaultAi = "OpenAI"
-                            }
-                        )
-                        Text("OpenAI")
-                    }
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        RadioButton(
-                            selected = SettingsService.defaultAi == "Gemini",
-                            onClick = {
-                                SettingsService.defaultAi = "Gemini"
-                            }
-                        )
-                        Text("Gemini")
-                    }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = SettingsService.defaultAi == "OpenAI",
+                        onClick = {
+                            SettingsService.defaultAi = "OpenAI"
+                        }
+                    )
+                    Text("OpenAI")
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(
+                        selected = SettingsService.defaultAi == "Gemini",
+                        onClick = {
+                            SettingsService.defaultAi = "Gemini"
+                        }
+                    )
+                    Text("Gemini")
                 }
             }
 
-            Observe {
-                SimpleTextField("OpenAI API URL: ", SettingsService.openAiApiUrl, onTextChanged = {
-                    SettingsService.openAiApiUrl = it.trim()
-                })
-            }
+            SimpleTextField("OpenAI API URL: ", SettingsService.openAiApiUrl, onTextChanged = {
+                SettingsService.openAiApiUrl = it.trim()
+            })
             HeightSpacer()
 
-            Observe {
-                SimpleTextField("OpenAI API Model: ", SettingsService.openAiApiModel, onTextChanged = {
-                    SettingsService.openAiApiModel = it.trim()
-                })
-            }
+            SimpleTextField("OpenAI API Model: ", SettingsService.openAiApiModel, onTextChanged = {
+                SettingsService.openAiApiModel = it.trim()
+            })
             HeightSpacer()
 
-            Observe {
-                SimpleTextField("OpenAI API key: ", SettingsService.openAiApiKey, onTextChanged = {
-                    SettingsService.openAiApiKey = it.trim()
-                })
-            }
+            SimpleTextField("OpenAI API key: ", SettingsService.openAiApiKey, onTextChanged = {
+                SettingsService.openAiApiKey = it.trim()
+            })
             HeightSpacer()
 
-            Observe {
-                SimpleTextField("Gemini API key: ", SettingsService.geminiKey, onTextChanged = {
-                    SettingsService.geminiKey = it.trim()
-                })
-            }
+            SimpleTextField("Gemini API key: ", SettingsService.geminiKey, onTextChanged = {
+                SettingsService.geminiKey = it.trim()
+            })
 
-            Observe {
-                SimpleTextField("IFly APP ID: ", SettingsService.iFlyAppId, onTextChanged = {
-                    SettingsService.iFlyAppId = it.trim()
-                })
-            }
+            SimpleTextField("IFly APP ID: ", SettingsService.iFlyAppId, onTextChanged = {
+                SettingsService.iFlyAppId = it.trim()
+            })
             HeightSpacer()
         }
 
         HeightSpacer()
 
         MyGroupBox {
-            Observe {
-                val fileSelectScope = currentRecomposeScope
-                val context = LocalContext.current
+            val context = LocalContext.current
+            val inspectionMode = LocalInspectionMode.current
 
-                val configDir =
-                    if (LocalInspectionMode.current)
-                        ""
-                    else
-                        SettingsService.settingsDir
-
-                MyFileSelector("Config Folder:", configDir, onSelect = {
-                    FileSelector.openFolder {
-                        SettingsService.settingsDir = it.toString()
-                        fileSelectScope.invalidate()
-                        onConfigDirChanged(context)
-                    }
-                }, onClear = {
-                    SettingsService.settingsDir = ""
-                    fileSelectScope.invalidate()
-                    onConfigDirChanged(context)
-                })
+            var configDir by remember {
+                mutableStateOf(if (inspectionMode) "" else SettingsService.settingsDir)
             }
+
+            MyFileSelector("Config Folder:", configDir, onSelect = {
+                FileSelector.openFolder {
+                    SettingsService.settingsDir = it.toString()
+                    configDir = it.toString()
+                    onConfigDirChanged(context)
+                }
+            }, onClear = {
+                SettingsService.settingsDir = ""
+                configDir = ""
+                onConfigDirChanged(context)
+            })
         }
 
         HeightSpacer()
@@ -217,14 +201,27 @@ private fun Editor() {
 
 @Composable
 private fun PermissionHealthGroup() {
-    App.permissionChangedTrigger
-
     val context = LocalContext.current
     val activity = context as? Activity
     val inspectionMode = LocalInspectionMode.current
-    val notificationAllowed = inspectionMode || PermissionsService.canPostNotifications(context)
-    val exactAlarmAllowed = inspectionMode || PermissionsService.canScheduleExactAlarms()
-    val batteryUnrestricted = inspectionMode || PermissionsService.isIgnoringBatteryOptimizations(context)
+
+    var refreshKey by remember { mutableIntStateOf(0) }
+    if (!inspectionMode) {
+        // 每次回到前台重新查询系统权限状态（用户可能刚从系统设置返回）
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+            refreshKey++
+        }
+    }
+
+    val notificationAllowed = remember(refreshKey) {
+        inspectionMode || PermissionsService.canPostNotifications(context)
+    }
+    val exactAlarmAllowed = remember(refreshKey) {
+        inspectionMode || PermissionsService.canScheduleExactAlarms()
+    }
+    val batteryUnrestricted = remember(refreshKey) {
+        inspectionMode || PermissionsService.isIgnoringBatteryOptimizations(context)
+    }
 
     MyGroupBox {
         Text("Permissions:")

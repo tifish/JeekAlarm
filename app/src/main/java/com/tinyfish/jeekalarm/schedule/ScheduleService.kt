@@ -1,6 +1,7 @@
 package com.tinyfish.jeekalarm.schedule
 
 import android.os.Environment
+import androidx.compose.runtime.mutableStateListOf
 import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.VibrationService
@@ -13,7 +14,7 @@ import java.util.Calendar
 object ScheduleService {
     private const val ScheduleFileName = "schedule.cron"
 
-    var scheduleList = mutableListOf<Schedule>()
+    val scheduleList = mutableStateListOf<Schedule>()
     var nextScheduleId = 1
 
     val configFile: File
@@ -27,18 +28,19 @@ object ScheduleService {
         }
 
     fun load() {
-        scheduleList =
+        val loaded =
             if (SettingsService.configExists(ScheduleFileName))
                 ScheduleParser.loadFromLines(SettingsService.readConfigLines(ScheduleFileName))
             else
-                mutableListOf()
+                emptyList()
+        scheduleList.clear()
+        scheduleList.addAll(loaded)
         sort()
     }
 
     fun loadAndRefresh() {
         load()
         setNextAlarm()
-        App.scheduleChangedTrigger++
     }
 
     fun save() {
@@ -49,7 +51,6 @@ object ScheduleService {
     fun saveAndRefresh() {
         save()
         setNextAlarm()
-        App.scheduleChangedTrigger++
     }
 
     fun sort() {
@@ -73,6 +74,13 @@ object ScheduleService {
 
     fun findSchedule(id: Int): Schedule? {
         return scheduleList.firstOrNull { it.id == id }
+    }
+
+    fun setEnabled(id: Int, enabled: Boolean) {
+        val index = scheduleList.indexOfFirst { it.id == id }
+        if (index < 0) return
+        scheduleList[index] = scheduleList[index].copy(enabled = enabled)
+        saveAndRefresh()
     }
 
     private fun ensureStableIds() {
@@ -155,7 +163,6 @@ object ScheduleService {
 
         sort()
         setNextAlarm()
-        App.scheduleChangedTrigger++
     }
 
     fun stopPlaying() {

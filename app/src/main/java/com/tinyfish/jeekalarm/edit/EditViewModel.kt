@@ -1,103 +1,90 @@
 package com.tinyfish.jeekalarm.edit
 
 import android.widget.Toast
-import androidx.lifecycle.ViewModel
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.ai.Gemini
 import com.tinyfish.jeekalarm.ai.OpenAi
-import com.tinyfish.jeekalarm.globalStateOf
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
-object EditViewModel : ViewModel() {
-    var isAdding = false
+object EditViewModel {
+    // App 级作用域：用于"按名字猜时间"，不随屏幕切换被取消（取代 GlobalScope）
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    var isAdding by mutableStateOf(false)
+        private set
 
     var editScheduleId = -1
-    private lateinit var editingSchedule: Schedule
-    private var initializedEditScheduleId: Int? = null
+        private set
+
+    // 单一真相源：正在编辑的副本。所有界面读它、改它，Compose 自动重组。
+    var editing by mutableStateOf(Schedule())
+        private set
 
     fun startEditing(scheduleId: Int) {
         editScheduleId = scheduleId
-        initializedEditScheduleId = null
-    }
-
-    fun initEditingSchedule() {
-        if (::editingSchedule.isInitialized && initializedEditScheduleId == editScheduleId)
-            return
-
-        isAdding = editScheduleId == -1
-        editingSchedule =
+        isAdding = scheduleId == -1
+        editing =
             if (isAdding)
                 Schedule()
             else
-                ScheduleService.scheduleList.filter { it.id == editScheduleId }[0]
-
-        editingScheduleName = editingSchedule.name
-        editingScheduleMinuteConfig = editingSchedule.minuteConfig
-        editingScheduleHourConfig = editingSchedule.hourConfig
-        editingScheduleDayConfig = editingSchedule.dayConfig
-        editingScheduleMonthConfig = editingSchedule.monthConfig
-        editingScheduleWeekDayConfig = editingSchedule.weekDayConfig
-        editingScheduleYearConfig = editingSchedule.yearConfig
-        editingScheduleEnabled = editingSchedule.enabled
-        editingScheduleOnlyOnce = editingSchedule.onlyOnce
-        editingSchedulePlayMusic = editingSchedule.playMusic
-        editingScheduleMusicFile = editingSchedule.musicFile
-        editingScheduleMusicFolder = editingSchedule.musicFolder
-        editingScheduleVibration = editingSchedule.vibration
-        editingScheduleVibrationCount = editingSchedule.vibrationCount
-        initializedEditScheduleId = editScheduleId
+                ScheduleService.findSchedule(scheduleId)?.copy() ?: Schedule()
     }
 
-    var editingScheduleName by globalStateOf("") { editingSchedule.name = it }
-    var editingScheduleMinuteConfig by globalStateOf("") { editingSchedule.minuteConfig = it }
-    var editingScheduleHourConfig by globalStateOf("") { editingSchedule.hourConfig = it }
-    var editingScheduleDayConfig by globalStateOf("") { editingSchedule.dayConfig = it }
-    var editingScheduleMonthConfig by globalStateOf("") { editingSchedule.monthConfig = it }
-    var editingScheduleWeekDayConfig by globalStateOf("") { editingSchedule.weekDayConfig = it }
-    var editingScheduleYearConfig by globalStateOf("") { editingSchedule.yearConfig = it }
-    var editingScheduleEnabled by globalStateOf(true) { editingSchedule.enabled = it }
-    var editingScheduleOnlyOnce by globalStateOf(false) { editingSchedule.onlyOnce = it }
-    var editingSchedulePlayMusic by globalStateOf(true) { editingSchedule.playMusic = it }
-    var editingScheduleMusicFile by globalStateOf("") { editingSchedule.musicFile = it }
-    var editingScheduleMusicFolder by globalStateOf("") { editingSchedule.musicFolder = it }
-    var editingScheduleVibration by globalStateOf(true) { editingSchedule.vibration = it }
-    var editingScheduleVibrationCount by globalStateOf(10) { editingSchedule.vibrationCount = it }
+    /** 以不可变方式更新编辑副本：editing = transform(editing) */
+    fun update(transform: (Schedule) -> Schedule) {
+        editing = transform(editing)
+    }
 
     fun saveEditingSchedule() {
-        editingSchedule.timeConfigChanged()
+        editing.timeConfigChanged()
         if (isAdding) {
-            editingSchedule.id = ScheduleService.createScheduleId()
-            ScheduleService.scheduleList.add(editingSchedule)
+            editing.id = ScheduleService.createScheduleId()
+            ScheduleService.scheduleList.add(editing)
+        } else {
+            val index = ScheduleService.scheduleList.indexOfFirst { it.id == editScheduleId }
+            if (index >= 0)
+                ScheduleService.scheduleList[index] = editing
         }
         ScheduleService.sort()
         ScheduleService.saveAndRefresh()
-        initializedEditScheduleId = null
     }
 
-    suspend fun guessEditingScheduleFromName() {
-        val schedule: Schedule?
-        if (SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty()) {
-            schedule = Gemini.getAnswer(editingSchedule.name)
-        } else if (SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty()) {
-            schedule = OpenAi.getAnswer(editingSchedule.name)
-        } else {
-            return
+    fun guessFromName() {
+        scope.launch { guess() }
+    }
+
+    private suspend fun guess() {
+        val schedule: Schedule? = when {
+            SettingsService.defaultAi == "Gemini" && SettingsService.geminiKey.isNotEmpty() ->
+                Gemini.getAnswer(editing.name)
+
+            SettingsService.defaultAi == "OpenAI" && SettingsService.openAiApiKey.isNotEmpty() ->
+                OpenAi.getAnswer(editing.name)
+
+            else -> return
         }
 
         if (schedule != null) {
-            editingScheduleMinuteConfig = schedule.minuteConfig
-            editingScheduleHourConfig = schedule.hourConfig
-            editingScheduleDayConfig = schedule.dayConfig
-            editingScheduleMonthConfig = schedule.monthConfig
-            editingScheduleWeekDayConfig = schedule.weekDayConfig
-            editingScheduleYearConfig = schedule.yearConfig
-            editingScheduleEnabled = schedule.enabled
-            editingScheduleOnlyOnce = schedule.onlyOnce
-            editingSchedule.timeConfigChanged()
-
+            editing = editing.copy(
+                minuteConfig = schedule.minuteConfig,
+                hourConfig = schedule.hourConfig,
+                dayConfig = schedule.dayConfig,
+                monthConfig = schedule.monthConfig,
+                weekDayConfig = schedule.weekDayConfig,
+                yearConfig = schedule.yearConfig,
+                enabled = schedule.enabled,
+                onlyOnce = schedule.onlyOnce,
+            )
             Toast.makeText(App.context, "Filled time automatically", Toast.LENGTH_SHORT).show()
         } else {
             Toast.makeText(App.context, "No time found in name", Toast.LENGTH_SHORT).show()
@@ -105,17 +92,17 @@ object EditViewModel : ViewModel() {
     }
 
     fun setEditingScheduleTime(time: Calendar) {
-        time.apply {
-            editingScheduleMinuteConfig = get(Calendar.MINUTE).toString()
-            editingScheduleHourConfig = get(Calendar.HOUR_OF_DAY).toString()
-            editingScheduleDayConfig = get(Calendar.DAY_OF_MONTH).toString()
-            editingScheduleMonthConfig = (get(Calendar.MONTH) + 1).toString()
-            editingScheduleWeekDayConfig = "*"
-            editingScheduleYearConfig = (get(Calendar.YEAR)).toString()
-        }
+        editing = editing.copy(
+            minuteConfig = time.get(Calendar.MINUTE).toString(),
+            hourConfig = time.get(Calendar.HOUR_OF_DAY).toString(),
+            dayConfig = time.get(Calendar.DAY_OF_MONTH).toString(),
+            monthConfig = (time.get(Calendar.MONTH) + 1).toString(),
+            weekDayConfig = "*",
+            yearConfig = time.get(Calendar.YEAR).toString(),
+        )
     }
 
     fun play() {
-        editingSchedule.play()
+        editing.play()
     }
 }

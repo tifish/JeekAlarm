@@ -39,9 +39,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun Observe(body: @Composable () -> Unit) = body()
-
-@Composable
 fun SimpleSwitch(
     hint: String,
     value: Boolean,

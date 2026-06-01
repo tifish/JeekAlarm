@@ -30,8 +30,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -40,7 +40,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
@@ -61,10 +60,6 @@ import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.SimpleVectorButton
 import com.tinyfish.ui.WidthSpacer
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Composable
@@ -103,12 +98,8 @@ fun getThemeFromConfig(theme: String): ColorScheme {
 fun HomeScreen() {
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
-        content = {
-            Surface(
-                Modifier
-                    .verticalScroll(rememberScrollState())
-                    .padding(it),
-            ) {
+        content = { padding ->
+            Surface(Modifier.padding(padding)) {
                 ScheduleList()
             }
         },
@@ -118,14 +109,9 @@ fun HomeScreen() {
 
 @Composable
 private fun ScheduleList() {
-    App.scheduleChangedTrigger
+    val schedules = ScheduleService.scheduleList
 
-    if (LocalInspectionMode.current) {
-        ScheduleService.scheduleList.add(Schedule(name = "Alarm1"))
-        ScheduleService.scheduleList.add(Schedule(name = "Alarm2"))
-    }
-
-    if (ScheduleService.scheduleList.isEmpty()) {
+    if (schedules.isEmpty()) {
         Box(Modifier.wrapContentSize()) {
             SimpleVectorButton(
                 ImageVector.vectorResource(R.drawable.ic_add),
@@ -136,15 +122,15 @@ private fun ScheduleList() {
             }
         }
     } else {
-        Column {
-            val now = Calendar.getInstance()
-            for (index in ScheduleService.scheduleList.indices) {
-                val schedule = ScheduleService.scheduleList[index]
-                HeightSpacer()
-                ScheduleItem(index, schedule, now)
-                HorizontalDivider(color = Color.DarkGray)
+        val now = Calendar.getInstance()
+        Column(Modifier.verticalScroll(rememberScrollState())) {
+            schedules.forEach { schedule ->
+                key(schedule.id) {
+                    HeightSpacer()
+                    ScheduleItem(schedule, now)
+                    HorizontalDivider(color = Color.DarkGray)
+                }
             }
-
             HeightSpacer(100.dp)
         }
     }
@@ -152,18 +138,15 @@ private fun ScheduleList() {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
+private fun ScheduleItem(schedule: Schedule, now: Calendar) {
     Row(
         Modifier.padding(start = 10.dp, end = 10.dp)
     ) {
         Box(modifier = Modifier.align(Alignment.Top)) {
-            val boxScope = currentRecomposeScope
             Switch(
                 checked = schedule.enabled,
-                onCheckedChange = {
-                    schedule.enabled = it
-                    ScheduleService.saveAndRefresh()
-                    boxScope.invalidate()
+                onCheckedChange = { checked ->
+                    ScheduleService.setEnabled(schedule.id, checked)
                 }
             )
         }
@@ -198,9 +181,8 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
                     text = { Text("Remove") },
                     onClick = {
                         dropdownMenuExpanded = false
-                        ScheduleService.scheduleList.removeAt(index)
+                        ScheduleService.scheduleList.removeIf { it.id == schedule.id }
                         ScheduleService.saveAndRefresh()
-                        App.scheduleChangedTrigger++
                     }
                 )
             }
@@ -208,7 +190,6 @@ private fun ScheduleItem(index: Int, schedule: Schedule, now: Calendar) {
     }
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 fun NavigationBottomBar(currentScreen: ScreenType) {
     BottomAppBar(
@@ -232,12 +213,9 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
                 EditViewModel.startEditing(-1)
                 App.screen = ScreenType.EDIT
 
-                IFly.showDialog(context) {
-                    EditViewModel.editingScheduleName = it
-
-                    GlobalScope.launch(Dispatchers.Main) {
-                        EditViewModel.guessEditingScheduleFromName()
-                    }
+                IFly.showDialog(context) { recognizedName ->
+                    EditViewModel.update { it.copy(name = recognizedName) }
+                    EditViewModel.guessFromName()
                 }
             }) {
                 Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
@@ -249,6 +227,11 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
 @Preview
 @Composable
 fun HomeScreenPreview() {
+    if (ScheduleService.scheduleList.isEmpty()) {
+        ScheduleService.scheduleList.addAll(
+            listOf(Schedule(name = "Alarm1"), Schedule(name = "Alarm2"))
+        )
+    }
     MaterialTheme(colorScheme = darkColorScheme()) {
         HomeScreen()
     }

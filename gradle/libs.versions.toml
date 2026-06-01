@@ -4,6 +4,7 @@ junit = { group = "junit", name = "junit", version = "4.13.2" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version = "1.2.1" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version = "3.6.1" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version = "2.9.0" }
+androidx-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version = "2.9.0" }
 androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version = "1.10.1" }
 androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version = "2025.05.00" }
 androidx-ui = { group = "androidx.compose.ui", name = "ui" }
@@ -26,4 +27,4 @@ ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp" }
 android-application = { id = "com.android.application", version = "8.10.0" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.0.21" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.0.21" }
-kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "1.9.10" }
+kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.21" }

@@ -16,10 +16,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -36,18 +32,11 @@ import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyGroupBox
 import com.tinyfish.ui.MySwitch
 import com.tinyfish.ui.MyTopBar
-import com.tinyfish.ui.Observe
 import com.tinyfish.ui.SimpleTextField
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.util.Calendar
 
 @Composable
 fun EditScreen() {
-    EditViewModel.initEditingSchedule()
-
     Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (EditViewModel.isAdding) "Add" else "Edit") }, content = {
         Surface(Modifier.padding(it)) {
             Editor()
@@ -55,9 +44,10 @@ fun EditScreen() {
     }, bottomBar = { BottomBar() })
 }
 
-@OptIn(DelicateCoroutinesApi::class)
 @Composable
 private fun Editor() {
+    val schedule = EditViewModel.editing
+
     Column(
         Modifier
             .padding(start = 15.dp, end = 15.dp)
@@ -66,142 +56,109 @@ private fun Editor() {
         HeightSpacer()
 
         MyGroupBox {
-            Observe {
-                MySwitch("Enabled", EditViewModel.editingScheduleEnabled, { EditViewModel.editingScheduleEnabled = it })
-                MySwitch("Only Once", EditViewModel.editingScheduleOnlyOnce, { EditViewModel.editingScheduleOnlyOnce = it })
-            }
+            MySwitch("Enabled", schedule.enabled, { checked -> EditViewModel.update { it.copy(enabled = checked) } })
+            MySwitch("Only Once", schedule.onlyOnce, { checked -> EditViewModel.update { it.copy(onlyOnce = checked) } })
         }
 
         HeightSpacer()
 
         MyGroupBox {
-            Observe {
-                SimpleTextField("Name: ", EditViewModel.editingScheduleName, onTextChanged = {
-                    EditViewModel.editingScheduleName = it
-                })
-            }
+            SimpleTextField("Name: ", schedule.name, onTextChanged = { name ->
+                EditViewModel.update { it.copy(name = name) }
+            })
             HeightSpacer()
 
             if (SettingsService.openAiApiKey != "") {
-                Button(onClick = {
-                    GlobalScope.launch(Dispatchers.Main) {
-                        EditViewModel.guessEditingScheduleFromName()
-                    }
-                }) {
+                Button(onClick = { EditViewModel.guessFromName() }) {
                     Text("Guess time from name")
                 }
                 HeightSpacer()
             }
 
-            val onChange = { _: String ->
-                if (!EditViewModel.editingScheduleEnabled) {
-                    EditViewModel.editingScheduleEnabled = true
-                }
-            }
-
-            CronTimeTextField("Hour: ", EditViewModel.editingScheduleHourConfig) {
-                EditViewModel.editingScheduleHourConfig = it
-                onChange(it)
+            // 改任意时间字段时，顺带启用该闹钟
+            CronTimeTextField("Hour: ", schedule.hourConfig) { value ->
+                EditViewModel.update { it.copy(hourConfig = value, enabled = true) }
             }
 
             HeightSpacer()
 
-            CronTimeTextField("Minute: ", EditViewModel.editingScheduleMinuteConfig) {
-                EditViewModel.editingScheduleMinuteConfig = it
-                onChange(it)
+            CronTimeTextField("Minute: ", schedule.minuteConfig) { value ->
+                EditViewModel.update { it.copy(minuteConfig = value, enabled = true) }
             }
 
             HeightSpacer()
 
-            CronTimeTextField("WeekDay: ", EditViewModel.editingScheduleWeekDayConfig) {
-                EditViewModel.editingScheduleWeekDayConfig = it
-                onChange(it)
+            CronTimeTextField("WeekDay: ", schedule.weekDayConfig) { value ->
+                EditViewModel.update { it.copy(weekDayConfig = value, enabled = true) }
             }
 
             HeightSpacer()
 
-            CronTimeTextField("Month: ", EditViewModel.editingScheduleMonthConfig) {
-                EditViewModel.editingScheduleMonthConfig = it
-                onChange(it)
+            CronTimeTextField("Month: ", schedule.monthConfig) { value ->
+                EditViewModel.update { it.copy(monthConfig = value, enabled = true) }
             }
 
             HeightSpacer()
 
-            CronTimeTextField("Day: ", EditViewModel.editingScheduleDayConfig) {
-                EditViewModel.editingScheduleDayConfig = it
-                onChange(it)
+            CronTimeTextField("Day: ", schedule.dayConfig) { value ->
+                EditViewModel.update { it.copy(dayConfig = value, enabled = true) }
             }
 
             HeightSpacer()
 
-            CronTimeTextField("Year: ", EditViewModel.editingScheduleYearConfig) {
-                EditViewModel.editingScheduleYearConfig = it
-                onChange(it)
+            CronTimeTextField("Year: ", schedule.yearConfig) { value ->
+                EditViewModel.update { it.copy(yearConfig = value, enabled = true) }
             }
         }
 
         HeightSpacer()
 
         MyGroupBox {
-            Observe {
-                MySwitch(hint = "Play Music:", EditViewModel.editingSchedulePlayMusic, { EditViewModel.editingSchedulePlayMusic = it })
+            MySwitch(hint = "Play Music:", schedule.playMusic, { checked -> EditViewModel.update { it.copy(playMusic = checked) } })
 
-                if (EditViewModel.editingSchedulePlayMusic) {
-                    Column(Modifier.padding(start = 20.dp)) {
-                        HeightSpacer()
+            if (schedule.playMusic) {
+                Column(Modifier.padding(start = 20.dp)) {
+                    HeightSpacer()
 
-                        Observe {
-                            MyFileSelector("Music File:", EditViewModel.editingScheduleMusicFile, onSelect = {
-                                FileSelector.openMusicFile {
-                                    EditViewModel.editingScheduleMusicFile = it.toString()
-                                }
-                            }, onClear = {
-                                EditViewModel.editingScheduleMusicFile = ""
-                            })
+                    MyFileSelector("Music File:", schedule.musicFile, onSelect = {
+                        FileSelector.openMusicFile { uri ->
+                            EditViewModel.update { it.copy(musicFile = uri.toString()) }
                         }
+                    }, onClear = {
+                        EditViewModel.update { it.copy(musicFile = "") }
+                    })
 
-                        HeightSpacer()
+                    HeightSpacer()
 
-                        Observe {
-                            MyFileSelector("Music Folder:", EditViewModel.editingScheduleMusicFolder, onSelect = {
-                                FileSelector.openFolder {
-                                    EditViewModel.editingScheduleMusicFolder = it.toString()
-                                }
-                            }, onClear = {
-                                EditViewModel.editingScheduleMusicFolder = ""
-                            })
+                    MyFileSelector("Music Folder:", schedule.musicFolder, onSelect = {
+                        FileSelector.openFolder { uri ->
+                            EditViewModel.update { it.copy(musicFolder = uri.toString()) }
                         }
-                    }
+                    }, onClear = {
+                        EditViewModel.update { it.copy(musicFolder = "") }
+                    })
                 }
+            }
 
+            HeightSpacer()
+
+            MySwitch("Vibration", schedule.vibration, { checked -> EditViewModel.update { it.copy(vibration = checked) } })
+
+            if (schedule.vibration) {
                 HeightSpacer()
 
-                Observe {
-                    MySwitch(
-                        "Vibration",
-                        EditViewModel.editingScheduleVibration,
-                        onCheckedChange = { EditViewModel.editingScheduleVibration = it })
-
-                    if (EditViewModel.editingScheduleVibration) {
-                        HeightSpacer()
-
-                        var vibrationCount by remember { mutableFloatStateOf(EditViewModel.editingScheduleVibrationCount.toFloat()) }
-
-                        Text(
-                            vibrationCount.toInt().toString() + " times", modifier = Modifier.padding(start = 20.dp)
-                        )
-                        Slider(
-                            value = vibrationCount,
-                            onValueChange = {
-                                vibrationCount = it
-                                EditViewModel.editingScheduleVibrationCount = vibrationCount.toInt()
-                            },
-                            modifier = Modifier.padding(start = 20.dp, end = 20.dp),
-                            steps = 30,
-                            valueRange = 1f..30f,
-                        )
-                    }
-                }
+                Text(
+                    "${schedule.vibrationCount} times", modifier = Modifier.padding(start = 20.dp)
+                )
+                Slider(
+                    value = schedule.vibrationCount.toFloat(),
+                    onValueChange = { value ->
+                        EditViewModel.update { it.copy(vibrationCount = value.toInt()) }
+                    },
+                    modifier = Modifier.padding(start = 20.dp, end = 20.dp),
+                    steps = 30,
+                    valueRange = 1f..30f,
+                )
             }
         }
 
@@ -230,9 +187,7 @@ fun BottomBar() {
 
         NavigationBarItem(
             selected = false,
-            onClick = {
-                onEditScreenPressBack()
-            },
+            onClick = { onEditScreenPressBack() },
             label = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
             icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) })
 
@@ -243,24 +198,20 @@ fun BottomBar() {
             icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) },
         )
 
-        Observe {
-            val text = if (App.isPlaying) "Stop" else "Play"
-            val onClick = {
-                if (App.isPlaying) ScheduleService.stopPlaying()
+        val isPlaying = App.isPlaying
+        NavigationBarItem(
+            selected = false,
+            onClick = {
+                if (isPlaying) ScheduleService.stopPlaying()
                 else EditViewModel.play()
-            }
-
-            if (App.isPlaying) NavigationBarItem(
-                selected = false,
-                onClick = onClick,
-                label = { Text(text) },
-                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_stop), null) })
-            else NavigationBarItem(
-                selected = false,
-                onClick = onClick,
-                label = { Text(text) },
-                icon = { Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null) })
-        }
+            },
+            label = { Text(if (isPlaying) "Stop" else "Play") },
+            icon = {
+                Icon(
+                    ImageVector.vectorResource(if (isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow),
+                    null
+                )
+            })
     })
 }
 

@@ -19,10 +19,6 @@ import com.tinyfish.jeekalarm.start.ScreenType
 
 
 class MainActivity : AppCompatActivity() {
-    companion object {
-        var instance: MainActivity? = null
-    }
-
     private fun showCurrentAlarms() {
         if (NotificationService.currentAlarmIds.isNotEmpty()) {
             allowAlarmOverLockScreen()
@@ -55,15 +51,12 @@ class MainActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
 
-        App.permissionChangedTrigger++
         ScheduleService.setNextAlarm()
         showCurrentAlarms()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        instance = this
 
         val permissions = mutableListOf(Manifest.permission.RECORD_AUDIO)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
@@ -103,11 +96,5 @@ class MainActivity : AppCompatActivity() {
         setContent {
             MainUI()
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-
-        instance = null
     }
 }
