@@ -1,114 +1,101 @@
 package com.tinyfish.jeekalarm.edit
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.text.TextRange
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.tinyfish.ui.MyTextButton
-import com.tinyfish.ui.SimpleTextField
-import com.tinyfish.ui.WidthSpacer
 
+private val cronPresets = listOf("*", "0", "1-3", "1,3", "*/3")
+
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CronTimeTextField(
-    hint: String,
+fun CronTimeField(
+    label: String,
     text: String,
+    modifier: Modifier = Modifier,
     onChange: (String) -> Unit = {}
 ) {
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-        var focusedState by remember { mutableStateOf(false) }
-        var textRange by remember { mutableStateOf(TextRange(text.length)) }
-        var keepWholeSelection by remember { mutableStateOf(false) }
-        if (keepWholeSelection) {
-            // in case onValueChange was not called immediately after onFocusChanged
-            // the selection will be transferred correctly, so we don't need to redefine it anymore
-            SideEffect {
-                keepWholeSelection = false
+    var focused by remember { mutableStateOf(false) }
+    var textRange by remember { mutableStateOf(TextRange(text.length)) }
+    var keepWholeSelection by remember { mutableStateOf(false) }
+    if (keepWholeSelection) {
+        // 聚焦后让 onValueChange 把全选状态正确传递一次即可
+        SideEffect { keepWholeSelection = false }
+    }
+
+    // 外部（如"现在"/"按名字猜测"）可能改变 text，需把选区限制在合法范围内
+    val safeRange = TextRange(
+        textRange.start.coerceIn(0, text.length),
+        textRange.end.coerceIn(0, text.length),
+    )
+
+    Column(modifier.fillMaxWidth()) {
+        // chip 放在输入框上方：聚焦后字段会被顶到键盘上方，此时 chip 仍可见
+        AnimatedVisibility(visible = focused) {
+            FlowRow(
+                Modifier.padding(bottom = 6.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                cronPresets.forEach { preset ->
+                    SuggestionChip(
+                        onClick = {
+                            if (text != preset) {
+                                onChange(preset)
+                                textRange = TextRange(preset.length)
+                            }
+                        },
+                        label = { Text(preset) },
+                    )
+                }
             }
         }
 
-        SimpleTextField(
-            hint = hint,
-            textFieldValue = TextFieldValue(text, textRange),
-            onTextFieldFocused = { focused ->
-                if (focusedState != focused) {
-                    focusedState = focused
-                    if (focused) {
-                        textRange = TextRange(0, text.length)
-                        keepWholeSelection = true
-                    }
+        OutlinedTextField(
+            value = TextFieldValue(text, safeRange),
+            onValueChange = {
+                if (text != it.text)
+                    onChange(it.text)
+
+                textRange = if (keepWholeSelection) {
+                    keepWholeSelection = false
+                    TextRange(0, it.text.length)
+                } else {
+                    it.selection
                 }
             },
-            textFieldModifier = Modifier.weight(1f, true),
-            textStyle = TextStyle(fontSize = (20.sp)),
-            modifier = Modifier.weight(1f, true),
-            onTextChanged = {
-                if (text != it.text) {
-                    onChange(it.text)
-                }
-
-                if (keepWholeSelection) {
-                    keepWholeSelection = false
-                    textRange = TextRange(0, it.text.length)
-                } else {
-                    textRange = it.selection
-                }
-            }
+            label = { Text(label) },
+            singleLine = true,
+            textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .onFocusChanged { state ->
+                    if (focused != state.isFocused) {
+                        focused = state.isFocused
+                        if (state.isFocused) {
+                            textRange = TextRange(0, text.length)
+                            keepWholeSelection = true
+                        }
+                    }
+                },
         )
-
-        if (focusedState) {
-            MyTextButton("*") {
-                if (text != "*") {
-                    onChange("*")
-                    textRange = TextRange(1, 1)
-                }
-            }
-
-            WidthSpacer()
-
-            MyTextButton("0") {
-                if (text != "0") {
-                    textRange = TextRange(1, 1)
-                    onChange("0")
-                }
-            }
-
-            WidthSpacer()
-
-            MyTextButton("1-3") {
-                if (text != "1-3") {
-                    textRange = TextRange(3, 3)
-                    onChange("0")
-                    onChange("1-3")
-                }
-            }
-
-            WidthSpacer()
-
-            MyTextButton("1,3") {
-                if (text != "1,3") {
-                    textRange = TextRange(3, 3)
-                    onChange("1,3")
-                }
-            }
-
-            WidthSpacer()
-
-            MyTextButton("*/3") {
-                if (text != "*/3") {
-                    textRange = TextRange(3, 3)
-                    onChange("*/3")
-                }
-            }
-        }
     }
 }

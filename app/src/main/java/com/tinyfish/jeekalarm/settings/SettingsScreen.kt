@@ -4,20 +4,25 @@ import android.app.Activity
 import android.app.AlertDialog
 import android.content.Context
 import android.content.DialogInterface
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -26,14 +31,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
-import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.PermissionsService
+import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.AlarmRingingService
 import com.tinyfish.jeekalarm.edit.FileSelector
@@ -41,161 +48,129 @@ import com.tinyfish.jeekalarm.home.NavigationBottomBar
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
-import com.tinyfish.ui.HeightSpacer
+import com.tinyfish.ui.LabeledTextField
 import com.tinyfish.ui.MyFileSelector
-import com.tinyfish.ui.MyGroupBox
 import com.tinyfish.ui.MyTopBar
-import com.tinyfish.ui.SimpleTextField
+import com.tinyfish.ui.SectionCard
 import com.tinyfish.ui.WidthSpacer
+import com.tinyfish.ui.theme.JeekAlarmTheme
 
 @Composable
 fun SettingsScreen() {
-    Scaffold(topBar = { MyTopBar(R.drawable.ic_settings, "Settings") }, content = {
-        Surface(
-            modifier = Modifier.padding(it),
-        ) {
-            Editor()
-        }
-    }, bottomBar = { NavigationBottomBar(ScreenType.SETTINGS) })
+    Scaffold(
+        topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
+        bottomBar = { NavigationBottomBar(ScreenType.SETTINGS) },
+    ) { padding ->
+        Editor(Modifier.padding(padding))
+    }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Editor() {
+private fun Editor(modifier: Modifier = Modifier) {
     Column(
-        Modifier
+        modifier
+            .fillMaxSize()
             .verticalScroll(rememberScrollState())
-            .padding(start = 15.dp, end = 15.dp)
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        HeightSpacer()
-
-        MyGroupBox {
-            Text("Theme:")
-            Row(
-                modifier = Modifier.padding(start = 20.dp), verticalAlignment = Alignment.CenterVertically
-            ) {
-                val options = listOf("Auto", "Dark", "Light")
-                options.forEach {
-                    val onClick = {
-                        SettingsService.theme = it
-                    }
-                    RadioButton(selected = SettingsService.theme == it, onClick = onClick)
-                    Text(it, Modifier.clickable(onClick = onClick))
-                    WidthSpacer()
+        SectionCard(title = "Appearance") {
+            Text("Theme", style = MaterialTheme.typography.bodyMedium)
+            val themes = listOf("Auto", "Dark", "Light")
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                themes.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        selected = SettingsService.theme == label,
+                        onClick = { SettingsService.theme = label },
+                        shape = SegmentedButtonDefaults.itemShape(index, themes.size),
+                    ) { Text(label) }
                 }
             }
         }
 
-        HeightSpacer()
-
         PermissionHealthGroup()
 
-        HeightSpacer()
-
-        MyGroupBox {
-            MyFileSelector("Music File:", SettingsService.defaultMusicFile, onSelect = {
-                FileSelector.openMusicFile {
-                    SettingsService.defaultMusicFile = it.toString()
-                    SettingsService.save()
-                }
+        SectionCard(title = "Default sound") {
+            MyFileSelector("Music file", SettingsService.defaultMusicFile, onSelect = {
+                FileSelector.openMusicFile { SettingsService.defaultMusicFile = it.toString() }
             }, onClear = {
                 SettingsService.defaultMusicFile = ""
             })
 
-            HeightSpacer()
-
-            MyFileSelector("Music Folder:", SettingsService.defaultMusicFolder, onSelect = {
-                FileSelector.openFolder {
-                    SettingsService.defaultMusicFolder = it.toString()
-                }
+            MyFileSelector("Music folder", SettingsService.defaultMusicFolder, onSelect = {
+                FileSelector.openFolder { SettingsService.defaultMusicFolder = it.toString() }
             }, onClear = {
                 SettingsService.defaultMusicFolder = ""
             })
         }
 
-        HeightSpacer()
-
-        Button(
+        FilledTonalButton(
             onClick = {
                 AlarmRingingService.start(context = App.context, alarmIds = ScheduleService.nextAlarmIds)
-            }, Modifier.padding(5.dp)
+            },
+            modifier = Modifier.fillMaxWidth(),
         ) {
-            Text("Test Next Alarm")
+            Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null)
+            WidthSpacer(8.dp)
+            Text("Test next alarm")
         }
 
-        HeightSpacer()
-
-        MyGroupBox {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text("Default AI: ")
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = SettingsService.defaultAi == "OpenAI",
-                        onClick = {
-                            SettingsService.defaultAi = "OpenAI"
-                        }
-                    )
-                    Text("OpenAI")
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    RadioButton(
-                        selected = SettingsService.defaultAi == "Gemini",
-                        onClick = {
-                            SettingsService.defaultAi = "Gemini"
-                        }
-                    )
-                    Text("Gemini")
+        SectionCard(title = "AI assistant") {
+            Text("Default provider", style = MaterialTheme.typography.bodyMedium)
+            val ais = listOf("OpenAI", "Gemini")
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                ais.forEachIndexed { index, label ->
+                    SegmentedButton(
+                        selected = SettingsService.defaultAi == label,
+                        onClick = { SettingsService.defaultAi = label },
+                        shape = SegmentedButtonDefaults.itemShape(index, ais.size),
+                    ) { Text(label) }
                 }
             }
 
-            SimpleTextField("OpenAI API URL: ", SettingsService.openAiApiUrl, onTextChanged = {
+            LabeledTextField("OpenAI API URL", SettingsService.openAiApiUrl) {
                 SettingsService.openAiApiUrl = it.trim()
-            })
-            HeightSpacer()
-
-            SimpleTextField("OpenAI API Model: ", SettingsService.openAiApiModel, onTextChanged = {
-                SettingsService.openAiApiModel = it.trim()
-            })
-            HeightSpacer()
-
-            SimpleTextField("OpenAI API key: ", SettingsService.openAiApiKey, onTextChanged = {
-                SettingsService.openAiApiKey = it.trim()
-            })
-            HeightSpacer()
-
-            SimpleTextField("Gemini API key: ", SettingsService.geminiKey, onTextChanged = {
-                SettingsService.geminiKey = it.trim()
-            })
-
-            SimpleTextField("IFly APP ID: ", SettingsService.iFlyAppId, onTextChanged = {
-                SettingsService.iFlyAppId = it.trim()
-            })
-            HeightSpacer()
-        }
-
-        HeightSpacer()
-
-        MyGroupBox {
-            val context = LocalContext.current
-            val inspectionMode = LocalInspectionMode.current
-
-            var configDir by remember {
-                mutableStateOf(if (inspectionMode) "" else SettingsService.settingsDir)
             }
-
-            MyFileSelector("Config Folder:", configDir, onSelect = {
-                FileSelector.openFolder {
-                    SettingsService.settingsDir = it.toString()
-                    configDir = it.toString()
-                    onConfigDirChanged(context)
-                }
-            }, onClear = {
-                SettingsService.settingsDir = ""
-                configDir = ""
-                onConfigDirChanged(context)
-            })
+            LabeledTextField("OpenAI API model", SettingsService.openAiApiModel) {
+                SettingsService.openAiApiModel = it.trim()
+            }
+            LabeledTextField("OpenAI API key", SettingsService.openAiApiKey) {
+                SettingsService.openAiApiKey = it.trim()
+            }
+            LabeledTextField("Gemini API key", SettingsService.geminiKey) {
+                SettingsService.geminiKey = it.trim()
+            }
+            LabeledTextField("iFlytek App ID", SettingsService.iFlyAppId) {
+                SettingsService.iFlyAppId = it.trim()
+            }
         }
 
-        HeightSpacer()
+        ConfigFolderGroup()
+    }
+}
+
+@Composable
+private fun ConfigFolderGroup() {
+    val context = LocalContext.current
+    val inspectionMode = LocalInspectionMode.current
+
+    var configDir by remember {
+        mutableStateOf(if (inspectionMode) "" else SettingsService.settingsDir)
+    }
+
+    SectionCard(title = "Config folder") {
+        MyFileSelector("Folder", configDir, onSelect = {
+            FileSelector.openFolder {
+                SettingsService.settingsDir = it.toString()
+                configDir = it.toString()
+                onConfigDirChanged(context)
+            }
+        }, onClear = {
+            SettingsService.settingsDir = ""
+            configDir = ""
+            onConfigDirChanged(context)
+        })
     }
 }
 
@@ -223,12 +198,10 @@ private fun PermissionHealthGroup() {
         inspectionMode || PermissionsService.isIgnoringBatteryOptimizations(context)
     }
 
-    MyGroupBox {
-        Text("Permissions:")
-        HeightSpacer()
-
+    SectionCard(title = "Permissions") {
         PermissionStatusRow(
             name = "Notifications",
+            allowed = notificationAllowed,
             status = if (notificationAllowed) "Allowed" else "Required",
             actionText = if (notificationAllowed) "Settings" else "Allow",
             onClick = {
@@ -236,13 +209,12 @@ private fun PermissionHealthGroup() {
                     PermissionsService.requestNotificationPermission(activity)
                 else
                     PermissionsService.openAppNotificationSettings(context)
-            }
+            },
         )
-
-        HeightSpacer()
 
         PermissionStatusRow(
             name = "Exact alarms",
+            allowed = exactAlarmAllowed,
             status = if (exactAlarmAllowed) "Allowed" else "Required",
             actionText = if (exactAlarmAllowed) "Settings" else "Allow",
             onClick = {
@@ -250,13 +222,12 @@ private fun PermissionHealthGroup() {
                     PermissionsService.openAppDetailsSettings(context)
                 else
                     PermissionsService.requestExactAlarmPermission(context)
-            }
+            },
         )
-
-        HeightSpacer()
 
         PermissionStatusRow(
             name = "Battery optimization",
+            allowed = batteryUnrestricted,
             status = if (batteryUnrestricted) "Unrestricted" else "May be restricted",
             actionText = if (batteryUnrestricted) "Settings" else "Allow",
             onClick = {
@@ -264,18 +235,17 @@ private fun PermissionHealthGroup() {
                     PermissionsService.openBatteryOptimizationSettings(context)
                 else
                     PermissionsService.requestIgnoreBatteryOptimizations(context)
-            }
+            },
         )
-
-        HeightSpacer()
 
         PermissionStatusRow(
             name = "Autostart / lock screen",
+            allowed = null,
             status = "Device setting",
             actionText = "Open",
             onClick = {
                 PermissionsService.openAppDetailsSettings(context)
-            }
+            },
         )
     }
 }
@@ -283,22 +253,40 @@ private fun PermissionHealthGroup() {
 @Composable
 private fun PermissionStatusRow(
     name: String,
+    allowed: Boolean?,
     status: String,
     actionText: String,
     onClick: () -> Unit,
 ) {
+    val statusColor = when (allowed) {
+        true -> MaterialTheme.colorScheme.primary
+        false -> MaterialTheme.colorScheme.error
+        null -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(Modifier.weight(1f, true)) {
-            Text(name)
-            Text(status, style = MaterialTheme.typography.bodySmall)
+        Column(Modifier.weight(1f)) {
+            Text(name, style = MaterialTheme.typography.bodyLarge)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (allowed == true) {
+                    Icon(
+                        ImageVector.vectorResource(R.drawable.ic_done),
+                        null,
+                        Modifier.size(16.dp),
+                        tint = statusColor,
+                    )
+                    WidthSpacer(4.dp)
+                }
+                Text(status, style = MaterialTheme.typography.bodySmall, color = statusColor)
+            }
         }
 
         WidthSpacer()
 
-        Button(onClick = onClick) {
+        TextButton(onClick = onClick) {
             Text(actionText)
         }
     }
@@ -335,7 +323,7 @@ fun onSettingsScreenPressBack() {
 @Preview
 @Composable
 fun SettingsScreenPreview() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
+    JeekAlarmTheme("Dark") {
         SettingsScreen()
     }
 }

@@ -1,20 +1,22 @@
 package com.tinyfish.jeekalarm.edit
 
 import android.app.AlertDialog
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,192 +29,206 @@ import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.ScreenType
-import com.tinyfish.ui.HeightSpacer
+import com.tinyfish.ui.LabeledTextField
 import com.tinyfish.ui.MyFileSelector
-import com.tinyfish.ui.MyGroupBox
-import com.tinyfish.ui.MySwitch
 import com.tinyfish.ui.MyTopBar
-import com.tinyfish.ui.SimpleTextField
+import com.tinyfish.ui.SectionCard
+import com.tinyfish.ui.SettingSwitchRow
+import com.tinyfish.ui.WidthSpacer
+import com.tinyfish.ui.theme.JeekAlarmTheme
 import java.util.Calendar
 
 @Composable
 fun EditScreen() {
-    Scaffold(topBar = { MyTopBar(R.drawable.ic_edit, if (EditViewModel.isAdding) "Add" else "Edit") }, content = {
-        Surface(Modifier.padding(it)) {
-            Editor()
-        }
-    }, bottomBar = { BottomBar() })
-}
-
-@Composable
-private fun Editor() {
-    val schedule = EditViewModel.editing
-
-    Column(
-        Modifier
-            .padding(start = 15.dp, end = 15.dp)
-            .verticalScroll(rememberScrollState())
-    ) {
-        HeightSpacer()
-
-        MyGroupBox {
-            MySwitch("Enabled", schedule.enabled, { checked -> EditViewModel.update { it.copy(enabled = checked) } })
-            MySwitch("Only Once", schedule.onlyOnce, { checked -> EditViewModel.update { it.copy(onlyOnce = checked) } })
-        }
-
-        HeightSpacer()
-
-        MyGroupBox {
-            SimpleTextField("Name: ", schedule.name, onTextChanged = { name ->
-                EditViewModel.update { it.copy(name = name) }
-            })
-            HeightSpacer()
-
-            if (SettingsService.openAiApiKey != "") {
-                Button(onClick = { EditViewModel.guessFromName() }) {
-                    Text("Guess time from name")
-                }
-                HeightSpacer()
-            }
-
-            // 改任意时间字段时，顺带启用该闹钟
-            CronTimeTextField("Hour: ", schedule.hourConfig) { value ->
-                EditViewModel.update { it.copy(hourConfig = value, enabled = true) }
-            }
-
-            HeightSpacer()
-
-            CronTimeTextField("Minute: ", schedule.minuteConfig) { value ->
-                EditViewModel.update { it.copy(minuteConfig = value, enabled = true) }
-            }
-
-            HeightSpacer()
-
-            CronTimeTextField("WeekDay: ", schedule.weekDayConfig) { value ->
-                EditViewModel.update { it.copy(weekDayConfig = value, enabled = true) }
-            }
-
-            HeightSpacer()
-
-            CronTimeTextField("Month: ", schedule.monthConfig) { value ->
-                EditViewModel.update { it.copy(monthConfig = value, enabled = true) }
-            }
-
-            HeightSpacer()
-
-            CronTimeTextField("Day: ", schedule.dayConfig) { value ->
-                EditViewModel.update { it.copy(dayConfig = value, enabled = true) }
-            }
-
-            HeightSpacer()
-
-            CronTimeTextField("Year: ", schedule.yearConfig) { value ->
-                EditViewModel.update { it.copy(yearConfig = value, enabled = true) }
-            }
-        }
-
-        HeightSpacer()
-
-        MyGroupBox {
-            MySwitch(hint = "Play Music:", schedule.playMusic, { checked -> EditViewModel.update { it.copy(playMusic = checked) } })
-
-            if (schedule.playMusic) {
-                Column(Modifier.padding(start = 20.dp)) {
-                    HeightSpacer()
-
-                    MyFileSelector("Music File:", schedule.musicFile, onSelect = {
-                        FileSelector.openMusicFile { uri ->
-                            EditViewModel.update { it.copy(musicFile = uri.toString()) }
-                        }
-                    }, onClear = {
-                        EditViewModel.update { it.copy(musicFile = "") }
-                    })
-
-                    HeightSpacer()
-
-                    MyFileSelector("Music Folder:", schedule.musicFolder, onSelect = {
-                        FileSelector.openFolder { uri ->
-                            EditViewModel.update { it.copy(musicFolder = uri.toString()) }
-                        }
-                    }, onClear = {
-                        EditViewModel.update { it.copy(musicFolder = "") }
-                    })
-                }
-            }
-
-            HeightSpacer()
-
-            MySwitch("Vibration", schedule.vibration, { checked -> EditViewModel.update { it.copy(vibration = checked) } })
-
-            if (schedule.vibration) {
-                HeightSpacer()
-
-                Text(
-                    "${schedule.vibrationCount} times", modifier = Modifier.padding(start = 20.dp)
-                )
-                Slider(
-                    value = schedule.vibrationCount.toFloat(),
-                    onValueChange = { value ->
-                        EditViewModel.update { it.copy(vibrationCount = value.toInt()) }
-                    },
-                    modifier = Modifier.padding(start = 20.dp, end = 20.dp),
-                    steps = 30,
-                    valueRange = 1f..30f,
-                )
-            }
-        }
-
-        HeightSpacer()
+    Scaffold(
+        topBar = {
+            MyTopBar(
+                R.drawable.ic_edit,
+                if (EditViewModel.isAdding) "Add alarm" else "Edit alarm",
+            )
+        },
+        bottomBar = { BottomBar() },
+    ) { padding ->
+        Editor(Modifier.padding(padding))
     }
 }
 
 @Composable
+private fun Editor(modifier: Modifier = Modifier) {
+    val schedule = EditViewModel.editing
+
+    Column(
+        modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        SectionCard {
+            SettingSwitchRow(
+                "Enabled",
+                schedule.enabled,
+                { checked -> EditViewModel.update { it.copy(enabled = checked) } },
+                subtitle = "Turn this alarm on or off",
+            )
+            SettingSwitchRow(
+                "Only once",
+                schedule.onlyOnce,
+                { checked -> EditViewModel.update { it.copy(onlyOnce = checked) } },
+                subtitle = "Auto-disable after it rings once",
+            )
+        }
+
+        SectionCard(title = "Name") {
+            LabeledTextField(
+                label = "Alarm name",
+                value = schedule.name,
+                onValueChange = { name -> EditViewModel.update { it.copy(name = name) } },
+            )
+
+            if (SettingsService.openAiApiKey != "") {
+                FilledTonalButton(onClick = { EditViewModel.guessFromName() }) {
+                    Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null)
+                    WidthSpacer(8.dp)
+                    Text("Guess time from name")
+                }
+            }
+        }
+
+        SectionCard(title = "Schedule", icon = R.drawable.ic_access_time) {
+            Text(
+                "Cron syntax — *: any · 0: fixed · 1-3: range · 1,3: list · */3: step",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+
+            // 改任意时间字段时，顺带启用该闹钟
+            CronTimeField("Hour", schedule.hourConfig) { value ->
+                EditViewModel.update { it.copy(hourConfig = value, enabled = true) }
+            }
+            CronTimeField("Minute", schedule.minuteConfig) { value ->
+                EditViewModel.update { it.copy(minuteConfig = value, enabled = true) }
+            }
+            CronTimeField("Weekday", schedule.weekDayConfig) { value ->
+                EditViewModel.update { it.copy(weekDayConfig = value, enabled = true) }
+            }
+            CronTimeField("Month", schedule.monthConfig) { value ->
+                EditViewModel.update { it.copy(monthConfig = value, enabled = true) }
+            }
+            CronTimeField("Day", schedule.dayConfig) { value ->
+                EditViewModel.update { it.copy(dayConfig = value, enabled = true) }
+            }
+            CronTimeField("Year", schedule.yearConfig) { value ->
+                EditViewModel.update { it.copy(yearConfig = value, enabled = true) }
+            }
+        }
+
+        SectionCard(title = "Sound & vibration") {
+            SettingSwitchRow(
+                "Play music",
+                schedule.playMusic,
+                { checked -> EditViewModel.update { it.copy(playMusic = checked) } },
+            )
+
+            if (schedule.playMusic) {
+                MyFileSelector("Music file", schedule.musicFile, onSelect = {
+                    FileSelector.openMusicFile { uri ->
+                        EditViewModel.update { it.copy(musicFile = uri.toString()) }
+                    }
+                }, onClear = {
+                    EditViewModel.update { it.copy(musicFile = "") }
+                })
+
+                MyFileSelector("Music folder", schedule.musicFolder, onSelect = {
+                    FileSelector.openFolder { uri ->
+                        EditViewModel.update { it.copy(musicFolder = uri.toString()) }
+                    }
+                }, onClear = {
+                    EditViewModel.update { it.copy(musicFolder = "") }
+                })
+            }
+
+            SettingSwitchRow(
+                "Vibration",
+                schedule.vibration,
+                { checked -> EditViewModel.update { it.copy(vibration = checked) } },
+            )
+
+            if (schedule.vibration) {
+                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                    Text(
+                        "Vibrate ${schedule.vibrationCount} times",
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                    Slider(
+                        value = schedule.vibrationCount.toFloat(),
+                        onValueChange = { value ->
+                            EditViewModel.update { it.copy(vibrationCount = value.toInt()) }
+                        },
+                        valueRange = 1f..30f,
+                        steps = 28,
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun BottomBar() {
     val context = LocalContext.current
 
-    BottomAppBar(actions = {
-        if (EditViewModel.isAdding) {
-            NavigationBarItem(selected = false, onClick = {
-                App.screen = ScreenType.HOME
-            }, label = { Text("Cancel") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_cancel), null) })
-        } else {
-            NavigationBarItem(selected = false, onClick = {
-                AlertDialog.Builder(context).setTitle("Remove").setMessage("Remove this schedule?").setPositiveButton("Yes") { _, _ ->
-                    ScheduleService.scheduleList.removeIf { it.id == EditViewModel.editScheduleId }
-                    ScheduleService.saveAndRefresh()
-                    App.screen = ScreenType.HOME
-                }.setNegativeButton("No", null).show()
-            }, label = { Text("Remove") }, icon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) })
-        }
+    BottomAppBar(
+        actions = {
+            if (EditViewModel.isAdding) {
+                IconButton(onClick = { App.screen = ScreenType.HOME }) {
+                    Icon(ImageVector.vectorResource(R.drawable.ic_cancel), "Cancel")
+                }
+            } else {
+                IconButton(onClick = {
+                    AlertDialog.Builder(context)
+                        .setTitle("Remove")
+                        .setMessage("Remove this schedule?")
+                        .setPositiveButton("Yes") { _, _ ->
+                            ScheduleService.scheduleList.removeIf { it.id == EditViewModel.editScheduleId }
+                            ScheduleService.saveAndRefresh()
+                            App.screen = ScreenType.HOME
+                        }
+                        .setNegativeButton("No", null)
+                        .show()
+                }) {
+                    Icon(ImageVector.vectorResource(R.drawable.ic_remove), "Remove")
+                }
+            }
 
-        NavigationBarItem(
-            selected = false,
-            onClick = { onEditScreenPressBack() },
-            label = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
-            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) })
+            IconButton(onClick = { EditViewModel.setEditingScheduleTime(Calendar.getInstance()) }) {
+                Icon(ImageVector.vectorResource(R.drawable.ic_access_time), "Set to now")
+            }
 
-        NavigationBarItem(
-            selected = false,
-            onClick = { EditViewModel.setEditingScheduleTime(Calendar.getInstance()) },
-            label = { Text("Now") },
-            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null) },
-        )
-
-        val isPlaying = App.isPlaying
-        NavigationBarItem(
-            selected = false,
-            onClick = {
+            val isPlaying = App.isPlaying
+            IconButton(onClick = {
                 if (isPlaying) ScheduleService.stopPlaying()
                 else EditViewModel.play()
-            },
-            label = { Text(if (isPlaying) "Stop" else "Play") },
-            icon = {
+            }) {
                 Icon(
                     ImageVector.vectorResource(if (isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow),
-                    null
+                    if (isPlaying) "Stop" else "Play",
                 )
-            })
-    })
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = { onEditScreenPressBack() },
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ) {
+                Icon(
+                    ImageVector.vectorResource(R.drawable.ic_done),
+                    if (EditViewModel.isAdding) "Add" else "Apply",
+                )
+            }
+        },
+    )
 }
 
 fun onEditScreenPressBack() {
@@ -225,7 +241,7 @@ fun onEditScreenPressBack() {
 @Preview
 @Composable
 fun EditScreenPreview() {
-    MaterialTheme(colorScheme = darkColorScheme()) {
+    JeekAlarmTheme("Dark") {
         EditScreen()
     }
 }

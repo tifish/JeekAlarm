@@ -1,48 +1,43 @@
 package com.tinyfish.jeekalarm.home
 
-import android.os.Build
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.BottomAppBar
-import androidx.compose.material3.ColorScheme
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
@@ -58,13 +53,13 @@ import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.jeekalarm.start.getScreenName
 import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
-import com.tinyfish.ui.SimpleVectorButton
 import com.tinyfish.ui.WidthSpacer
+import com.tinyfish.ui.theme.JeekAlarmTheme
 import java.util.Calendar
 
 @Composable
 fun MainUI() {
-    MaterialTheme(colorScheme = getThemeFromConfig(SettingsService.theme)) {
+    JeekAlarmTheme(SettingsService.theme) {
         when (App.screen) {
             ScreenType.HOME -> HomeScreen()
             ScreenType.EDIT -> EditScreen()
@@ -75,63 +70,88 @@ fun MainUI() {
 }
 
 @Composable
-fun getThemeFromConfig(theme: String): ColorScheme {
-    val darkTheme = when (theme) {
-        "Auto" -> isSystemInDarkTheme()
-        "Dark" -> true
-        "Light" -> false
-        else -> throw Exception("Unexpected theme")
-    }
-
-    // Dynamic color is available on Android 12+
-    val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val context = LocalContext.current
-    return when {
-        dynamicColor && darkTheme -> dynamicDarkColorScheme(context)
-        dynamicColor && !darkTheme -> dynamicLightColorScheme(context)
-        darkTheme -> darkColorScheme()
-        else -> lightColorScheme()
-    }
-}
-
-@Composable
 fun HomeScreen() {
+    val context = LocalContext.current
+
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
-        content = { padding ->
-            Surface(Modifier.padding(padding)) {
-                ScheduleList()
+        bottomBar = { NavigationBottomBar(ScreenType.HOME) },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = {
+                    EditViewModel.startEditing(-1)
+                    App.screen = ScreenType.EDIT
+
+                    IFly.showDialog(context) { recognizedName ->
+                        EditViewModel.update { it.copy(name = recognizedName) }
+                        EditViewModel.guessFromName()
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.primary,
+            ) {
+                Icon(ImageVector.vectorResource(R.drawable.ic_add), "Add alarm")
             }
         },
-        bottomBar = { NavigationBottomBar(ScreenType.HOME) },
-    )
+    ) { padding ->
+        ScheduleList(Modifier.padding(padding))
+    }
 }
 
 @Composable
-private fun ScheduleList() {
+private fun ScheduleList(modifier: Modifier = Modifier) {
     val schedules = ScheduleService.scheduleList
 
     if (schedules.isEmpty()) {
-        Box(Modifier.wrapContentSize()) {
-            SimpleVectorButton(
-                ImageVector.vectorResource(R.drawable.ic_add),
-                "Add"
-            ) {
-                EditViewModel.startEditing(-1)
-                App.screen = ScreenType.EDIT
-            }
+        EmptyState(modifier)
+        return
+    }
+
+    val now = Calendar.getInstance()
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        items(schedules, key = { it.id }) { schedule ->
+            ScheduleItem(schedule, now)
         }
-    } else {
-        val now = Calendar.getInstance()
-        Column(Modifier.verticalScroll(rememberScrollState())) {
-            schedules.forEach { schedule ->
-                key(schedule.id) {
-                    HeightSpacer()
-                    ScheduleItem(schedule, now)
-                    HorizontalDivider(color = Color.DarkGray)
-                }
-            }
-            HeightSpacer(100.dp)
+        // 给悬浮按钮留出底部空间，避免遮挡最后一项
+        item { HeightSpacer(80.dp) }
+    }
+}
+
+@Composable
+private fun EmptyState(modifier: Modifier = Modifier) {
+    Column(
+        modifier
+            .fillMaxSize()
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+    ) {
+        Icon(
+            ImageVector.vectorResource(R.drawable.ic_alarm),
+            null,
+            Modifier.size(96.dp),
+            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
+        )
+        HeightSpacer(20.dp)
+        Text("No alarms yet", style = MaterialTheme.typography.titleLarge)
+        HeightSpacer(4.dp)
+        Text(
+            "Tap + to add your first alarm",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
+        HeightSpacer(24.dp)
+        Button(onClick = {
+            EditViewModel.startEditing(-1)
+            App.screen = ScreenType.EDIT
+        }) {
+            Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
+            WidthSpacer(8.dp)
+            Text("Add alarm")
         }
     }
 }
@@ -139,51 +159,69 @@ private fun ScheduleList() {
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ScheduleItem(schedule: Schedule, now: Calendar) {
-    Row(
-        Modifier.padding(start = 10.dp, end = 10.dp)
-    ) {
-        Box(modifier = Modifier.align(Alignment.Top)) {
-            Switch(
-                checked = schedule.enabled,
-                onCheckedChange = { checked ->
-                    ScheduleService.setEnabled(schedule.id, checked)
-                }
+    var menuExpanded by remember { mutableStateOf(false) }
+    val isNext = schedule.id in App.nextAlarmIds
+
+    ElevatedCard(
+        modifier = Modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = {
+                    EditViewModel.startEditing(schedule.id)
+                    App.screen = ScreenType.EDIT
+                },
+                onLongClick = { menuExpanded = true },
             )
-        }
-
-        WidthSpacer(15.dp)
-
-        Box(modifier = Modifier.weight(1f, true)) {
-            var dropdownMenuExpanded by remember { mutableStateOf(false) }
-
-            Column(
-                Modifier
-                    .combinedClickable(
-                        onClick = {
-                            EditViewModel.startEditing(schedule.id)
-                            App.screen = ScreenType.EDIT
-                        },
-                        onLongClick = {
-                            dropdownMenuExpanded = true
-                        })
-            ) {
-                Text(schedule.name + if (schedule.id in App.nextAlarmIds) " (Next)" else "", Modifier.fillMaxWidth())
-                Text(schedule.timeConfig)
-                Text(App.format(schedule.getNextTriggerTime(now)))
+    ) {
+        Row(
+            Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Column(Modifier.weight(1f)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        schedule.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        color = if (schedule.enabled)
+                            MaterialTheme.colorScheme.onSurface
+                        else
+                            MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                    if (isNext) {
+                        WidthSpacer(8.dp)
+                        NextBadge()
+                    }
+                }
+                HeightSpacer(2.dp)
+                Text(
+                    App.format(schedule.getNextTriggerTime(now)),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+                Text(
+                    schedule.timeConfig,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
 
+            Switch(
+                checked = schedule.enabled,
+                onCheckedChange = { checked -> ScheduleService.setEnabled(schedule.id, checked) },
+            )
+
             DropdownMenu(
-                expanded = dropdownMenuExpanded,
-                onDismissRequest = { dropdownMenuExpanded = false },
-                offset = DpOffset(50.dp, (-10).dp)
+                expanded = menuExpanded,
+                onDismissRequest = { menuExpanded = false },
             ) {
                 DropdownMenuItem(
                     text = { Text("Remove") },
+                    leadingIcon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) },
                     onClick = {
-                        dropdownMenuExpanded = false
+                        menuExpanded = false
                         ScheduleService.scheduleList.removeIf { it.id == schedule.id }
                         ScheduleService.saveAndRefresh()
-                    }
+                    },
                 )
             }
         }
@@ -191,37 +229,35 @@ private fun ScheduleItem(schedule: Schedule, now: Calendar) {
 }
 
 @Composable
+private fun NextBadge() {
+    Surface(
+        color = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        shape = RoundedCornerShape(50),
+    ) {
+        Text(
+            "NEXT",
+            Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
+            style = MaterialTheme.typography.labelSmall,
+        )
+    }
+}
+
+@Composable
 fun NavigationBottomBar(currentScreen: ScreenType) {
-    BottomAppBar(
-        actions = {
-            val items = listOf(ScreenType.HOME, ScreenType.SETTINGS)
-            val icons = listOf(R.drawable.ic_home, R.drawable.ic_settings)
+    NavigationBar {
+        val items = listOf(ScreenType.HOME, ScreenType.SETTINGS)
+        val icons = listOf(R.drawable.ic_home, R.drawable.ic_settings)
 
-            items.forEachIndexed { index, item ->
-                NavigationBarItem(
-                    selected = item == currentScreen,
-                    onClick = { App.screen = item },
-                    label = { Text(getScreenName(item)) },
-                    icon = { Icon(ImageVector.vectorResource(icons[index]), getScreenName(item)) }
-                )
-            }
-        },
-        floatingActionButton = {
-            val context = LocalContext.current
-
-            FloatingActionButton(onClick = {
-                EditViewModel.startEditing(-1)
-                App.screen = ScreenType.EDIT
-
-                IFly.showDialog(context) { recognizedName ->
-                    EditViewModel.update { it.copy(name = recognizedName) }
-                    EditViewModel.guessFromName()
-                }
-            }) {
-                Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
-            }
-        },
-    )
+        items.forEachIndexed { index, item ->
+            NavigationBarItem(
+                selected = item == currentScreen,
+                onClick = { App.screen = item },
+                label = { Text(getScreenName(item)) },
+                icon = { Icon(ImageVector.vectorResource(icons[index]), getScreenName(item)) },
+            )
+        }
+    }
 }
 
 @Preview
@@ -232,7 +268,7 @@ fun HomeScreenPreview() {
             listOf(Schedule(name = "Alarm1"), Schedule(name = "Alarm2"))
         )
     }
-    MaterialTheme(colorScheme = darkColorScheme()) {
+    JeekAlarmTheme("Dark") {
         HomeScreen()
     }
 }
