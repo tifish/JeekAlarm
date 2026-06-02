@@ -5,6 +5,7 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,22 +23,26 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -70,6 +75,7 @@ import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.WidthSpacer
 import com.tinyfish.ui.theme.JeekAlarmTheme
+import kotlinx.coroutines.launch
 import java.util.Calendar
 
 /** 底部导航的两个标签页（仅用于高亮当前页）。 */
@@ -140,6 +146,27 @@ fun HomeScreen(
     onNavigateHome: () -> Unit,
     onNavigateSettings: () -> Unit,
 ) {
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+
+    // 左滑删除：先移除并保存，再弹 Snackbar 给一次撤销机会；撤销则把原对象插回并重新排序。
+    val onDelete: (Schedule) -> Unit = { schedule ->
+        ScheduleService.scheduleList.removeIf { it.id == schedule.id }
+        ScheduleService.saveAndRefresh()
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(
+                message = "Removed \"${schedule.name}\"",
+                actionLabel = "Undo",
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                ScheduleService.scheduleList.add(schedule)
+                ScheduleService.sort()
+                ScheduleService.saveAndRefresh()
+            }
+        }
+    }
+
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
         bottomBar = {
@@ -150,8 +177,14 @@ fun HomeScreen(
                 onAdd = onAdd,
             )
         },
+        snackbarHost = { SnackbarHost(snackbarHostState) },
     ) { padding ->
-        ScheduleList(Modifier.padding(padding), onOpenEdit = onOpenEdit, onAdd = onAdd)
+        ScheduleList(
+            Modifier.padding(padding),
+            onOpenEdit = onOpenEdit,
+            onAdd = onAdd,
+            onDelete = onDelete,
+        )
     }
 }
 
@@ -160,6 +193,7 @@ private fun ScheduleList(
     modifier: Modifier = Modifier,
     onOpenEdit: (Int) -> Unit,
     onAdd: () -> Unit,
+    onDelete: (Schedule) -> Unit,
 ) {
     val schedules = ScheduleService.scheduleList
 
@@ -175,7 +209,7 @@ private fun ScheduleList(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(schedules, key = { it.id }) { schedule ->
-            ScheduleItem(schedule, now, onOpenEdit)
+            ScheduleItem(schedule, now, onOpenEdit, onDelete)
         }
     }
 }
@@ -213,72 +247,94 @@ private fun EmptyState(modifier: Modifier = Modifier, onAdd: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ScheduleItem(schedule: Schedule, now: Calendar, onOpenEdit: (Int) -> Unit) {
-    var menuExpanded by remember { mutableStateOf(false) }
+private fun ScheduleItem(
+    schedule: Schedule,
+    now: Calendar,
+    onOpenEdit: (Int) -> Unit,
+    onDelete: (Schedule) -> Unit,
+) {
     val isNext = schedule.id in App.nextAlarmIds
 
-    ElevatedCard(
-        modifier = Modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = { onOpenEdit(schedule.id) },
-                onLongClick = { menuExpanded = true },
-            )
-    ) {
-        Row(
-            Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        schedule.name,
-                        style = MaterialTheme.typography.titleLarge,
-                        color = if (schedule.enabled)
-                            MaterialTheme.colorScheme.onSurface
-                        else
-                            MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                    if (isNext) {
-                        WidthSpacer(8.dp)
-                        NextBadge()
-                    }
-                }
-                HeightSpacer(2.dp)
-                Text(
-                    App.format(schedule.getNextTriggerTime(now)),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
-                    schedule.timeConfig,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
+    val dismissState = rememberSwipeToDismissBoxState(
+        confirmValueChange = { value ->
+            if (value == SwipeToDismissBoxValue.EndToStart) {
+                onDelete(schedule)
+                true
+            } else {
+                false
             }
+        }
+    )
 
-            Switch(
-                checked = schedule.enabled,
-                onCheckedChange = { checked -> ScheduleService.setEnabled(schedule.id, checked) },
-            )
-
-            DropdownMenu(
-                expanded = menuExpanded,
-                onDismissRequest = { menuExpanded = false },
+    SwipeToDismissBox(
+        state = dismissState,
+        enableDismissFromStartToEnd = false,
+        backgroundContent = { DismissBackground() },
+    ) {
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onOpenEdit(schedule.id) }
+        ) {
+            Row(
+                Modifier.padding(start = 16.dp, end = 8.dp, top = 12.dp, bottom = 12.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                DropdownMenuItem(
-                    text = { Text("Remove") },
-                    leadingIcon = { Icon(ImageVector.vectorResource(R.drawable.ic_remove), null) },
-                    onClick = {
-                        menuExpanded = false
-                        ScheduleService.scheduleList.removeIf { it.id == schedule.id }
-                        ScheduleService.saveAndRefresh()
-                    },
+                Column(Modifier.weight(1f)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            schedule.name,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = if (schedule.enabled)
+                                MaterialTheme.colorScheme.onSurface
+                            else
+                                MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        if (isNext) {
+                            WidthSpacer(8.dp)
+                            NextBadge()
+                        }
+                    }
+                    HeightSpacer(2.dp)
+                    Text(
+                        App.format(schedule.getNextTriggerTime(now)),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                    )
+                    Text(
+                        schedule.timeConfig,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+
+                Switch(
+                    checked = schedule.enabled,
+                    onCheckedChange = { checked -> ScheduleService.setEnabled(schedule.id, checked) },
                 )
             }
         }
+    }
+}
+
+// 左滑时露出的红色删除背景，删除图标随手势停靠在右侧。
+@Composable
+private fun DismissBackground() {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.errorContainer)
+            .padding(horizontal = 20.dp),
+        contentAlignment = Alignment.CenterEnd,
+    ) {
+        Icon(
+            ImageVector.vectorResource(R.drawable.ic_remove),
+            contentDescription = "Remove",
+            tint = MaterialTheme.colorScheme.onErrorContainer,
+        )
     }
 }
 
