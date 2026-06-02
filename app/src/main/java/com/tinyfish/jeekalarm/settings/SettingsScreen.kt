@@ -44,10 +44,10 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.AlarmRingingService
 import com.tinyfish.jeekalarm.edit.FileSelector
+import com.tinyfish.jeekalarm.home.BottomTab
 import com.tinyfish.jeekalarm.home.NavigationBottomBar
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.LabeledTextField
 import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyTopBar
@@ -56,10 +56,21 @@ import com.tinyfish.ui.WidthSpacer
 import com.tinyfish.ui.theme.JeekAlarmTheme
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(
+    onAdd: () -> Unit,
+    onNavigateHome: () -> Unit,
+    onNavigateSettings: () -> Unit,
+) {
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
-        bottomBar = { NavigationBottomBar(ScreenType.SETTINGS) },
+        bottomBar = {
+            NavigationBottomBar(
+                selected = BottomTab.SETTINGS,
+                onNavigateHome = onNavigateHome,
+                onNavigateSettings = onNavigateSettings,
+                onAdd = onAdd,
+            )
+        },
     ) { padding ->
         Editor(Modifier.padding(padding))
     }
@@ -301,14 +312,10 @@ private fun onConfigDirChanged(context: Context) {
     }
 }
 
-fun onSettingsScreenPressBack() {
-    App.screen = ScreenType.HOME
-}
-
 @Preview
 @Composable
 fun SettingsScreenPreview() {
     JeekAlarmTheme("Dark") {
-        SettingsScreen()
+        SettingsScreen(onAdd = {}, onNavigateHome = {}, onNavigateSettings = {})
     }
 }

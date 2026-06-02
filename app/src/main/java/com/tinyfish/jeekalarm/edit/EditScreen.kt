@@ -1,6 +1,7 @@
 package com.tinyfish.jeekalarm.edit
 
 import android.app.AlertDialog
+import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -32,7 +33,6 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.start.ScreenType
 import com.tinyfish.ui.LabeledTextField
 import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyTopBar
@@ -43,7 +43,16 @@ import com.tinyfish.ui.theme.JeekAlarmTheme
 import java.util.Calendar
 
 @Composable
-fun EditScreen() {
+fun EditScreen(onNavigateBack: () -> Unit) {
+    // 离开编辑页（FAB 应用 / 系统返回键）都先保存再返回，保持原有行为。
+    val leaveWithSave = {
+        EditViewModel.saveEditingSchedule()
+        ScheduleService.stopPlaying()
+        onNavigateBack()
+    }
+
+    BackHandler { leaveWithSave() }
+
     Scaffold(
         topBar = {
             MyTopBar(
@@ -51,7 +60,13 @@ fun EditScreen() {
                 if (EditViewModel.isAdding) "Add alarm" else "Edit alarm",
             )
         },
-        bottomBar = { BottomBar() },
+        bottomBar = {
+            BottomBar(
+                onApply = leaveWithSave,
+                onCancel = onNavigateBack,
+                onRemoved = onNavigateBack,
+            )
+        },
     ) { padding ->
         Editor(Modifier.padding(padding))
     }
@@ -180,14 +195,18 @@ private fun Editor(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomBar() {
+fun BottomBar(
+    onApply: () -> Unit,
+    onCancel: () -> Unit,
+    onRemoved: () -> Unit,
+) {
     val context = LocalContext.current
 
     BottomAppBar(
         actions = {
             if (EditViewModel.isAdding) {
                 LabeledAction(R.drawable.ic_cancel, "Cancel") {
-                    App.screen = ScreenType.HOME
+                    onCancel()
                 }
             } else {
                 LabeledAction(R.drawable.ic_remove, "Remove") {
@@ -197,7 +216,7 @@ fun BottomBar() {
                         .setPositiveButton("Yes") { _, _ ->
                             ScheduleService.scheduleList.removeIf { it.id == EditViewModel.editScheduleId }
                             ScheduleService.saveAndRefresh()
-                            App.screen = ScreenType.HOME
+                            onRemoved()
                         }
                         .setNegativeButton("No", null)
                         .show()
@@ -221,7 +240,7 @@ fun BottomBar() {
             ExtendedFloatingActionButton(
                 text = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
                 icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) },
-                onClick = { onEditScreenPressBack() },
+                onClick = onApply,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
             )
         },
@@ -247,17 +266,10 @@ private fun LabeledAction(
     }
 }
 
-fun onEditScreenPressBack() {
-    EditViewModel.saveEditingSchedule()
-
-    ScheduleService.stopPlaying()
-    App.screen = ScreenType.HOME
-}
-
 @Preview
 @Composable
 fun EditScreenPreview() {
     JeekAlarmTheme("Dark") {
-        EditScreen()
+        EditScreen(onNavigateBack = {})
     }
 }

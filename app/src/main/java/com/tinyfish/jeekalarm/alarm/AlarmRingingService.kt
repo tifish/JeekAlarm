@@ -7,7 +7,6 @@ import android.os.IBinder
 import androidx.core.content.ContextCompat
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.start.ScreenType
 
 class AlarmRingingService : Service() {
     companion object {
@@ -35,11 +34,8 @@ class AlarmRingingService : Service() {
             return START_NOT_STICKY
         }
 
+        // 只更新响铃状态；通知浮层由 UI 层观察 currentAlarmIds 自动弹出。
         NotificationService.setCurrentAlarmIds(alarmIds)
-        if (App.screen != ScreenType.NOTIFICATION) {
-            App.screenBeforeNotification = App.screen
-            App.screen = ScreenType.NOTIFICATION
-        }
         startForeground(NotificationService.AlarmId, NotificationService.getAlarmNotification(alarmIds))
 
         if (App.isPlaying)

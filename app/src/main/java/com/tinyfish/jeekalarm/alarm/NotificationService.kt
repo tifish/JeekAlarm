@@ -12,7 +12,6 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.home.MainActivity
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.start.ScreenType
 import java.util.Calendar
 
 object NotificationService {
@@ -162,9 +161,7 @@ object NotificationService {
 
         notificationManager.cancel(AlarmId)
 
-        if (App.screen == ScreenType.NOTIFICATION)
-            App.screen = App.screenBeforeNotification
-
+        // 清空响铃状态，UI 层的通知浮层随之消失，露出底下的导航页面。
         currentAlarmIds.clear()
         AlarmRingingService.stop()
     }

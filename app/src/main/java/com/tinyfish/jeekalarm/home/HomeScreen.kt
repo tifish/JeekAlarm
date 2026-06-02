@@ -1,6 +1,8 @@
 package com.tinyfish.jeekalarm.home
 
-import android.content.Context
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -47,9 +49,13 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
+import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.edit.EditViewModel
 import com.tinyfish.jeekalarm.ifly.IFly
@@ -57,42 +63,108 @@ import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.start.ScreenType
-import com.tinyfish.jeekalarm.start.getScreenName
+import com.tinyfish.jeekalarm.start.EditRoute
+import com.tinyfish.jeekalarm.start.HomeRoute
+import com.tinyfish.jeekalarm.start.SettingsRoute
 import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.WidthSpacer
 import com.tinyfish.ui.theme.JeekAlarmTheme
 import java.util.Calendar
 
+/** 底部导航的两个标签页（仅用于高亮当前页）。 */
+enum class BottomTab { HOME, SETTINGS }
+
 @Composable
 fun MainUI() {
     JeekAlarmTheme(SettingsService.theme) {
-        when (App.screen) {
-            ScreenType.HOME -> HomeScreen()
-            ScreenType.EDIT -> EditScreen()
-            ScreenType.SETTINGS -> SettingsScreen()
-            ScreenType.NOTIFICATION -> NotificationScreen()
+        val navController = rememberNavController()
+
+        // 进入编辑页：先准备好编辑副本，再导航。
+        val openEdit: (Int) -> Unit = { id ->
+            EditViewModel.startEditing(id)
+            navController.navigate(EditRoute)
+        }
+        // 底部导航在 Home/Settings 两个标签间切换，保持单实例、不堆栈。
+        val goHome: () -> Unit = {
+            navController.popBackStack(HomeRoute, inclusive = false)
+        }
+        val goSettings: () -> Unit = {
+            navController.navigate(SettingsRoute) {
+                launchSingleTop = true
+                popUpTo(HomeRoute)
+            }
+        }
+
+        NavHost(
+            navController = navController,
+            startDestination = HomeRoute,
+            // 横向滑动：前进时新页从右滑入、旧页左推；返回时反向。
+            enterTransition = { slideInHorizontally(tween(220)) { it } },
+            exitTransition = { slideOutHorizontally(tween(220)) { -it } },
+            popEnterTransition = { slideInHorizontally(tween(220)) { -it } },
+            popExitTransition = { slideOutHorizontally(tween(220)) { it } },
+        ) {
+            composable<HomeRoute> {
+                HomeScreen(
+                    onOpenEdit = openEdit,
+                    onAdd = { openEdit(-1) },
+                    onNavigateHome = goHome,
+                    onNavigateSettings = goSettings,
+                )
+            }
+            composable<SettingsRoute> {
+                SettingsScreen(
+                    onAdd = { openEdit(-1) },
+                    onNavigateHome = goHome,
+                    onNavigateSettings = goSettings,
+                )
+            }
+            composable<EditRoute> {
+                EditScreen(onNavigateBack = { navController.popBackStack() })
+            }
+        }
+
+        // 闹钟响铃时的全屏浮层：纯由 currentAlarmIds 状态驱动，覆盖在导航之上。
+        // 因此后台 Service/广播只需更新闹钟状态，完全不必参与导航。
+        if (NotificationService.currentAlarmIds.isNotEmpty()) {
+            NotificationScreen()
         }
     }
 }
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    onOpenEdit: (Int) -> Unit,
+    onAdd: () -> Unit,
+    onNavigateHome: () -> Unit,
+    onNavigateSettings: () -> Unit,
+) {
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
-        bottomBar = { NavigationBottomBar(ScreenType.HOME) },
+        bottomBar = {
+            NavigationBottomBar(
+                selected = BottomTab.HOME,
+                onNavigateHome = onNavigateHome,
+                onNavigateSettings = onNavigateSettings,
+                onAdd = onAdd,
+            )
+        },
     ) { padding ->
-        ScheduleList(Modifier.padding(padding))
+        ScheduleList(Modifier.padding(padding), onOpenEdit = onOpenEdit, onAdd = onAdd)
     }
 }
 
 @Composable
-private fun ScheduleList(modifier: Modifier = Modifier) {
+private fun ScheduleList(
+    modifier: Modifier = Modifier,
+    onOpenEdit: (Int) -> Unit,
+    onAdd: () -> Unit,
+) {
     val schedules = ScheduleService.scheduleList
 
     if (schedules.isEmpty()) {
-        EmptyState(modifier)
+        EmptyState(modifier, onAdd)
         return
     }
 
@@ -103,13 +175,13 @@ private fun ScheduleList(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(schedules, key = { it.id }) { schedule ->
-            ScheduleItem(schedule, now)
+            ScheduleItem(schedule, now, onOpenEdit)
         }
     }
 }
 
 @Composable
-private fun EmptyState(modifier: Modifier = Modifier) {
+private fun EmptyState(modifier: Modifier = Modifier, onAdd: () -> Unit) {
     Column(
         modifier
             .fillMaxSize()
@@ -133,10 +205,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
             textAlign = TextAlign.Center,
         )
         HeightSpacer(24.dp)
-        Button(onClick = {
-            EditViewModel.startEditing(-1)
-            App.screen = ScreenType.EDIT
-        }) {
+        Button(onClick = onAdd) {
             Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
             WidthSpacer(8.dp)
             Text("Add alarm")
@@ -146,7 +215,7 @@ private fun EmptyState(modifier: Modifier = Modifier) {
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun ScheduleItem(schedule: Schedule, now: Calendar) {
+private fun ScheduleItem(schedule: Schedule, now: Calendar, onOpenEdit: (Int) -> Unit) {
     var menuExpanded by remember { mutableStateOf(false) }
     val isNext = schedule.id in App.nextAlarmIds
 
@@ -154,10 +223,7 @@ private fun ScheduleItem(schedule: Schedule, now: Calendar) {
         modifier = Modifier
             .fillMaxWidth()
             .combinedClickable(
-                onClick = {
-                    EditViewModel.startEditing(schedule.id)
-                    App.screen = ScreenType.EDIT
-                },
+                onClick = { onOpenEdit(schedule.id) },
                 onLongClick = { menuExpanded = true },
             )
     ) {
@@ -232,24 +298,27 @@ private fun NextBadge() {
 }
 
 @Composable
-fun NavigationBottomBar(currentScreen: ScreenType) {
-    val context = LocalContext.current
-
+fun NavigationBottomBar(
+    selected: BottomTab,
+    onNavigateHome: () -> Unit,
+    onNavigateSettings: () -> Unit,
+    onAdd: () -> Unit,
+) {
     NavigationBar {
         NavigationBarItem(
-            selected = currentScreen == ScreenType.HOME,
-            onClick = { App.screen = ScreenType.HOME },
-            label = { Text(getScreenName(ScreenType.HOME)) },
-            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_home), getScreenName(ScreenType.HOME)) },
+            selected = selected == BottomTab.HOME,
+            onClick = onNavigateHome,
+            label = { Text("Home") },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_home), "Home") },
         )
 
-        AddNavItem(context)
+        AddNavItem(onAdd)
 
         NavigationBarItem(
-            selected = currentScreen == ScreenType.SETTINGS,
-            onClick = { App.screen = ScreenType.SETTINGS },
-            label = { Text(getScreenName(ScreenType.SETTINGS)) },
-            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_settings), getScreenName(ScreenType.SETTINGS)) },
+            selected = selected == BottomTab.SETTINGS,
+            onClick = onNavigateSettings,
+            label = { Text("Settings") },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_settings), "Settings") },
         )
     }
 }
@@ -257,7 +326,8 @@ fun NavigationBottomBar(currentScreen: ScreenType) {
 // 单击直接进入编辑页手动添加，按住则先进编辑页再弹出语音识别。
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun RowScope.AddNavItem(context: Context) {
+private fun RowScope.AddNavItem(onAdd: () -> Unit) {
+    val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
     Box(
@@ -272,14 +342,10 @@ private fun RowScope.AddNavItem(context: Context) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.primary)
                 .combinedClickable(
-                    onClick = {
-                        EditViewModel.startEditing(-1)
-                        App.screen = ScreenType.EDIT
-                    },
+                    onClick = onAdd,
                     onLongClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        EditViewModel.startEditing(-1)
-                        App.screen = ScreenType.EDIT
+                        onAdd()
                         IFly.showDialog(context) { recognizedName ->
                             EditViewModel.update { it.copy(name = recognizedName) }
                             EditViewModel.guessFromName()
@@ -306,6 +372,11 @@ fun HomeScreenPreview() {
         )
     }
     JeekAlarmTheme("Dark") {
-        HomeScreen()
+        HomeScreen(
+            onOpenEdit = {},
+            onAdd = {},
+            onNavigateHome = {},
+            onNavigateSettings = {},
+        )
     }
 }

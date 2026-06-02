@@ -5,28 +5,19 @@ import android.content.Intent
 import android.os.Build
 import android.os.Bundle
 import android.view.WindowManager
-import androidx.activity.addCallback
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.tinyfish.jeekalarm.PermissionsService
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
-import com.tinyfish.jeekalarm.edit.onEditScreenPressBack
 import com.tinyfish.jeekalarm.schedule.ScheduleService
-import com.tinyfish.jeekalarm.settings.onSettingsScreenPressBack
-import com.tinyfish.jeekalarm.start.App
-import com.tinyfish.jeekalarm.start.ScreenType
 
 
 class MainActivity : AppCompatActivity() {
+    // 响铃时点亮屏幕、显示在锁屏之上；通知浮层本身由 UI 层观察响铃状态自动弹出。
     private fun showCurrentAlarms() {
-        if (NotificationService.currentAlarmIds.isNotEmpty()) {
+        if (NotificationService.currentAlarmIds.isNotEmpty())
             allowAlarmOverLockScreen()
-            if (App.screen != ScreenType.NOTIFICATION) {
-                App.screenBeforeNotification = App.screen
-                App.screen = ScreenType.NOTIFICATION
-            }
-        }
     }
 
     private fun allowAlarmOverLockScreen() {
@@ -69,30 +60,7 @@ class MainActivity : AppCompatActivity() {
 
         showCurrentAlarms()
 
-        onBackPressedDispatcher.addCallback(this) {
-            when (App.screen) {
-                ScreenType.HOME -> {
-                    isEnabled = false
-                    try {
-                        onBackPressedDispatcher.onBackPressed()
-                    } finally {
-                        isEnabled = true
-                    }
-                }
-
-                ScreenType.EDIT -> {
-                    onEditScreenPressBack()
-                }
-
-                ScreenType.SETTINGS -> {
-                    onSettingsScreenPressBack()
-                }
-
-                ScreenType.NOTIFICATION -> {
-                }
-            }
-        }
-
+        // 返回键交给 Compose 的 NavHost 与各屏幕的 BackHandler 处理。
         setContent {
             MainUI()
         }

@@ -1,5 +1,6 @@
 package com.tinyfish.jeekalarm.alarm
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.infiniteRepeatable
@@ -35,6 +36,9 @@ import com.tinyfish.ui.WidthSpacer
 
 @Composable
 fun NotificationScreen() {
+    // 响铃浮层显示时吞掉系统返回键，必须显式 Pause/Dismiss 才能离开。
+    BackHandler {}
+
     Surface(Modifier.fillMaxSize()) {
         Column(
             Modifier

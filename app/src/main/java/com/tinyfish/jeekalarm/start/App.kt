@@ -12,22 +12,6 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 
-enum class ScreenType {
-    HOME,
-    SETTINGS,
-    EDIT,
-    NOTIFICATION,
-}
-
-fun getScreenName(screenType: ScreenType): String {
-    return when (screenType) {
-        ScreenType.HOME -> "Home"
-        ScreenType.SETTINGS -> "Settings"
-        ScreenType.EDIT -> "Edit"
-        ScreenType.NOTIFICATION -> "Notification"
-    }
-}
-
 class App : Application() {
     companion object {
         // Only 1 instance, leak is not a problem
@@ -70,9 +54,6 @@ class App : Application() {
             return "$dateString $timeString $weekString"
         }
 
-        var screenBeforeNotification = ScreenType.HOME
-
-        var screen by mutableStateOf(ScreenType.HOME)
         var nextAlarmIds by mutableStateOf(listOf<Int>())
         var isPlaying by mutableStateOf(false)
     }
