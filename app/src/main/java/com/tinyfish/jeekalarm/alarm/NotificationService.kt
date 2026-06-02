@@ -6,6 +6,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import androidx.compose.runtime.mutableStateListOf
 import androidx.core.app.NotificationCompat
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.home.MainActivity
@@ -86,7 +87,7 @@ object NotificationService {
         }
     }
 
-    val currentAlarmIds = mutableListOf<Int>()
+    val currentAlarmIds = mutableStateListOf<Int>()
 
     fun setCurrentAlarmIds(alarmIds: List<Int>) {
         currentAlarmIds.clear()
