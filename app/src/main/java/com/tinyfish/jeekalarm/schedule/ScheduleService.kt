@@ -66,7 +66,8 @@ object ScheduleService {
     }
 
     fun createScheduleId(): Int {
-        val usedIds = scheduleList.map { it.id }.toSet()
+        // 也避开回收站里的 id，否则恢复/再次删除时回收站列表可能出现重复 id。
+        val usedIds = (scheduleList.map { it.id } + RecycleBinService.recycleList.map { it.id }).toSet()
         while (nextScheduleId <= 0 || nextScheduleId in usedIds)
             nextScheduleId++
         return nextScheduleId++
@@ -163,6 +164,37 @@ object ScheduleService {
 
         sort()
         setNextAlarm()
+    }
+
+    /** 把闹钟移入回收站（手工删除走这里）。 */
+    fun recycle(schedule: Schedule) {
+        scheduleList.removeIf { it.id == schedule.id }
+        saveAndRefresh()
+        RecycleBinService.add(schedule)
+    }
+
+    /** 响铃关闭时调用：触发结束的一次性闹钟自动进回收站。 */
+    fun recycleTriggeredOnceAlarms(alarmIds: List<Int>) {
+        var modified = false
+        for (alarmId in alarmIds) {
+            val schedule = findSchedule(alarmId) ?: continue
+            if (schedule.onlyOnce) {
+                scheduleList.removeIf { it.id == schedule.id }
+                RecycleBinService.add(schedule)
+                modified = true
+            }
+        }
+        if (modified)
+            saveAndRefresh()
+    }
+
+    /** 从回收站恢复：清掉删除标记、重新分配 id 避免冲突，加回活动列表。 */
+    fun restoreFromRecycleBin(schedule: Schedule) {
+        schedule.deletedAt = 0L
+        schedule.id = createScheduleId()
+        scheduleList.add(schedule)
+        sort()
+        saveAndRefresh()
     }
 
     fun stopPlaying() {

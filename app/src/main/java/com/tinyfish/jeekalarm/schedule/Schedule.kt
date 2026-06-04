@@ -32,7 +32,9 @@ data class Schedule(
     var musicFile: String = "",
     var musicFolder: String = "",
     var vibration: Boolean = true,
-    var vibrationCount: Int = 10
+    var vibrationCount: Int = 10,
+    // 进入回收站的时间戳（epoch 毫秒）；0 表示是活动闹钟、不在回收站。
+    var deletedAt: Long = 0L
 ) {
     fun copyTo(dest: Schedule) {
         dest.name = name

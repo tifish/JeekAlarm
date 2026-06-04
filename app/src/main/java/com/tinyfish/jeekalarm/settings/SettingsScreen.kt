@@ -60,6 +60,7 @@ fun SettingsScreen(
     onAdd: () -> Unit,
     onNavigateHome: () -> Unit,
     onNavigateSettings: () -> Unit,
+    onOpenRecycleBin: () -> Unit,
 ) {
     Scaffold(
         topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
@@ -72,13 +73,13 @@ fun SettingsScreen(
             )
         },
     ) { padding ->
-        Editor(Modifier.padding(padding))
+        Editor(Modifier.padding(padding), onOpenRecycleBin = onOpenRecycleBin)
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun Editor(modifier: Modifier = Modifier) {
+private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit = {}) {
     Column(
         modifier
             .fillMaxSize()
@@ -98,6 +99,15 @@ private fun Editor(modifier: Modifier = Modifier) {
                     ) { Text(label) }
                 }
             }
+        }
+
+        FilledTonalButton(
+            onClick = onOpenRecycleBin,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            Icon(ImageVector.vectorResource(R.drawable.ic_delete), null)
+            WidthSpacer(8.dp)
+            Text("Recycle bin")
         }
 
         PermissionHealthGroup()
@@ -316,6 +326,6 @@ private fun onConfigDirChanged(context: Context) {
 @Composable
 fun SettingsScreenPreview() {
     JeekAlarmTheme("Dark") {
-        SettingsScreen(onAdd = {}, onNavigateHome = {}, onNavigateSettings = {})
+        SettingsScreen(onAdd = {}, onNavigateHome = {}, onNavigateSettings = {}, onOpenRecycleBin = {})
     }
 }

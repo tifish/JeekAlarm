@@ -161,8 +161,14 @@ object NotificationService {
 
         notificationManager.cancel(AlarmId)
 
+        // 关闭响铃即视为这些闹钟"结束"，触发过的一次性闹钟自动进回收站。
+        // 必须在清空 currentAlarmIds 之前取出 id（响铃界面还要靠它取闹钟信息）。
+        val finishedIds = currentAlarmIds.toList()
+
         // 清空响铃状态，UI 层的通知浮层随之消失，露出底下的导航页面。
         currentAlarmIds.clear()
         AlarmRingingService.stop()
+
+        ScheduleService.recycleTriggeredOnceAlarms(finishedIds)
     }
 }

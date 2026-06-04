@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import com.tinyfish.jeekalarm.SettingsService
+import com.tinyfish.jeekalarm.schedule.RecycleBinService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -65,6 +66,7 @@ class App : Application() {
 
         SettingsService.load()
         ScheduleService.load()
+        RecycleBinService.load()
         ScheduleService.sort()
         ScheduleService.setNextAlarm()
     }

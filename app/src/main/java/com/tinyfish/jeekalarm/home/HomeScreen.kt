@@ -40,7 +40,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -76,12 +75,14 @@ import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.EditScreen
 import com.tinyfish.jeekalarm.edit.EditViewModel
 import com.tinyfish.jeekalarm.ifly.IFly
+import com.tinyfish.jeekalarm.recyclebin.RecycleBinScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.EditRoute
 import com.tinyfish.jeekalarm.start.HomeRoute
+import com.tinyfish.jeekalarm.start.RecycleBinRoute
 import com.tinyfish.jeekalarm.start.SettingsRoute
 import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
@@ -113,6 +114,9 @@ fun MainUI() {
                 popUpTo(HomeRoute)
             }
         }
+        val openRecycleBin: () -> Unit = {
+            navController.navigate(RecycleBinRoute)
+        }
 
         NavHost(
             navController = navController,
@@ -136,10 +140,14 @@ fun MainUI() {
                     onAdd = { openEdit(-1) },
                     onNavigateHome = goHome,
                     onNavigateSettings = goSettings,
+                    onOpenRecycleBin = openRecycleBin,
                 )
             }
             composable<EditRoute> {
                 EditScreen(onNavigateBack = { navController.popBackStack() })
+            }
+            composable<RecycleBinRoute> {
+                RecycleBinScreen(onNavigateBack = { navController.popBackStack() })
             }
         }
 
@@ -161,21 +169,14 @@ fun HomeScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    // 左滑删除：先移除并保存，再弹 Snackbar 给一次撤销机会；撤销则把原对象插回并重新排序。
+    // 左滑删除：移入回收站（不再提供 undo），弹个简短提示。回收站里可恢复或彻底删除。
     val onDelete: (Schedule) -> Unit = { schedule ->
-        ScheduleService.scheduleList.removeIf { it.id == schedule.id }
-        ScheduleService.saveAndRefresh()
+        ScheduleService.recycle(schedule)
         scope.launch {
-            val result = snackbarHostState.showSnackbar(
-                message = "Removed \"${schedule.name}\"",
-                actionLabel = "Undo",
+            snackbarHostState.showSnackbar(
+                message = "Moved \"${schedule.name}\" to recycle bin",
                 duration = SnackbarDuration.Short,
             )
-            if (result == SnackbarResult.ActionPerformed) {
-                ScheduleService.scheduleList.add(schedule)
-                ScheduleService.sort()
-                ScheduleService.saveAndRefresh()
-            }
         }
     }
 
