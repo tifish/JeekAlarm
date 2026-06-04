@@ -45,9 +45,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -210,6 +214,9 @@ private fun ScheduleList(
         return
     }
 
+    // 记录当前滑开露出删除按钮的条目，保证同时只展开一个：展开新条目会收起旧的。
+    var openedId by remember { mutableStateOf<Int?>(null) }
+
     val now = Calendar.getInstance()
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -217,7 +224,14 @@ private fun ScheduleList(
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         items(schedules, key = { it.id }) { schedule ->
-            ScheduleItem(schedule, now, onOpenEdit, onDelete)
+            ScheduleItem(
+                schedule = schedule,
+                now = now,
+                openedId = openedId,
+                onOpenedChange = { openedId = it },
+                onOpenEdit = onOpenEdit,
+                onDelete = onDelete,
+            )
         }
     }
 }
@@ -262,11 +276,12 @@ private enum class SwipeAnchor { Closed, Open }
 private fun ScheduleItem(
     schedule: Schedule,
     now: Calendar,
+    openedId: Int?,
+    onOpenedChange: (Int?) -> Unit,
     onOpenEdit: (Int) -> Unit,
     onDelete: (Schedule) -> Unit,
 ) {
     val isNext = schedule.id in App.nextAlarmIds
-    val scope = rememberCoroutineScope()
 
     // 左滑不再一滑即删，而是把卡片停靠到左侧、露出删除按钮，点按钮才真正删除，避免误触。
     val actionWidth = 88.dp
@@ -280,7 +295,15 @@ private fun ScheduleItem(
             }
         )
     }
-    val closePanel: () -> Unit = { scope.launch { dragState.animateTo(SwipeAnchor.Closed) } }
+    // 本条滑开时登记为当前展开项；别的条目成为展开项时，收起自己。
+    LaunchedEffect(dragState.settledValue) {
+        if (dragState.settledValue == SwipeAnchor.Open) onOpenedChange(schedule.id)
+    }
+    LaunchedEffect(openedId) {
+        if (openedId != schedule.id && dragState.currentValue != SwipeAnchor.Closed) {
+            dragState.animateTo(SwipeAnchor.Closed)
+        }
+    }
 
     Box(Modifier.fillMaxWidth()) {
         // 背景层：停靠在右侧的删除按钮，随卡片滑开而露出。
@@ -295,7 +318,7 @@ private fun ScheduleItem(
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.errorContainer)
                     .clickable {
-                        closePanel()
+                        onOpenedChange(null)
                         onDelete(schedule)
                     },
                 contentAlignment = Alignment.Center,
@@ -326,7 +349,7 @@ private fun ScheduleItem(
                 .anchoredDraggable(dragState, Orientation.Horizontal)
                 .clickable {
                     // 已滑开时，点一下先收回；否则进入编辑。
-                    if (dragState.currentValue == SwipeAnchor.Open) closePanel()
+                    if (dragState.currentValue == SwipeAnchor.Open) onOpenedChange(null)
                     else onOpenEdit(schedule.id)
                 }
         ) {
