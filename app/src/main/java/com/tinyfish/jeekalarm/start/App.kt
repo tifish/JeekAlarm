@@ -57,10 +57,11 @@ class App : Application() {
         }
 
         /**
-         * 主列表主角行的“哪天”标签：今明后→相对词，一周内→星期，更远→月日，跨年再带年份。
-         * 时间另行显示，这里只给日期部分。
+         * 主列表主角行的“哪天”标签：今明后→相对词，更远→月日，跨年再带年份。
+         * useWeekday 为 true（按星期重复的闹钟）时，落在一周内会用星期几（如 "下周二" 的语感）；
+         * 月/年/一次性的闹钟关心的是日期，不该以星期几开头。
          */
-        fun nextTriggerDay(calendar: Calendar?): String {
+        fun nextTriggerDay(calendar: Calendar?, useWeekday: Boolean = false): String {
             if (calendar == null)
                 return ""
             val now = Calendar.getInstance()
@@ -72,7 +73,7 @@ class App : Application() {
                 diff == 0 -> "Today"
                 diff == 1 -> "Tmr"
                 diff == 2 -> "DAT"
-                diff in 3..6 -> weekFormat.format(calendar.time)
+                diff in 3..6 && useWeekday -> weekFormat.format(calendar.time)
                 else -> monthDayFormat.format(calendar.time)
             }
         }

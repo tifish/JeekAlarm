@@ -372,7 +372,7 @@ private fun ScheduleItem(
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
                             if (singleTime)
-                                "${App.nextTriggerDay(next)} %02d:%02d".format(
+                                "${App.nextTriggerDay(next, schedule.weekDays.isNotEmpty())} %02d:%02d".format(
                                     schedule.hours[0], schedule.minutes[0]
                                 )
                             else
