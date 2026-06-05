@@ -171,11 +171,15 @@ fun HomeScreen(
     val scope = rememberCoroutineScope()
 
     // 左滑删除：移入回收站（不再提供 undo），弹个简短提示。回收站里可恢复或彻底删除。
+    // 名字还是默认名的会被直接丢弃、不进回收站，提示文案也相应区分。
     val onDelete: (Schedule) -> Unit = { schedule ->
-        ScheduleService.recycle(schedule)
+        val recycled = ScheduleService.recycle(schedule)
         scope.launch {
             snackbarHostState.showSnackbar(
-                message = "Moved \"${schedule.name}\" to recycle bin",
+                message = if (recycled)
+                    "Moved \"${schedule.name}\" to recycle bin"
+                else
+                    "Deleted \"${schedule.name}\"",
                 duration = SnackbarDuration.Short,
             )
         }

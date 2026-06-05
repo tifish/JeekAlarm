@@ -19,7 +19,7 @@ import kotlin.random.Random
 @Serializable
 data class Schedule(
     var id: Int = 0,
-    var name: String = "Alarm",
+    var name: String = DefaultName,
     var minuteConfig: String = "*",
     var hourConfig: String = "*",
     var dayConfig: String = "*",
@@ -36,6 +36,11 @@ data class Schedule(
     // 进入回收站的时间戳（epoch 毫秒）；0 表示是活动闹钟、不在回收站。
     var deletedAt: Long = 0L
 ) {
+    companion object {
+        /** 新建闹钟时的默认名字。 */
+        const val DefaultName = "Alarm"
+    }
+
     fun copyTo(dest: Schedule) {
         dest.name = name
         dest.hourConfig = hourConfig

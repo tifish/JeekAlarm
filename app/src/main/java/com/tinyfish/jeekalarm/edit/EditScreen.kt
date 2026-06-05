@@ -214,8 +214,8 @@ fun BottomBar(
                         .setTitle("Remove")
                         .setMessage("Remove this schedule?")
                         .setPositiveButton("Yes") { _, _ ->
-                            ScheduleService.scheduleList.removeIf { it.id == EditViewModel.editScheduleId }
-                            ScheduleService.saveAndRefresh()
+                            ScheduleService.findSchedule(EditViewModel.editScheduleId)
+                                ?.let { ScheduleService.recycle(it) }
                             onRemoved()
                         }
                         .setNegativeButton("No", null)

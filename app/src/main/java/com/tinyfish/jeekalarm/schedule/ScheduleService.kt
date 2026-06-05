@@ -166,11 +166,14 @@ object ScheduleService {
         setNextAlarm()
     }
 
-    /** 把闹钟移入回收站（手工删除走这里）。 */
-    fun recycle(schedule: Schedule) {
+    /** 把闹钟移入回收站（手工删除走这里）。名字还是默认名的，直接丢弃、不进回收站。返回是否进了回收站。 */
+    fun recycle(schedule: Schedule): Boolean {
         scheduleList.removeIf { it.id == schedule.id }
         saveAndRefresh()
-        RecycleBinService.add(schedule)
+        val recycled = schedule.name != Schedule.DefaultName
+        if (recycled)
+            RecycleBinService.add(schedule)
+        return recycled
     }
 
     /** 响铃关闭时调用：触发结束的一次性闹钟自动进回收站。 */
@@ -180,7 +183,8 @@ object ScheduleService {
             val schedule = findSchedule(alarmId) ?: continue
             if (schedule.onlyOnce) {
                 scheduleList.removeIf { it.id == schedule.id }
-                RecycleBinService.add(schedule)
+                if (schedule.name != Schedule.DefaultName)
+                    RecycleBinService.add(schedule)
                 modified = true
             }
         }
