@@ -78,6 +78,7 @@ import com.tinyfish.jeekalarm.ifly.IFly
 import com.tinyfish.jeekalarm.recyclebin.RecycleBinScreen
 import com.tinyfish.jeekalarm.schedule.Schedule
 import com.tinyfish.jeekalarm.schedule.ScheduleService
+import com.tinyfish.jeekalarm.schedule.describeRecurrence
 import com.tinyfish.jeekalarm.settings.SettingsScreen
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.jeekalarm.start.EditRoute
@@ -380,7 +381,7 @@ private fun ScheduleItem(
                         color = MaterialTheme.colorScheme.primary,
                     )
                     Text(
-                        schedule.timeConfig,
+                        schedule.describeRecurrence() ?: "Custom",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
