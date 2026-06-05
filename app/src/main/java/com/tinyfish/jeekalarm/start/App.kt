@@ -22,6 +22,7 @@ class App : Application() {
         private val dateFormat = SimpleDateFormat("MM-dd", Locale.US)
         private val timeFormat = SimpleDateFormat("HH:mm", Locale.US)
         private val weekFormat = SimpleDateFormat("EEE", Locale.US)
+        private val monthDayFormat = SimpleDateFormat("MMM d", Locale.US)
 
         fun format(calendar: Calendar?): String {
             if (calendar == null)
@@ -53,6 +54,27 @@ class App : Application() {
             val timeString = timeFormat.format(calendar.time)
 
             return "$dateString $timeString $weekString"
+        }
+
+        /**
+         * 主列表主角行的“哪天”标签：今明后→相对词，一周内→星期，更远→月日，跨年再带年份。
+         * 时间另行显示，这里只给日期部分。
+         */
+        fun nextTriggerDay(calendar: Calendar?): String {
+            if (calendar == null)
+                return ""
+            val now = Calendar.getInstance()
+            if (now.get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
+                return "${monthDayFormat.format(calendar.time)} ${calendar.get(Calendar.YEAR)}"
+
+            val diff = calendar.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)
+            return when {
+                diff == 0 -> "Today"
+                diff == 1 -> "Tmr"
+                diff == 2 -> "DAT"
+                diff in 3..6 -> weekFormat.format(calendar.time)
+                else -> monthDayFormat.format(calendar.time)
+            }
         }
 
         var nextAlarmIds by mutableStateOf(listOf<Int>())

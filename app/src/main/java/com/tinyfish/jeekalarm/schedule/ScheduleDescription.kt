@@ -37,7 +37,7 @@ fun Schedule.describeRecurrence(): String? {
 
         // 每年某月某日：限定单月单日，不按星期、年份不限定
         anyWeekDay && !anyDay && !anyMonth && anyYear && days.size == 1 && months.size == 1 ->
-            "${monthShortNames[months[0]]} ${days[0]}"
+            "Yearly · ${monthShortNames[months[0]]} ${days[0]}"
 
         // 其余任意组合：交给兜底
         else -> null
@@ -49,6 +49,6 @@ private fun describeWeekDays(weekDays: List<Int>): String {
     return when {
         set == setOf(2, 3, 4, 5, 6) -> "Weekdays"
         set == setOf(1, 7) -> "Weekends"
-        else -> weekDays.sorted().joinToString(", ") { weekDayShortNames[it - 1] }
+        else -> "Weekly · " + weekDays.sorted().joinToString(", ") { weekDayShortNames[it - 1] }
     }
 }

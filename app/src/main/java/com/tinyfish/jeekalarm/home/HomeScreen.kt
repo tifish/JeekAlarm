@@ -360,14 +360,28 @@ private fun ScheduleItem(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(Modifier.weight(1f)) {
+                    val next = schedule.getNextTriggerTime(now)
+                    // 单一时刻才有唯一的 HH:mm 可当主角；多时刻/通配则退回完整的下次触发串。
+                    val singleTime = schedule.hours.size == 1 && schedule.minutes.size == 1
+                    val strongColor = if (schedule.enabled)
+                        MaterialTheme.colorScheme.onSurface
+                    else
+                        MaterialTheme.colorScheme.onSurfaceVariant
+
+                    // 主角：下次触发。单一时刻显示“哪天 + 时间”整行同字号；多时刻/通配退回完整串。
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            schedule.name,
-                            style = MaterialTheme.typography.titleLarge,
-                            color = if (schedule.enabled)
-                                MaterialTheme.colorScheme.onSurface
+                            if (singleTime)
+                                "${App.nextTriggerDay(next)} %02d:%02d".format(
+                                    schedule.hours[0], schedule.minutes[0]
+                                )
                             else
-                                MaterialTheme.colorScheme.onSurfaceVariant,
+                                App.format(next),
+                            style = if (singleTime)
+                                MaterialTheme.typography.headlineMedium
+                            else
+                                MaterialTheme.typography.titleMedium,
+                            color = strongColor,
                         )
                         if (isNext) {
                             WidthSpacer(8.dp)
@@ -375,14 +389,16 @@ private fun ScheduleItem(
                         }
                     }
                     HeightSpacer(2.dp)
+                    // 名字：闹钟身份，层级仅次于时间。
                     Text(
-                        App.format(schedule.getNextTriggerTime(now)),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.primary,
+                        schedule.name,
+                        style = MaterialTheme.typography.titleMedium,
+                        color = strongColor,
                     )
+                    // 重复规则：降为灰色辅助信息。
                     Text(
                         schedule.describeRecurrence() ?: "Custom",
-                        style = MaterialTheme.typography.bodySmall,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
