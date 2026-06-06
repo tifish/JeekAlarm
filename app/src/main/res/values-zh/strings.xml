@@ -1,0 +1,171 @@
+<resources>
+
+    <!-- Common actions -->
+    <string name="action_back">返回</string>
+    <string name="action_select">选择</string>
+    <string name="action_clear">清除</string>
+    <string name="action_cancel">取消</string>
+    <string name="action_open">打开</string>
+    <string name="action_allow">允许</string>
+    <string name="action_load">加载</string>
+    <string name="action_overwrite">覆盖</string>
+    <string name="action_restore">恢复</string>
+    <string name="action_remove">移除</string>
+    <string name="action_delete">删除</string>
+    <string name="action_delete_all">删除全部</string>
+    <string name="action_delete_forever">永久删除</string>
+    <string name="action_pause">暂停</string>
+    <string name="action_play">播放</string>
+    <string name="action_stop">停止</string>
+    <string name="action_dismiss">关闭</string>
+    <string name="action_yes">是</string>
+    <string name="action_no">否</string>
+
+    <!-- Shared labels -->
+    <string name="add_alarm">添加闹钟</string>
+    <string name="label_music_file">音乐文件</string>
+    <string name="label_music_folder">音乐文件夹</string>
+    <string name="label_settings">设置</string>
+    <string name="label_recycle_bin">回收站</string>
+    <string name="common_not_set">未设置</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">主页</string>
+
+    <!-- Home screen -->
+    <string name="home_empty_title">暂无闹钟</string>
+    <string name="home_empty_subtitle">点击 + 添加第一个闹钟</string>
+    <string name="home_recurrence_custom">自定义</string>
+    <string name="home_next_badge">下一个</string>
+    <string name="home_snackbar_moved">已将“%1$s”移至回收站</string>
+    <string name="home_snackbar_deleted">已删除“%1$s”</string>
+
+    <!-- Settings screen -->
+    <string name="settings_appearance">外观</string>
+    <string name="settings_theme">主题</string>
+    <string name="theme_auto">自动</string>
+    <string name="theme_dark">深色</string>
+    <string name="theme_light">浅色</string>
+    <string name="settings_default_sound">默认声音</string>
+    <string name="action_test_alarm">测试下一个闹钟</string>
+    <string name="settings_ai_assistant">AI 助手</string>
+    <string name="settings_openai_url">OpenAI API 地址</string>
+    <string name="settings_openai_model">OpenAI API 模型</string>
+    <string name="settings_openai_key">OpenAI API 密钥</string>
+    <string name="settings_ifly_appid">讯飞 App ID</string>
+    <string name="settings_config_folder">配置文件夹</string>
+    <string name="label_folder">文件夹</string>
+    <string name="settings_permissions">权限</string>
+    <string name="settings_language">语言</string>
+    <string name="language_system">跟随系统</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">中文</string>
+
+    <!-- Permission rows -->
+    <string name="perm_notifications">通知</string>
+    <string name="perm_exact_alarms">精确闹钟</string>
+    <string name="perm_battery_optimization">电池优化</string>
+    <string name="perm_autostart_lockscreen">自启动 / 锁屏</string>
+    <string name="perm_status_allowed">已允许</string>
+    <string name="perm_status_required">需要</string>
+    <string name="perm_status_unrestricted">不受限制</string>
+    <string name="perm_status_may_restricted">可能受限</string>
+    <string name="perm_status_device_setting">设备设置</string>
+
+    <!-- Config-folder dialog -->
+    <string name="dialog_config_found">在新位置发现配置文件，是加载还是覆盖？</string>
+
+    <!-- Edit screen -->
+    <string name="edit_title_edit">编辑闹钟</string>
+    <string name="edit_enabled">启用</string>
+    <string name="edit_enabled_subtitle">打开或关闭此闹钟</string>
+    <string name="edit_only_once">仅一次</string>
+    <string name="edit_only_once_subtitle">响铃一次后自动关闭</string>
+    <string name="edit_section_name">名称</string>
+    <string name="edit_alarm_name">闹钟名称</string>
+    <string name="edit_guess_time">根据名称推测时间</string>
+    <string name="edit_section_schedule">时间安排</string>
+    <string name="edit_cron_syntax">Cron 语法 — *：任意 · 0：固定 · 1-3：范围 · 1,3：列表 · */3：步长</string>
+    <string name="edit_cron_hour">小时</string>
+    <string name="edit_cron_minute">分钟</string>
+    <string name="edit_cron_weekday">星期</string>
+    <string name="edit_cron_month">月</string>
+    <string name="edit_cron_day">日</string>
+    <string name="edit_cron_year">年</string>
+    <string name="edit_section_sound">声音与振动</string>
+    <string name="edit_play_music">播放音乐</string>
+    <string name="edit_vibration">振动</string>
+    <string name="edit_vibrate_count">振动 %1$d 次</string>
+    <string name="edit_dialog_remove_message">移除此闹钟？</string>
+    <string name="edit_action_now">现在</string>
+    <string name="edit_fab_add">添加</string>
+    <string name="edit_fab_apply">应用</string>
+
+    <!-- Recycle bin screen -->
+    <string name="recycle_clear_all">全部清空</string>
+    <string name="recycle_clear_confirm_title">清空回收站？</string>
+    <string name="recycle_clear_confirm_message">此处的 %1$d 个闹钟将被永久删除。</string>
+    <string name="recycle_empty_title">回收站是空的</string>
+    <string name="recycle_empty_description">已删除和已完成的闹钟会在此保留 30 天</string>
+    <string name="recycle_removes_today">今天移除</string>
+    <string name="recycle_item_status">删除于 %1$s · %2$s</string>
+    <plurals name="recycle_removes_in_days">
+        <item quantity="other">%1$d 天后移除</item>
+    </plurals>
+
+    <!-- Notifications -->
+    <string name="notif_channel_info_name">闹钟状态</string>
+    <string name="notif_channel_info_desc">下一个闹钟状态</string>
+    <string name="notif_channel_alarm_name">闹钟响铃</string>
+    <string name="notif_channel_alarm_desc">闹钟响铃通知</string>
+    <string name="notif_info_text">下一个：%1$s %2$s</string>
+    <string name="notif_title_standby">JeekAlarm 待命中</string>
+    <string name="alarm_fallback_name">闹钟 #%1$d</string>
+
+    <!-- Recurrence descriptions -->
+    <string name="recur_once">一次</string>
+    <string name="recur_daily">每天</string>
+    <string name="recur_weekdays">工作日</string>
+    <string name="recur_weekends">周末</string>
+    <string name="recur_weekly_prefix">"每周 · "</string>
+    <string name="recur_monthly_day">每月 · %1$d日</string>
+    <string name="recur_yearly_date">每年 · %1$s%2$d日</string>
+
+    <!-- Relative day labels -->
+    <string name="date_today">今天</string>
+    <string name="date_tomorrow">明天</string>
+    <string name="date_day_after_tomorrow">后天</string>
+
+    <!-- AI / speech toasts -->
+    <string name="edit_ai_request_failed">AI 请求失败：%1$s</string>
+    <string name="edit_filled_time_auto">已自动填充时间</string>
+    <string name="edit_no_time_found">未在名称中找到时间</string>
+    <string name="ifly_init_error">讯飞初始化错误代码：%1$d</string>
+
+    <!-- Abbreviated weekday names; index 0 = Sunday (Calendar weekday - 1) -->
+    <string-array name="weekday_short_names">
+        <item>周日</item>
+        <item>周一</item>
+        <item>周二</item>
+        <item>周三</item>
+        <item>周四</item>
+        <item>周五</item>
+        <item>周六</item>
+    </string-array>
+
+    <!-- Abbreviated month names; index 0 = January (Calendar.MONTH) -->
+    <string-array name="month_short_names">
+        <item>1月</item>
+        <item>2月</item>
+        <item>3月</item>
+        <item>4月</item>
+        <item>5月</item>
+        <item>6月</item>
+        <item>7月</item>
+        <item>8月</item>
+        <item>9月</item>
+        <item>10月</item>
+        <item>11月</item>
+        <item>12月</item>
+    </string-array>
+</resources>

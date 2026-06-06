@@ -25,6 +25,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -85,7 +86,7 @@ fun NotificationScreen() {
                         null,
                     )
                     WidthSpacer(8.dp)
-                    Text(if (isPlaying) "Pause" else "Play")
+                    Text(if (isPlaying) stringResource(R.string.action_pause) else stringResource(R.string.action_play))
                 }
 
                 Button(
@@ -97,7 +98,7 @@ fun NotificationScreen() {
                 ) {
                     Icon(ImageVector.vectorResource(R.drawable.ic_close), null)
                     WidthSpacer(8.dp)
-                    Text("Dismiss")
+                    Text(stringResource(R.string.action_dismiss))
                 }
             }
         }

@@ -17,6 +17,8 @@ object SettingsService {
     var defaultMusicFile by SettingsItemState("")
     var defaultMusicFolder by SettingsItemState("")
     var theme by SettingsItemState("Dark")
+    // 应用内语言：""=跟随系统，"en"=English，"zh"=中文。
+    var language by SettingsItemState("")
     var openAiApiUrl by SettingsItemState("")
     var openAiApiKey by SettingsItemState("")
     var openAiApiModel by SettingsItemState("")
@@ -170,6 +172,7 @@ object SettingsService {
         var defaultMusicFile: String = "",
         var defaultMusicFolder: String = "",
         var theme: String = "Dark",
+        var language: String = "",
         var openAiApiUrl: String = "",
         var openAiApiKey: String = "",
         var openAiApiModel: String = "",
@@ -192,6 +195,7 @@ object SettingsService {
             defaultMusicFile = data.defaultMusicFile
             defaultMusicFolder = data.defaultMusicFolder
             theme = data.theme
+            language = data.language
 
             openAiApiUrl = data.openAiApiUrl
             openAiApiModel = data.openAiApiModel
@@ -217,6 +221,7 @@ object SettingsService {
         data.defaultMusicFile = defaultMusicFile
         data.defaultMusicFolder = defaultMusicFolder
         data.theme = theme
+        data.language = language
         data.openAiApiUrl = openAiApiUrl
         data.openAiApiModel = openAiApiModel
 

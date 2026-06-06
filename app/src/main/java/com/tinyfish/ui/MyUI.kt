@@ -26,6 +26,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -51,7 +52,7 @@ fun MyTopBar(@DrawableRes iconID: Int, title: String, onBack: (() -> Unit)? = nu
         navigationIcon = {
             if (onBack != null) {
                 IconButton(onClick = onBack) {
-                    Icon(ImageVector.vectorResource(R.drawable.ic_back), "Back")
+                    Icon(ImageVector.vectorResource(R.drawable.ic_back), stringResource(R.string.action_back))
                 }
             } else {
                 Icon(
@@ -164,7 +165,7 @@ fun MyFileSelector(
         )
         Row(verticalAlignment = Alignment.CenterVertically) {
             val display = if (value.isEmpty())
-                "Not set"
+                stringResource(R.string.common_not_set)
             else
                 Uri.decode(value.substringAfterLast('/'))
 
@@ -180,10 +181,10 @@ fun MyFileSelector(
                     MaterialTheme.colorScheme.onSurface
             )
             IconButton(onClick = onSelect) {
-                Icon(ImageVector.vectorResource(R.drawable.ic_location_searching), "Select")
+                Icon(ImageVector.vectorResource(R.drawable.ic_location_searching), stringResource(R.string.action_select))
             }
             IconButton(onClick = onClear) {
-                Icon(ImageVector.vectorResource(R.drawable.ic_clear), "Clear")
+                Icon(ImageVector.vectorResource(R.drawable.ic_clear), stringResource(R.string.action_clear))
             }
         }
     }

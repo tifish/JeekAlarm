@@ -4,6 +4,7 @@ import android.widget.Toast
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.ai.OpenAi
 import com.tinyfish.jeekalarm.schedule.Schedule
@@ -69,7 +70,7 @@ object EditViewModel {
         val schedule = try {
             OpenAi.getAnswer(editing.name)
         } catch (ex: Exception) {
-            Toast.makeText(App.context, "AI request failed: ${ex.message}", Toast.LENGTH_LONG).show()
+            Toast.makeText(App.context, App.localizedContext().getString(R.string.edit_ai_request_failed, ex.message ?: ""), Toast.LENGTH_LONG).show()
             return
         }
 
@@ -84,9 +85,9 @@ object EditViewModel {
                 enabled = schedule.enabled,
                 onlyOnce = schedule.onlyOnce,
             )
-            Toast.makeText(App.context, "Filled time automatically", Toast.LENGTH_SHORT).show()
+            Toast.makeText(App.context, App.localizedContext().getString(R.string.edit_filled_time_auto), Toast.LENGTH_SHORT).show()
         } else {
-            Toast.makeText(App.context, "No time found in name", Toast.LENGTH_SHORT).show()
+            Toast.makeText(App.context, App.localizedContext().getString(R.string.edit_no_time_found), Toast.LENGTH_SHORT).show()
         }
     }
 

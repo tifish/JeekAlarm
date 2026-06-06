@@ -10,6 +10,7 @@ import com.iflytek.cloud.SpeechError
 import com.iflytek.cloud.SpeechUtility
 import com.iflytek.cloud.ui.RecognizerDialog
 import com.iflytek.cloud.ui.RecognizerDialogListener
+import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.start.App
 
@@ -34,7 +35,7 @@ class IFly {
 
             val initListener = InitListener { code ->
                 if (code != ErrorCode.SUCCESS) {
-                    Toast.makeText(context, "IFly init error code：$code", Toast.LENGTH_SHORT).show()
+                    Toast.makeText(context, context.getString(R.string.ifly_init_error, code), Toast.LENGTH_SHORT).show()
                 }
             }
 

@@ -26,6 +26,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -43,7 +44,7 @@ fun RecycleBinScreen(onNavigateBack: () -> Unit) {
     var showClearConfirm by remember { mutableStateOf(false) }
 
     Scaffold(
-        topBar = { MyTopBar(R.drawable.ic_delete, "Recycle bin", onBack = onNavigateBack) },
+        topBar = { MyTopBar(R.drawable.ic_delete, stringResource(R.string.label_recycle_bin), onBack = onNavigateBack) },
     ) { padding ->
         if (items.isEmpty()) {
             EmptyState(Modifier.padding(padding))
@@ -63,7 +64,7 @@ fun RecycleBinScreen(onNavigateBack: () -> Unit) {
                     horizontalArrangement = Arrangement.End,
                 ) {
                     TextButton(onClick = { showClearConfirm = true }) {
-                        Text("Clear all")
+                        Text(stringResource(R.string.recycle_clear_all))
                     }
                 }
             }
@@ -80,16 +81,16 @@ fun RecycleBinScreen(onNavigateBack: () -> Unit) {
     if (showClearConfirm) {
         AlertDialog(
             onDismissRequest = { showClearConfirm = false },
-            title = { Text("Clear recycle bin?") },
-            text = { Text("All ${items.size} alarms here will be permanently deleted.") },
+            title = { Text(stringResource(R.string.recycle_clear_confirm_title)) },
+            text = { Text(stringResource(R.string.recycle_clear_confirm_message, items.size)) },
             confirmButton = {
                 TextButton(onClick = {
                     RecycleBinService.clearAll()
                     showClearConfirm = false
-                }) { Text("Delete all") }
+                }) { Text(stringResource(R.string.action_delete_all)) }
             },
             dismissButton = {
-                TextButton(onClick = { showClearConfirm = false }) { Text("Cancel") }
+                TextButton(onClick = { showClearConfirm = false }) { Text(stringResource(R.string.action_cancel)) }
             },
         )
     }
@@ -129,14 +130,14 @@ private fun RecycleItem(
             IconButton(onClick = onRestore) {
                 Icon(
                     ImageVector.vectorResource(R.drawable.ic_restore),
-                    contentDescription = "Restore",
+                    contentDescription = stringResource(R.string.action_restore),
                     tint = MaterialTheme.colorScheme.primary,
                 )
             }
             IconButton(onClick = onDeleteForever) {
                 Icon(
                     ImageVector.vectorResource(R.drawable.ic_delete),
-                    contentDescription = "Delete forever",
+                    contentDescription = stringResource(R.string.action_delete_forever),
                     tint = MaterialTheme.colorScheme.error,
                 )
             }
@@ -147,8 +148,12 @@ private fun RecycleItem(
 private fun deletedStatus(schedule: Schedule): String {
     val deletedCal = Calendar.getInstance().apply { timeInMillis = schedule.deletedAt }
     val days = RecycleBinService.daysUntilRemoval(schedule)
-    val removal = if (days <= 0) "removes today" else "removes in $days day${if (days == 1) "" else "s"}"
-    return "Deleted ${App.format(deletedCal)} · $removal"
+    val res = App.localizedContext().resources
+    val removal = if (days <= 0)
+        res.getString(R.string.recycle_removes_today)
+    else
+        res.getQuantityString(R.plurals.recycle_removes_in_days, days, days)
+    return res.getString(R.string.recycle_item_status, App.format(deletedCal), removal)
 }
 
 @Composable
@@ -167,10 +172,10 @@ private fun EmptyState(modifier: Modifier = Modifier) {
             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
         )
         HeightSpacer(20.dp)
-        Text("Recycle bin is empty", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.recycle_empty_title), style = MaterialTheme.typography.titleLarge)
         HeightSpacer(4.dp)
         Text(
-            "Deleted and finished alarms appear here for 30 days",
+            stringResource(R.string.recycle_empty_description),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

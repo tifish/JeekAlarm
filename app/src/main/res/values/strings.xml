@@ -1,3 +1,173 @@
 <resources>
     <string name="app_name">JeekAlarm</string>
+
+    <!-- Common actions -->
+    <string name="action_back">Back</string>
+    <string name="action_select">Select</string>
+    <string name="action_clear">Clear</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_open">Open</string>
+    <string name="action_allow">Allow</string>
+    <string name="action_load">Load</string>
+    <string name="action_overwrite">Overwrite</string>
+    <string name="action_restore">Restore</string>
+    <string name="action_remove">Remove</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_delete_all">Delete all</string>
+    <string name="action_delete_forever">Delete forever</string>
+    <string name="action_pause">Pause</string>
+    <string name="action_play">Play</string>
+    <string name="action_stop">Stop</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_yes">Yes</string>
+    <string name="action_no">No</string>
+
+    <!-- Shared labels -->
+    <string name="add_alarm">Add alarm</string>
+    <string name="label_music_file">Music file</string>
+    <string name="label_music_folder">Music folder</string>
+    <string name="label_settings">Settings</string>
+    <string name="label_recycle_bin">Recycle bin</string>
+    <string name="common_not_set">Not set</string>
+
+    <!-- Navigation -->
+    <string name="nav_home">Home</string>
+
+    <!-- Home screen -->
+    <string name="home_empty_title">No alarms yet</string>
+    <string name="home_empty_subtitle">Tap + to add your first alarm</string>
+    <string name="home_recurrence_custom">Custom</string>
+    <string name="home_next_badge">NEXT</string>
+    <string name="home_snackbar_moved">Moved \"%1$s\" to recycle bin</string>
+    <string name="home_snackbar_deleted">Deleted \"%1$s\"</string>
+
+    <!-- Settings screen -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_theme">Theme</string>
+    <string name="theme_auto">Auto</string>
+    <string name="theme_dark">Dark</string>
+    <string name="theme_light">Light</string>
+    <string name="settings_default_sound">Default sound</string>
+    <string name="action_test_alarm">Test next alarm</string>
+    <string name="settings_ai_assistant">AI assistant</string>
+    <string name="settings_openai_url">OpenAI API URL</string>
+    <string name="settings_openai_model">OpenAI API model</string>
+    <string name="settings_openai_key">OpenAI API key</string>
+    <string name="settings_ifly_appid">iFlytek App ID</string>
+    <string name="settings_config_folder">Config folder</string>
+    <string name="label_folder">Folder</string>
+    <string name="settings_permissions">Permissions</string>
+    <string name="settings_language">Language</string>
+    <string name="language_system">Follow system</string>
+    <string name="language_english">English</string>
+    <string name="language_chinese">中文</string>
+
+    <!-- Permission rows -->
+    <string name="perm_notifications">Notifications</string>
+    <string name="perm_exact_alarms">Exact alarms</string>
+    <string name="perm_battery_optimization">Battery optimization</string>
+    <string name="perm_autostart_lockscreen">Autostart / lock screen</string>
+    <string name="perm_status_allowed">Allowed</string>
+    <string name="perm_status_required">Required</string>
+    <string name="perm_status_unrestricted">Unrestricted</string>
+    <string name="perm_status_may_restricted">May be restricted</string>
+    <string name="perm_status_device_setting">Device setting</string>
+
+    <!-- Config-folder dialog -->
+    <string name="dialog_config_found">Found config file in new location, load or overwrite them?</string>
+
+    <!-- Edit screen -->
+    <string name="edit_title_edit">Edit alarm</string>
+    <string name="edit_enabled">Enabled</string>
+    <string name="edit_enabled_subtitle">Turn this alarm on or off</string>
+    <string name="edit_only_once">Only once</string>
+    <string name="edit_only_once_subtitle">Auto-disable after it rings once</string>
+    <string name="edit_section_name">Name</string>
+    <string name="edit_alarm_name">Alarm name</string>
+    <string name="edit_guess_time">Guess time from name</string>
+    <string name="edit_section_schedule">Schedule</string>
+    <string name="edit_cron_syntax">Cron syntax — *: any · 0: fixed · 1-3: range · 1,3: list · */3: step</string>
+    <string name="edit_cron_hour">Hour</string>
+    <string name="edit_cron_minute">Minute</string>
+    <string name="edit_cron_weekday">Weekday</string>
+    <string name="edit_cron_month">Month</string>
+    <string name="edit_cron_day">Day</string>
+    <string name="edit_cron_year">Year</string>
+    <string name="edit_section_sound">Sound &amp; vibration</string>
+    <string name="edit_play_music">Play music</string>
+    <string name="edit_vibration">Vibration</string>
+    <string name="edit_vibrate_count">Vibrate %1$d times</string>
+    <string name="edit_dialog_remove_message">Remove this schedule?</string>
+    <string name="edit_action_now">Now</string>
+    <string name="edit_fab_add">Add</string>
+    <string name="edit_fab_apply">Apply</string>
+
+    <!-- Recycle bin screen -->
+    <string name="recycle_clear_all">Clear all</string>
+    <string name="recycle_clear_confirm_title">Clear recycle bin?</string>
+    <string name="recycle_clear_confirm_message">All %1$d alarms here will be permanently deleted.</string>
+    <string name="recycle_empty_title">Recycle bin is empty</string>
+    <string name="recycle_empty_description">Deleted and finished alarms appear here for 30 days</string>
+    <string name="recycle_removes_today">removes today</string>
+    <string name="recycle_item_status">Deleted %1$s · %2$s</string>
+    <plurals name="recycle_removes_in_days">
+        <item quantity="one">removes in %1$d day</item>
+        <item quantity="other">removes in %1$d days</item>
+    </plurals>
+
+    <!-- Notifications -->
+    <string name="notif_channel_info_name">Alarm status</string>
+    <string name="notif_channel_info_desc">Next alarm status</string>
+    <string name="notif_channel_alarm_name">Alarm</string>
+    <string name="notif_channel_alarm_desc">Ringing alarm notifications</string>
+    <string name="notif_info_text">Next: %1$s %2$s</string>
+    <string name="notif_title_standby">JeekAlarm standby</string>
+    <string name="alarm_fallback_name">Alarm #%1$d</string>
+
+    <!-- Recurrence descriptions -->
+    <string name="recur_once">Once</string>
+    <string name="recur_daily">Daily</string>
+    <string name="recur_weekdays">Weekdays</string>
+    <string name="recur_weekends">Weekends</string>
+    <string name="recur_weekly_prefix">"Weekly · "</string>
+    <string name="recur_monthly_day">Monthly · day %1$d</string>
+    <string name="recur_yearly_date">Yearly · %1$s %2$d</string>
+
+    <!-- Relative day labels -->
+    <string name="date_today">Today</string>
+    <string name="date_tomorrow">Tmr</string>
+    <string name="date_day_after_tomorrow">DAT</string>
+
+    <!-- AI / speech toasts -->
+    <string name="edit_ai_request_failed">AI request failed: %1$s</string>
+    <string name="edit_filled_time_auto">Filled time automatically</string>
+    <string name="edit_no_time_found">No time found in name</string>
+    <string name="ifly_init_error">iFlytek init error code: %1$d</string>
+
+    <!-- Abbreviated weekday names; index 0 = Sunday (Calendar weekday - 1) -->
+    <string-array name="weekday_short_names">
+        <item>Sun</item>
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+    </string-array>
+
+    <!-- Abbreviated month names; index 0 = January (Calendar.MONTH) -->
+    <string-array name="month_short_names">
+        <item>Jan</item>
+        <item>Feb</item>
+        <item>Mar</item>
+        <item>Apr</item>
+        <item>May</item>
+        <item>Jun</item>
+        <item>Jul</item>
+        <item>Aug</item>
+        <item>Sep</item>
+        <item>Oct</item>
+        <item>Nov</item>
+        <item>Dec</item>
+    </string-array>
 </resources>

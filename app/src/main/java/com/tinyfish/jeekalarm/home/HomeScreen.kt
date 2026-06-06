@@ -59,6 +59,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -169,6 +170,7 @@ fun HomeScreen(
 ) {
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     // 左滑删除：移入回收站（不再提供 undo），弹个简短提示。回收站里可恢复或彻底删除。
     // 名字还是默认名的会被直接丢弃、不进回收站，提示文案也相应区分。
@@ -177,16 +179,16 @@ fun HomeScreen(
         scope.launch {
             snackbarHostState.showSnackbar(
                 message = if (recycled)
-                    "Moved \"${schedule.name}\" to recycle bin"
+                    context.getString(R.string.home_snackbar_moved, schedule.name)
                 else
-                    "Deleted \"${schedule.name}\"",
+                    context.getString(R.string.home_snackbar_deleted, schedule.name),
                 duration = SnackbarDuration.Short,
             )
         }
     }
 
     Scaffold(
-        topBar = { MyTopBar(R.drawable.ic_alarm, "JeekAlarm") },
+        topBar = { MyTopBar(R.drawable.ic_alarm, stringResource(R.string.app_name)) },
         bottomBar = {
             NavigationBottomBar(
                 selected = BottomTab.HOME,
@@ -258,10 +260,10 @@ private fun EmptyState(modifier: Modifier = Modifier, onAdd: () -> Unit) {
             tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
         )
         HeightSpacer(20.dp)
-        Text("No alarms yet", style = MaterialTheme.typography.titleLarge)
+        Text(stringResource(R.string.home_empty_title), style = MaterialTheme.typography.titleLarge)
         HeightSpacer(4.dp)
         Text(
-            "Tap + to add your first alarm",
+            stringResource(R.string.home_empty_subtitle),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
@@ -270,7 +272,7 @@ private fun EmptyState(modifier: Modifier = Modifier, onAdd: () -> Unit) {
         Button(onClick = onAdd) {
             Icon(ImageVector.vectorResource(R.drawable.ic_add), null)
             WidthSpacer(8.dp)
-            Text("Add alarm")
+            Text(stringResource(R.string.add_alarm))
         }
     }
 }
@@ -337,7 +339,7 @@ private fun ScheduleItem(
                     )
                     HeightSpacer(2.dp)
                     Text(
-                        "Delete",
+                        stringResource(R.string.action_delete),
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onErrorContainer,
                     )
@@ -401,7 +403,7 @@ private fun ScheduleItem(
                     )
                     // 重复规则：降为灰色辅助信息。
                     Text(
-                        schedule.describeRecurrence() ?: "Custom",
+                        schedule.describeRecurrence() ?: stringResource(R.string.home_recurrence_custom),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -424,7 +426,7 @@ private fun NextBadge() {
         shape = RoundedCornerShape(50),
     ) {
         Text(
-            "NEXT",
+            stringResource(R.string.home_next_badge),
             Modifier.padding(horizontal = 8.dp, vertical = 2.dp),
             style = MaterialTheme.typography.labelSmall,
         )
@@ -442,8 +444,8 @@ fun NavigationBottomBar(
         NavigationBarItem(
             selected = selected == BottomTab.HOME,
             onClick = onNavigateHome,
-            label = { Text("Home") },
-            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_home), "Home") },
+            label = { Text(stringResource(R.string.nav_home)) },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_home), stringResource(R.string.nav_home)) },
         )
 
         AddNavItem(onAdd)
@@ -451,8 +453,8 @@ fun NavigationBottomBar(
         NavigationBarItem(
             selected = selected == BottomTab.SETTINGS,
             onClick = onNavigateSettings,
-            label = { Text("Settings") },
-            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_settings), "Settings") },
+            label = { Text(stringResource(R.string.label_settings)) },
+            icon = { Icon(ImageVector.vectorResource(R.drawable.ic_settings), stringResource(R.string.label_settings)) },
         )
     }
 }
@@ -490,7 +492,7 @@ private fun RowScope.AddNavItem(onAdd: () -> Unit) {
         ) {
             Icon(
                 ImageVector.vectorResource(R.drawable.ic_add),
-                "Add alarm",
+                stringResource(R.string.add_alarm),
                 tint = MaterialTheme.colorScheme.onPrimary,
             )
         }

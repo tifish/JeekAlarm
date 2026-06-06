@@ -34,6 +34,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -63,7 +64,7 @@ fun SettingsScreen(
     onOpenRecycleBin: () -> Unit,
 ) {
     Scaffold(
-        topBar = { MyTopBar(R.drawable.ic_settings, "Settings") },
+        topBar = { MyTopBar(R.drawable.ic_settings, stringResource(R.string.label_settings)) },
         bottomBar = {
             NavigationBottomBar(
                 selected = BottomTab.SETTINGS,
@@ -87,16 +88,44 @@ private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit =
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        SectionCard(title = "Appearance") {
-            Text("Theme", style = MaterialTheme.typography.bodyMedium)
+        SectionCard(title = stringResource(R.string.settings_appearance)) {
+            Text(stringResource(R.string.settings_theme), style = MaterialTheme.typography.bodyMedium)
+            // 存储值固定用英文（参与持久化与比较），只本地化显示标签。
             val themes = listOf("Auto", "Dark", "Light")
+            val themeLabels = listOf(
+                stringResource(R.string.theme_auto),
+                stringResource(R.string.theme_dark),
+                stringResource(R.string.theme_light),
+            )
             SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
-                themes.forEachIndexed { index, label ->
+                themes.forEachIndexed { index, value ->
                     SegmentedButton(
-                        selected = SettingsService.theme == label,
-                        onClick = { SettingsService.theme = label },
+                        selected = SettingsService.theme == value,
+                        onClick = { SettingsService.theme = value },
                         shape = SegmentedButtonDefaults.itemShape(index, themes.size),
-                    ) { Text(label) }
+                    ) { Text(themeLabels[index]) }
+                }
+            }
+        }
+
+        SectionCard(title = stringResource(R.string.settings_language)) {
+            // 存储值：""=跟随系统，"en"，"zh"；切换后立即生效（AppCompat 会重建界面）。
+            val languages = listOf("", "en", "zh")
+            val languageLabels = listOf(
+                stringResource(R.string.language_system),
+                stringResource(R.string.language_english),
+                stringResource(R.string.language_chinese),
+            )
+            SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth()) {
+                languages.forEachIndexed { index, value ->
+                    SegmentedButton(
+                        selected = SettingsService.language == value,
+                        onClick = {
+                            SettingsService.language = value
+                            App.applyStoredLanguage()
+                        },
+                        shape = SegmentedButtonDefaults.itemShape(index, languages.size),
+                    ) { Text(languageLabels[index]) }
                 }
             }
         }
@@ -107,19 +136,19 @@ private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit =
         ) {
             Icon(ImageVector.vectorResource(R.drawable.ic_delete), null)
             WidthSpacer(8.dp)
-            Text("Recycle bin")
+            Text(stringResource(R.string.label_recycle_bin))
         }
 
         PermissionHealthGroup()
 
-        SectionCard(title = "Default sound") {
-            MyFileSelector("Music file", SettingsService.defaultMusicFile, onSelect = {
+        SectionCard(title = stringResource(R.string.settings_default_sound)) {
+            MyFileSelector(stringResource(R.string.label_music_file), SettingsService.defaultMusicFile, onSelect = {
                 FileSelector.openMusicFile { SettingsService.defaultMusicFile = it.toString() }
             }, onClear = {
                 SettingsService.defaultMusicFile = ""
             })
 
-            MyFileSelector("Music folder", SettingsService.defaultMusicFolder, onSelect = {
+            MyFileSelector(stringResource(R.string.label_music_folder), SettingsService.defaultMusicFolder, onSelect = {
                 FileSelector.openFolder { SettingsService.defaultMusicFolder = it.toString() }
             }, onClear = {
                 SettingsService.defaultMusicFolder = ""
@@ -134,20 +163,20 @@ private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit =
         ) {
             Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null)
             WidthSpacer(8.dp)
-            Text("Test next alarm")
+            Text(stringResource(R.string.action_test_alarm))
         }
 
-        SectionCard(title = "AI assistant") {
-            LabeledTextField("OpenAI API URL", SettingsService.openAiApiUrl) {
+        SectionCard(title = stringResource(R.string.settings_ai_assistant)) {
+            LabeledTextField(stringResource(R.string.settings_openai_url), SettingsService.openAiApiUrl) {
                 SettingsService.openAiApiUrl = it.trim()
             }
-            LabeledTextField("OpenAI API model", SettingsService.openAiApiModel) {
+            LabeledTextField(stringResource(R.string.settings_openai_model), SettingsService.openAiApiModel) {
                 SettingsService.openAiApiModel = it.trim()
             }
-            LabeledTextField("OpenAI API key", SettingsService.openAiApiKey) {
+            LabeledTextField(stringResource(R.string.settings_openai_key), SettingsService.openAiApiKey) {
                 SettingsService.openAiApiKey = it.trim()
             }
-            LabeledTextField("iFlytek App ID", SettingsService.iFlyAppId) {
+            LabeledTextField(stringResource(R.string.settings_ifly_appid), SettingsService.iFlyAppId) {
                 SettingsService.iFlyAppId = it.trim()
             }
         }
@@ -165,8 +194,8 @@ private fun ConfigFolderGroup() {
         mutableStateOf(if (inspectionMode) "" else SettingsService.settingsDir)
     }
 
-    SectionCard(title = "Config folder") {
-        MyFileSelector("Folder", configDir, onSelect = {
+    SectionCard(title = stringResource(R.string.settings_config_folder)) {
+        MyFileSelector(stringResource(R.string.label_folder), configDir, onSelect = {
             FileSelector.openFolder {
                 SettingsService.settingsDir = it.toString()
                 configDir = it.toString()
@@ -204,12 +233,12 @@ private fun PermissionHealthGroup() {
         inspectionMode || PermissionsService.isIgnoringBatteryOptimizations(context)
     }
 
-    SectionCard(title = "Permissions") {
+    SectionCard(title = stringResource(R.string.settings_permissions)) {
         PermissionStatusRow(
-            name = "Notifications",
+            name = stringResource(R.string.perm_notifications),
             allowed = notificationAllowed,
-            status = if (notificationAllowed) "Allowed" else "Required",
-            actionText = if (notificationAllowed) "Settings" else "Allow",
+            status = if (notificationAllowed) stringResource(R.string.perm_status_allowed) else stringResource(R.string.perm_status_required),
+            actionText = if (notificationAllowed) stringResource(R.string.label_settings) else stringResource(R.string.action_allow),
             onClick = {
                 if (activity != null && !notificationAllowed)
                     PermissionsService.requestNotificationPermission(activity)
@@ -219,10 +248,10 @@ private fun PermissionHealthGroup() {
         )
 
         PermissionStatusRow(
-            name = "Exact alarms",
+            name = stringResource(R.string.perm_exact_alarms),
             allowed = exactAlarmAllowed,
-            status = if (exactAlarmAllowed) "Allowed" else "Required",
-            actionText = if (exactAlarmAllowed) "Settings" else "Allow",
+            status = if (exactAlarmAllowed) stringResource(R.string.perm_status_allowed) else stringResource(R.string.perm_status_required),
+            actionText = if (exactAlarmAllowed) stringResource(R.string.label_settings) else stringResource(R.string.action_allow),
             onClick = {
                 if (exactAlarmAllowed)
                     PermissionsService.openAppDetailsSettings(context)
@@ -232,10 +261,10 @@ private fun PermissionHealthGroup() {
         )
 
         PermissionStatusRow(
-            name = "Battery optimization",
+            name = stringResource(R.string.perm_battery_optimization),
             allowed = batteryUnrestricted,
-            status = if (batteryUnrestricted) "Unrestricted" else "May be restricted",
-            actionText = if (batteryUnrestricted) "Settings" else "Allow",
+            status = if (batteryUnrestricted) stringResource(R.string.perm_status_unrestricted) else stringResource(R.string.perm_status_may_restricted),
+            actionText = if (batteryUnrestricted) stringResource(R.string.label_settings) else stringResource(R.string.action_allow),
             onClick = {
                 if (batteryUnrestricted)
                     PermissionsService.openBatteryOptimizationSettings(context)
@@ -245,10 +274,10 @@ private fun PermissionHealthGroup() {
         )
 
         PermissionStatusRow(
-            name = "Autostart / lock screen",
+            name = stringResource(R.string.perm_autostart_lockscreen),
             allowed = null,
-            status = "Device setting",
-            actionText = "Open",
+            status = stringResource(R.string.perm_status_device_setting),
+            actionText = stringResource(R.string.action_open),
             onClick = {
                 PermissionsService.openAppDetailsSettings(context)
             },
@@ -314,8 +343,9 @@ private fun onConfigDirChanged(context: Context) {
             }
         }
 
-        AlertDialog.Builder(context).setMessage("Found config file in new location, load or overwrite them?")
-            .setPositiveButton("Load", dialogClickListener).setNegativeButton("Overwrite", dialogClickListener).show()
+        AlertDialog.Builder(context).setMessage(context.getString(R.string.dialog_config_found))
+            .setPositiveButton(context.getString(R.string.action_load), dialogClickListener)
+            .setNegativeButton(context.getString(R.string.action_overwrite), dialogClickListener).show()
     } else {
         SettingsService.save()
         ScheduleService.save()

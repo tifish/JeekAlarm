@@ -26,6 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,7 +58,7 @@ fun EditScreen(onNavigateBack: () -> Unit) {
         topBar = {
             MyTopBar(
                 R.drawable.ic_edit,
-                if (EditViewModel.isAdding) "Add alarm" else "Edit alarm",
+                if (EditViewModel.isAdding) stringResource(R.string.add_alarm) else stringResource(R.string.edit_title_edit),
             )
         },
         bottomBar = {
@@ -85,22 +86,22 @@ private fun Editor(modifier: Modifier = Modifier) {
     ) {
         SectionCard {
             SettingSwitchRow(
-                "Enabled",
+                stringResource(R.string.edit_enabled),
                 schedule.enabled,
                 { checked -> EditViewModel.update { it.copy(enabled = checked) } },
-                subtitle = "Turn this alarm on or off",
+                subtitle = stringResource(R.string.edit_enabled_subtitle),
             )
             SettingSwitchRow(
-                "Only once",
+                stringResource(R.string.edit_only_once),
                 schedule.onlyOnce,
                 { checked -> EditViewModel.update { it.copy(onlyOnce = checked) } },
-                subtitle = "Auto-disable after it rings once",
+                subtitle = stringResource(R.string.edit_only_once_subtitle),
             )
         }
 
-        SectionCard(title = "Name") {
+        SectionCard(title = stringResource(R.string.edit_section_name)) {
             LabeledTextField(
-                label = "Alarm name",
+                label = stringResource(R.string.edit_alarm_name),
                 value = schedule.name,
                 onValueChange = { name -> EditViewModel.update { it.copy(name = name) } },
             )
@@ -109,48 +110,48 @@ private fun Editor(modifier: Modifier = Modifier) {
                 FilledTonalButton(onClick = { EditViewModel.guessFromName() }) {
                     Icon(ImageVector.vectorResource(R.drawable.ic_access_time), null)
                     WidthSpacer(8.dp)
-                    Text("Guess time from name")
+                    Text(stringResource(R.string.edit_guess_time))
                 }
             }
         }
 
-        SectionCard(title = "Schedule", icon = R.drawable.ic_access_time) {
+        SectionCard(title = stringResource(R.string.edit_section_schedule), icon = R.drawable.ic_access_time) {
             Text(
-                "Cron syntax — *: any · 0: fixed · 1-3: range · 1,3: list · */3: step",
+                stringResource(R.string.edit_cron_syntax),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
             // 改任意时间字段时，顺带启用该闹钟
-            CronTimeField("Hour", schedule.hourConfig) { value ->
+            CronTimeField(stringResource(R.string.edit_cron_hour), schedule.hourConfig) { value ->
                 EditViewModel.update { it.copy(hourConfig = value, enabled = true) }
             }
-            CronTimeField("Minute", schedule.minuteConfig) { value ->
+            CronTimeField(stringResource(R.string.edit_cron_minute), schedule.minuteConfig) { value ->
                 EditViewModel.update { it.copy(minuteConfig = value, enabled = true) }
             }
-            CronTimeField("Weekday", schedule.weekDayConfig) { value ->
+            CronTimeField(stringResource(R.string.edit_cron_weekday), schedule.weekDayConfig) { value ->
                 EditViewModel.update { it.copy(weekDayConfig = value, enabled = true) }
             }
-            CronTimeField("Month", schedule.monthConfig) { value ->
+            CronTimeField(stringResource(R.string.edit_cron_month), schedule.monthConfig) { value ->
                 EditViewModel.update { it.copy(monthConfig = value, enabled = true) }
             }
-            CronTimeField("Day", schedule.dayConfig) { value ->
+            CronTimeField(stringResource(R.string.edit_cron_day), schedule.dayConfig) { value ->
                 EditViewModel.update { it.copy(dayConfig = value, enabled = true) }
             }
-            CronTimeField("Year", schedule.yearConfig) { value ->
+            CronTimeField(stringResource(R.string.edit_cron_year), schedule.yearConfig) { value ->
                 EditViewModel.update { it.copy(yearConfig = value, enabled = true) }
             }
         }
 
-        SectionCard(title = "Sound & vibration") {
+        SectionCard(title = stringResource(R.string.edit_section_sound)) {
             SettingSwitchRow(
-                "Play music",
+                stringResource(R.string.edit_play_music),
                 schedule.playMusic,
                 { checked -> EditViewModel.update { it.copy(playMusic = checked) } },
             )
 
             if (schedule.playMusic) {
-                MyFileSelector("Music file", schedule.musicFile, onSelect = {
+                MyFileSelector(stringResource(R.string.label_music_file), schedule.musicFile, onSelect = {
                     FileSelector.openMusicFile { uri ->
                         EditViewModel.update { it.copy(musicFile = uri.toString()) }
                     }
@@ -158,7 +159,7 @@ private fun Editor(modifier: Modifier = Modifier) {
                     EditViewModel.update { it.copy(musicFile = "") }
                 })
 
-                MyFileSelector("Music folder", schedule.musicFolder, onSelect = {
+                MyFileSelector(stringResource(R.string.label_music_folder), schedule.musicFolder, onSelect = {
                     FileSelector.openFolder { uri ->
                         EditViewModel.update { it.copy(musicFolder = uri.toString()) }
                     }
@@ -168,7 +169,7 @@ private fun Editor(modifier: Modifier = Modifier) {
             }
 
             SettingSwitchRow(
-                "Vibration",
+                stringResource(R.string.edit_vibration),
                 schedule.vibration,
                 { checked -> EditViewModel.update { it.copy(vibration = checked) } },
             )
@@ -176,7 +177,7 @@ private fun Editor(modifier: Modifier = Modifier) {
             if (schedule.vibration) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        "Vibrate ${schedule.vibrationCount} times",
+                        stringResource(R.string.edit_vibrate_count, schedule.vibrationCount),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Slider(
@@ -205,32 +206,32 @@ fun BottomBar(
     BottomAppBar(
         actions = {
             if (EditViewModel.isAdding) {
-                LabeledAction(R.drawable.ic_cancel, "Cancel") {
+                LabeledAction(R.drawable.ic_cancel, stringResource(R.string.action_cancel)) {
                     onCancel()
                 }
             } else {
-                LabeledAction(R.drawable.ic_remove, "Remove") {
+                LabeledAction(R.drawable.ic_remove, stringResource(R.string.action_remove)) {
                     AlertDialog.Builder(context)
-                        .setTitle("Remove")
-                        .setMessage("Remove this schedule?")
-                        .setPositiveButton("Yes") { _, _ ->
+                        .setTitle(context.getString(R.string.action_remove))
+                        .setMessage(context.getString(R.string.edit_dialog_remove_message))
+                        .setPositiveButton(context.getString(R.string.action_yes)) { _, _ ->
                             ScheduleService.findSchedule(EditViewModel.editScheduleId)
                                 ?.let { ScheduleService.recycle(it) }
                             onRemoved()
                         }
-                        .setNegativeButton("No", null)
+                        .setNegativeButton(context.getString(R.string.action_no), null)
                         .show()
                 }
             }
 
-            LabeledAction(R.drawable.ic_access_time, "Now") {
+            LabeledAction(R.drawable.ic_access_time, stringResource(R.string.edit_action_now)) {
                 EditViewModel.setEditingScheduleTime(Calendar.getInstance())
             }
 
             val isPlaying = App.isPlaying
             LabeledAction(
                 if (isPlaying) R.drawable.ic_stop else R.drawable.ic_play_arrow,
-                if (isPlaying) "Stop" else "Play",
+                if (isPlaying) stringResource(R.string.action_stop) else stringResource(R.string.action_play),
             ) {
                 if (isPlaying) ScheduleService.stopPlaying()
                 else EditViewModel.play()
@@ -238,7 +239,7 @@ fun BottomBar(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                text = { Text(if (EditViewModel.isAdding) "Add" else "Apply") },
+                text = { Text(if (EditViewModel.isAdding) stringResource(R.string.edit_fab_add) else stringResource(R.string.edit_fab_apply)) },
                 icon = { Icon(ImageVector.vectorResource(R.drawable.ic_done), null) },
                 onClick = onApply,
                 containerColor = MaterialTheme.colorScheme.primaryContainer,

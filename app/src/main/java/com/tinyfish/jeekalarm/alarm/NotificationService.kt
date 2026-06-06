@@ -25,14 +25,22 @@ object NotificationService {
     const val AlarmId = 2
 
     private fun initOnce() {
-        val infoChannel = NotificationChannel(InfoChannel, InfoChannel, NotificationManager.IMPORTANCE_LOW).apply {
-            description = "Next alarm status"
+        val infoChannel = NotificationChannel(
+            InfoChannel,
+            App.localizedContext().getString(R.string.notif_channel_info_name),
+            NotificationManager.IMPORTANCE_LOW
+        ).apply {
+            description = App.localizedContext().getString(R.string.notif_channel_info_desc)
             setShowBadge(false)
         }
         notificationManager.createNotificationChannel(infoChannel)
 
-        val alarmChannel = NotificationChannel(AlarmChannel, AlarmChannel, NotificationManager.IMPORTANCE_HIGH).apply {
-            description = "Ringing alarm notifications"
+        val alarmChannel = NotificationChannel(
+            AlarmChannel,
+            App.localizedContext().getString(R.string.notif_channel_alarm_name),
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            description = App.localizedContext().getString(R.string.notif_channel_alarm_desc)
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         notificationManager.createNotificationChannel(alarmChannel)
@@ -70,9 +78,9 @@ object NotificationService {
 
         val nextAlarmDateString = App.format(schedules.first().getNextTriggerTime(Calendar.getInstance()))
         val alarmNames = schedules.joinToString("; ") { it.name }
-        val infoText = "Next: $alarmNames $nextAlarmDateString"
+        val infoText = App.localizedContext().getString(R.string.notif_info_text, alarmNames, nextAlarmDateString)
         return NotificationCompat.Builder(App.context, InfoChannel).run {
-            setContentTitle("JeekAlarm standby")
+            setContentTitle(App.localizedContext().getString(R.string.notif_title_standby))
             setContentText(infoText)
             setStyle(NotificationCompat.BigTextStyle().bigText(infoText))
             setOngoing(true)
@@ -123,7 +131,7 @@ object NotificationService {
         val alarmNames = getAlarmNames(alarmIds)
         val alarmText = alarmNames.joinToString("\n")
         return NotificationCompat.Builder(App.context, AlarmChannel).run {
-            setContentTitle("JeekAlarm")
+            setContentTitle(App.localizedContext().getString(R.string.app_name))
             setContentText(alarmNames.joinToString("; "))
             setStyle(NotificationCompat.BigTextStyle().bigText(alarmText))
             setOngoing(true)
@@ -136,8 +144,8 @@ object NotificationService {
             setContentIntent(openPendingIntent)
             setFullScreenIntent(openPendingIntent, true)
             setDeleteIntent(dismissPendingIntent)
-            addAction(R.drawable.ic_pause, if (App.isPlaying) "Pause" else "Play", pausePendingIntent)
-            addAction(R.drawable.ic_close, "Dismiss", dismissPendingIntent)
+            addAction(R.drawable.ic_pause, if (App.isPlaying) App.localizedContext().getString(R.string.action_pause) else App.localizedContext().getString(R.string.action_play), pausePendingIntent)
+            addAction(R.drawable.ic_close, App.localizedContext().getString(R.string.action_dismiss), dismissPendingIntent)
             build()
         }
     }
@@ -151,7 +159,7 @@ object NotificationService {
 
     private fun getAlarmNames(alarmIds: List<Int>): List<String> {
         return alarmIds.map { alarmId ->
-            ScheduleService.findSchedule(alarmId)?.name ?: "Alarm #$alarmId"
+            ScheduleService.findSchedule(alarmId)?.name ?: App.localizedContext().getString(R.string.alarm_fallback_name, alarmId)
         }
     }
 
