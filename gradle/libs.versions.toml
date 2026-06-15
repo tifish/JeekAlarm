@@ -24,7 +24,7 @@ openai-client = { module = "com.aallam.openai:openai-client" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp" }
 
 [plugins]
-android-application = { id = "com.android.application", version = "8.10.0" }
+android-application = { id = "com.android.application", version = "8.13.2" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version = "2.0.21" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version = "2.0.21" }
 kotlin-plugin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version = "2.0.21" }
