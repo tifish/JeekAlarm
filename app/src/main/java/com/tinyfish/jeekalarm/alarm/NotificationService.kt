@@ -96,6 +96,9 @@ object NotificationService {
 
     val currentAlarmIds = mutableStateListOf<Int>()
 
+    // 闹钟响铃被关闭时回调，MainActivity 用来把因全屏 Intent 拉起的任务挪回后台。
+    var onAlarmDismissed: (() -> Unit)? = null
+
     fun setCurrentAlarmIds(alarmIds: List<Int>) {
         currentAlarmIds.clear()
         currentAlarmIds.addAll(alarmIds)
@@ -178,5 +181,7 @@ object NotificationService {
         AlarmRingingService.stop()
 
         ScheduleService.recycleTriggeredOnceAlarms(finishedIds)
+
+        onAlarmDismissed?.invoke()
     }
 }
