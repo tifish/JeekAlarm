@@ -11,10 +11,13 @@ object FileSelector {
     private var selectFileResultLauncher: ActivityResultLauncher<Array<String>>? = null
     private var selectFolderResultLauncher: ActivityResultLauncher<Uri?>? = null
 
+    /**
+     * 每次 Activity 重建（切主题/语言、转屏、系统回收后重建）都必须重新注册。
+     * launcher 绑在具体的 Activity 实例上，旧实例销毁后它就失效了；
+     * 之前这里在已注册时直接 return，结果继续拿着失效的 launcher，
+     * 再点选文件/文件夹就抛 "Attempting to launch an unregistered ActivityResultLauncher" 崩掉。
+     */
     fun init(activity: ComponentActivity) {
-        if (selectFileResultLauncher != null)
-            return
-
         this.activity = activity
 
         val callback: (Uri?) -> Unit = {
