@@ -1,10 +1,11 @@
 package com.tinyfish.jeekalarm.schedule
 
+import android.net.Uri
 import android.os.Environment
+import android.provider.DocumentsContract
 import android.provider.Settings
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.documentfile.provider.DocumentFile
 import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.VibrationService
@@ -378,14 +379,51 @@ data class Schedule(
     }
 
     fun play() {
-        if (playMusic) {
-            runCatching { playMusic() }
+        // 响铃状态立刻置上，界面和通知的播放/暂停按钮不用等实际出声。
+        App.isPlaying = true
+
+        // 选曲和 MediaPlayer.prepare 都可能耗好几秒，必须离开主线程。
+        MusicService.runSerially {
+            if (playMusic)
+                runCatching { playMusic() }.onFailure { Log.e(javaClass.name, "play music failed", it) }
+
+            if (vibration)
+                VibrationService.vibrate(vibrationCount)
+        }
+    }
+
+    /**
+     * 从 SAF 文件夹里随机挑一个音频文件。
+     * 一次 ContentResolver 查询就把子项的 id 和 MIME 全拿回来——DocumentFile.listFiles() 之后再读 .isFile/.type
+     * 是每个文件各发一次跨进程查询，几十首歌就是好几秒，主线程上直接 ANR。
+     */
+    private fun randomAudioInTree(treeUri: Uri): Uri? {
+        val childrenUri = DocumentsContract.buildChildDocumentsUriUsingTree(
+            treeUri,
+            DocumentsContract.getTreeDocumentId(treeUri),
+        )
+
+        val documentIds = mutableListOf<String>()
+        App.context.contentResolver.query(
+            childrenUri,
+            arrayOf(
+                DocumentsContract.Document.COLUMN_DOCUMENT_ID,
+                DocumentsContract.Document.COLUMN_MIME_TYPE,
+            ),
+            null,
+            null,
+            null,
+        )?.use { cursor ->
+            while (cursor.moveToNext()) {
+                if (cursor.getString(1)?.startsWith("audio/") == true)
+                    documentIds.add(cursor.getString(0))
+            }
         }
 
-        if (vibration)
-            VibrationService.vibrate(vibrationCount)
+        if (documentIds.isEmpty())
+            return null
 
-        App.isPlaying = true
+        return DocumentsContract.buildDocumentUriUsingTree(treeUri, documentIds[Random.nextInt(documentIds.size)])
     }
 
     private fun playMusic() {
@@ -393,15 +431,8 @@ data class Schedule(
 
         if (finalMusicFolder.isNotEmpty()) {
             if (finalMusicFolder.startsWith("content://")) {
-                val folder = DocumentFile.fromTreeUri(App.context, android.net.Uri.parse(finalMusicFolder))
-                val musicFiles = folder?.listFiles()
-                    ?.filter { it.isFile && it.type?.startsWith("audio/") == true }
-                    ?: return
-                if (musicFiles.isEmpty())
-                    return
-
-                val randomIndex = Random.nextInt(musicFiles.size)
-                MusicService.play(musicFiles[randomIndex].uri)
+                val musicUri = randomAudioInTree(Uri.parse(finalMusicFolder)) ?: return
+                MusicService.play(musicUri)
                 return
             }
 

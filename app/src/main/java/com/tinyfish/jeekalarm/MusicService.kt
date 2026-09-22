@@ -7,10 +7,26 @@ import android.media.AudioManager
 import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
+import java.util.concurrent.Executors
 
 object MusicService {
+    /**
+     * 播放相关的慢操作（扫描音乐文件夹、MediaPlayer.prepare）都排到这条单线程上。
+     * 放在主线程会卡住输入分发，系统判 ANR 直接杀进程——闹钟看起来就是"顿几秒然后界面消失、声音没了"。
+     * 用单线程还顺带保证了 play / stop / pause 的先后顺序，且 MediaPlayer 只被一个线程碰。
+     */
+    private val playbackExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "AlarmPlayback")
+    }
+
+    fun runSerially(block: () -> Unit) {
+        playbackExecutor.execute(block)
+    }
+
     private val mediaPlayer: MediaPlayer by lazy { MediaPlayer() }
     private val audioManager: AudioManager by lazy {
         App.context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
@@ -26,7 +42,9 @@ object MusicService {
             .setAudioAttributes(alarmAudioAttributes)
             .setAcceptsDelayedFocusGain(false)
             .setWillPauseWhenDucked(false)
-            .setOnAudioFocusChangeListener { handleAudioFocusChange(it) }
+            // 必须显式给 Handler：这个请求是在没有 Looper 的播放线程上懒加载的，
+            // 不带 Handler 的重载会去取当前线程的 Looper，直接抛 IllegalStateException。
+            .setOnAudioFocusChangeListener({ handleAudioFocusChange(it) }, Handler(Looper.getMainLooper()))
             .build()
     }
     private var prepared = false
@@ -120,6 +138,11 @@ object MusicService {
     }
 
     private fun handleAudioFocusChange(focusChange: Int) {
+        // 回调落在主线程，绕回播放线程再动 MediaPlayer。
+        runSerially { applyAudioFocusChange(focusChange) }
+    }
+
+    private fun applyAudioFocusChange(focusChange: Int) {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 hasAudioFocus = true

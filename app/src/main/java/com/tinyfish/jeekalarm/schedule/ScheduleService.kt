@@ -201,23 +201,26 @@ object ScheduleService {
         saveAndRefresh()
     }
 
-    fun stopPlaying() {
-        MusicService.stop()
-        VibrationService.stop()
+    // 停/暂停/继续：状态标记当场就改（界面和通知按钮要立刻跟上），
+    // MediaPlayer 的实际操作排到播放线程，和 Schedule.play() 保持先后顺序。
 
+    fun stopPlaying() {
         App.isPlaying = false
+
+        VibrationService.stop()
+        MusicService.runSerially { MusicService.stop() }
     }
 
     fun pausePlaying() {
-        MusicService.pause()
-        VibrationService.stop()
-
         App.isPlaying = false
+
+        VibrationService.stop()
+        MusicService.runSerially { MusicService.pause() }
     }
 
     fun resumePlaying() {
-        MusicService.resume()
-
         App.isPlaying = true
+
+        MusicService.runSerially { MusicService.resume() }
     }
 }
