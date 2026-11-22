@@ -1,9 +1,6 @@
 package com.tinyfish.jeekalarm.settings
 
 import android.app.Activity
-import android.app.AlertDialog
-import android.content.Context
-import android.content.DialogInterface
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -47,6 +45,7 @@ import com.tinyfish.jeekalarm.alarm.AlarmRingingService
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.home.BottomTab
 import com.tinyfish.jeekalarm.home.NavigationBottomBar
+import com.tinyfish.jeekalarm.schedule.RecycleBinService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.ui.LabeledTextField
@@ -157,8 +156,13 @@ private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit =
 
         FilledTonalButton(
             onClick = {
-                AlarmRingingService.start(context = App.context, alarmIds = ScheduleService.nextAlarmIds)
+                AlarmRingingService.start(
+                    context = App.context,
+                    alarmIds = ScheduleService.nextAlarmIds,
+                    isTest = true,
+                )
             },
+            enabled = App.nextAlarmIds.isNotEmpty(),
             modifier = Modifier.fillMaxWidth(),
         ) {
             Icon(ImageVector.vectorResource(R.drawable.ic_play_arrow), null)
@@ -187,11 +191,24 @@ private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit =
 
 @Composable
 private fun ConfigFolderGroup() {
-    val context = LocalContext.current
     val inspectionMode = LocalInspectionMode.current
 
     var configDir by remember {
         mutableStateOf(if (inspectionMode) "" else SettingsService.settingsDir)
+    }
+    var showConfigFoundDialog by remember { mutableStateOf(false) }
+
+    val handleConfigDirChanged = {
+        val hasExisting = SettingsService.configExists("config.json") ||
+            SettingsService.configExists("schedule.cron") ||
+            SettingsService.configExists("recyclebin.cron")
+        if (hasExisting) {
+            showConfigFoundDialog = true
+        } else {
+            SettingsService.save()
+            ScheduleService.save()
+            RecycleBinService.save()
+        }
     }
 
     SectionCard(title = stringResource(R.string.settings_config_folder)) {
@@ -199,13 +216,37 @@ private fun ConfigFolderGroup() {
             FileSelector.openFolder {
                 SettingsService.settingsDir = it.toString()
                 configDir = it.toString()
-                onConfigDirChanged(context)
+                handleConfigDirChanged()
             }
         }, onClear = {
             SettingsService.settingsDir = ""
             configDir = ""
-            onConfigDirChanged(context)
+            handleConfigDirChanged()
         })
+    }
+
+    if (showConfigFoundDialog) {
+        AlertDialog(
+            onDismissRequest = {},
+            text = { Text(stringResource(R.string.dialog_config_found)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showConfigFoundDialog = false
+                    SettingsService.load()
+                    App.applyStoredLanguage()
+                    ScheduleService.loadAndRefresh()
+                    RecycleBinService.load()
+                }) { Text(stringResource(R.string.action_load)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    showConfigFoundDialog = false
+                    SettingsService.save()
+                    ScheduleService.save()
+                    RecycleBinService.save()
+                }) { Text(stringResource(R.string.action_overwrite)) }
+            },
+        )
     }
 }
 
@@ -324,31 +365,6 @@ private fun PermissionStatusRow(
         TextButton(onClick = onClick) {
             Text(actionText)
         }
-    }
-}
-
-private fun onConfigDirChanged(context: Context) {
-    if (SettingsService.configExists("config.json") || SettingsService.configExists("schedule.cron")) {
-        val dialogClickListener = DialogInterface.OnClickListener { _, which ->
-            when (which) {
-                DialogInterface.BUTTON_POSITIVE -> {
-                    SettingsService.load()
-                    ScheduleService.loadAndRefresh()
-                }
-
-                DialogInterface.BUTTON_NEGATIVE -> {
-                    SettingsService.save()
-                    ScheduleService.save()
-                }
-            }
-        }
-
-        AlertDialog.Builder(context).setMessage(context.getString(R.string.dialog_config_found))
-            .setPositiveButton(context.getString(R.string.action_load), dialogClickListener)
-            .setNegativeButton(context.getString(R.string.action_overwrite), dialogClickListener).show()
-    } else {
-        SettingsService.save()
-        ScheduleService.save()
     }
 }
 

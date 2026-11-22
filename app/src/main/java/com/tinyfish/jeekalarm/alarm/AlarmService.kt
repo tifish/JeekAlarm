@@ -1,12 +1,14 @@
 package com.tinyfish.jeekalarm.alarm
 
+import android.app.Activity
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import androidx.core.net.toUri
 import com.tinyfish.jeekalarm.home.MainActivity
 import com.tinyfish.jeekalarm.start.App
 import java.util.Calendar
@@ -17,7 +19,6 @@ object AlarmService {
 
     const val ActionFireAlarm = "com.tinyfish.jeekalarm.action.FIRE_ALARM"
     private const val ExtraAlarmIds = "com.tinyfish.jeekalarm.extra.ALARM_IDS"
-    private const val ExtraTriggerAtMillis = "com.tinyfish.jeekalarm.extra.TRIGGER_AT_MILLIS"
 
     private val alarmManager: AlarmManager by lazy {
         App.context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -30,7 +31,6 @@ object AlarmService {
         val triggerAtMillis = calendar.timeInMillis
         val operation = alarmPendingIntent(
             alarmIds,
-            triggerAtMillis,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
         val showIntent = Intent(App.context, MainActivity::class.java).apply {
@@ -70,10 +70,6 @@ object AlarmService {
         return intent.getIntArrayExtra(ExtraAlarmIds)?.toList() ?: emptyList()
     }
 
-    fun getTriggerAtMillis(intent: Intent): Long {
-        return intent.getLongExtra(ExtraTriggerAtMillis, 0L)
-    }
-
     fun canScheduleExactAlarms(): Boolean {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
     }
@@ -83,21 +79,23 @@ object AlarmService {
             return
 
         val intent = Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).apply {
-            data = Uri.parse("package:${context.packageName}")
+            data = "package:${context.packageName}".toUri()
+            if (context !is Activity)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         }
-        if (intent.resolveActivity(context.packageManager) != null)
+        try {
             context.startActivity(intent)
+        } catch (_: ActivityNotFoundException) {
+        }
     }
 
     private fun alarmPendingIntent(
         alarmIds: List<Int>,
-        triggerAtMillis: Long,
         flags: Int,
     ): PendingIntent {
         val intent = Intent(App.context, AlarmReceiver::class.java).apply {
             action = ActionFireAlarm
             putExtra(ExtraAlarmIds, alarmIds.toIntArray())
-            putExtra(ExtraTriggerAtMillis, triggerAtMillis)
         }
 
         return PendingIntent.getBroadcast(App.context, RequestAlarm, intent, flags)

@@ -13,21 +13,23 @@ object RecycleBinService {
     val recycleList = mutableStateListOf<Schedule>()
 
     fun load() {
-        val loaded =
-            if (SettingsService.configExists(RecycleBinFileName))
-                SettingsService.readConfigLines(RecycleBinFileName).mapNotNull { line ->
-                    val trimmed = line.trim()
-                    if (trimmed.isEmpty()) null else ScheduleParser.parseJsonLine(trimmed)
-                }
-            else
-                emptyList()
+        val loaded = SettingsService.readConfigLines(RecycleBinFileName).mapNotNull { line ->
+            val trimmed = line.trim()
+            if (trimmed.isEmpty()) null else ScheduleParser.parseJsonLine(trimmed)
+        }
+        val usedIds = mutableSetOf<Int>()
+        for (schedule in loaded) {
+            if (schedule.id <= 0 || schedule.id in usedIds)
+                schedule.id = ScheduleService.createScheduleId()
+            usedIds.add(schedule.id)
+        }
         recycleList.clear()
         recycleList.addAll(loaded)
         sort()
         purgeExpired()
     }
 
-    private fun save() {
+    fun save() {
         SettingsService.writeConfigText(RecycleBinFileName, ScheduleParser.saveToString(recycleList))
     }
 

@@ -8,6 +8,7 @@ import android.view.WindowManager
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import com.tinyfish.jeekalarm.PermissionsService
+import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.schedule.ScheduleService
@@ -17,23 +18,28 @@ class MainActivity : AppCompatActivity() {
     // 标记本次 Activity 实例是被闹钟全屏 Intent 拉到前台的——关闭响铃时要送回后台，
     // 让用户回到响铃前所在的 app 而不是停留在主界面。
     private var launchedForAlarm = false
+    private val alarmDismissedCallback: () -> Unit = {
+        setAlarmOverLockScreen(false)
+        if (launchedForAlarm) {
+            launchedForAlarm = false
+            moveTaskToBack(true)
+        }
+    }
 
     // 响铃时点亮屏幕、显示在锁屏之上；通知浮层本身由 UI 层观察响铃状态自动弹出。
     private fun showCurrentAlarms() {
-        if (NotificationService.currentAlarmIds.isNotEmpty())
-            allowAlarmOverLockScreen()
+        setAlarmOverLockScreen(NotificationService.currentAlarmIds.isNotEmpty())
     }
 
-    private fun allowAlarmOverLockScreen() {
+    private fun setAlarmOverLockScreen(enabled: Boolean) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            setShowWhenLocked(true)
-            setTurnScreenOn(true)
+            setShowWhenLocked(enabled)
+            setTurnScreenOn(enabled)
         } else {
             @Suppress("DEPRECATION")
-            window.addFlags(
-                WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
-                    WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
-            )
+            val flags = WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON
+            if (enabled) window.addFlags(flags) else window.clearFlags(flags)
         }
     }
 
@@ -41,7 +47,7 @@ class MainActivity : AppCompatActivity() {
         super.onNewIntent(intent)
 
         // onNewIntent 只在外部 PendingIntent 拉起时触发——若此刻有响铃，说明是从 app 外被叫醒的。
-        if (NotificationService.currentAlarmIds.isNotEmpty())
+        if (NotificationService.currentAlarmIds.isNotEmpty() && !NotificationService.isTestAlarm)
             launchedForAlarm = true
 
         showCurrentAlarms()
@@ -62,20 +68,15 @@ class MainActivity : AppCompatActivity() {
             permissions.add(Manifest.permission.POST_NOTIFICATIONS)
 
         PermissionsService.checkAndRequestPermissions(permissions.toTypedArray(), this)
-        PermissionsService.requestExactAlarmPermissionIfNeeded(this)
+        PermissionsService.requestExactAlarmPermission(this)
 
         FileSelector.init(this)
 
         // 进程被全屏 Intent 冷启动时，currentAlarmIds 已被响铃服务填好；此情形也算从 app 外拉起。
-        if (NotificationService.currentAlarmIds.isNotEmpty())
+        if (NotificationService.currentAlarmIds.isNotEmpty() && !NotificationService.isTestAlarm)
             launchedForAlarm = true
 
-        NotificationService.onAlarmDismissed = {
-            if (launchedForAlarm) {
-                launchedForAlarm = false
-                moveTaskToBack(true)
-            }
-        }
+        NotificationService.onAlarmDismissed = alarmDismissedCallback
 
         showCurrentAlarms()
 
@@ -85,8 +86,15 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onStop() {
+        SettingsService.flushSave()
+        super.onStop()
+    }
+
     override fun onDestroy() {
-        NotificationService.onAlarmDismissed = null
+        if (NotificationService.onAlarmDismissed === alarmDismissedCallback)
+            NotificationService.onAlarmDismissed = null
+        FileSelector.detach(this)
         super.onDestroy()
     }
 }

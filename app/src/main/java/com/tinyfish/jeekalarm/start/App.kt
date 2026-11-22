@@ -14,6 +14,8 @@ import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.RecycleBinService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Locale
 
@@ -23,26 +25,23 @@ class App : Application() {
         @SuppressLint("StaticFieldLeak")
         lateinit var context: Context
 
-        // 数字格式与语言无关，固定用 US 即可。
-        private val dateFormat = SimpleDateFormat("MM-dd", Locale.US)
-        private val timeFormat = SimpleDateFormat("HH:mm", Locale.US)
-
         // 星期名称跟随当前语言。
-        private fun weekFormat() = SimpleDateFormat("EEE", currentLocale())
+        private fun weekFormat(calendar: Calendar) =
+            SimpleDateFormat("EEE", currentLocale()).apply { timeZone = calendar.timeZone }
 
         // 月日/年月日：按当前 Locale 取最合适的排版，中文带“月/日”（如 6月5日、2027年6月5日），
         // 英文为 Jun 5 / Jun 5, 2027——用 skeleton 而非固定 "MMM d"，避免中文丢掉“日”。
-        private fun monthDayFormat() =
+        private fun monthDayFormat(calendar: Calendar) =
             SimpleDateFormat(
                 android.text.format.DateFormat.getBestDateTimePattern(currentLocale(), "MMMd"),
                 currentLocale()
-            )
+            ).apply { timeZone = calendar.timeZone }
 
-        private fun yearMonthDayFormat() =
+        private fun yearMonthDayFormat(calendar: Calendar) =
             SimpleDateFormat(
                 android.text.format.DateFormat.getBestDateTimePattern(currentLocale(), "yMMMd"),
                 currentLocale()
-            )
+            ).apply { timeZone = calendar.timeZone }
 
         /** 当前生效的 Locale：应用内选了具体语言就用它，否则跟随系统。 */
         private fun currentLocale(): Locale {
@@ -73,34 +72,48 @@ class App : Application() {
             AppCompatDelegate.setApplicationLocales(locales)
         }
 
-        fun format(calendar: Calendar?): String {
+        internal fun dayDiff(from: Calendar, to: Calendar): Long {
+            val fromDate = LocalDate.of(
+                from.get(Calendar.YEAR),
+                from.get(Calendar.MONTH) + 1,
+                from.get(Calendar.DAY_OF_MONTH),
+            )
+            val toDate = LocalDate.of(
+                to.get(Calendar.YEAR),
+                to.get(Calendar.MONTH) + 1,
+                to.get(Calendar.DAY_OF_MONTH),
+            )
+            return ChronoUnit.DAYS.between(fromDate, toDate)
+        }
+
+        fun format(calendar: Calendar?, now: Calendar = Calendar.getInstance()): String {
             if (calendar == null)
                 return ""
 
-            val now = Calendar.getInstance()
+            val diff = dayDiff(now, calendar)
             val calendarYear = calendar.get(Calendar.YEAR)
             val sameYear = now.get(Calendar.YEAR) == calendarYear
-            val today = now.get(Calendar.DAY_OF_YEAR)
-            val tomorrow = today + 1
-            val dat = tomorrow + 1
-            val calendarDay = calendar.get(Calendar.DAY_OF_YEAR)
-            val isToday = sameYear && calendarDay == today
-            val isTomorrow = sameYear && calendarDay == tomorrow
-            val isDat = sameYear && calendarDay == dat
 
-            var dateString = dateFormat.format(calendar.time)
-            if (isToday)
-                dateString = localizedContext().getString(R.string.date_today)
-            else if (isTomorrow)
-                dateString = localizedContext().getString(R.string.date_tomorrow)
-            else if (isDat)
-                dateString = localizedContext().getString(R.string.date_day_after_tomorrow)
-            else if (!sameYear)
-                dateString = "$calendarYear-$dateString"
+            val dateString = when (diff) {
+                0L -> localizedContext().getString(R.string.date_today)
+                1L -> localizedContext().getString(R.string.date_tomorrow)
+                2L -> localizedContext().getString(R.string.date_day_after_tomorrow)
+                else -> {
+                    val mmdd = "%02d-%02d".format(
+                        Locale.US,
+                        calendar.get(Calendar.MONTH) + 1,
+                        calendar.get(Calendar.DAY_OF_MONTH),
+                    )
+                    if (sameYear) mmdd else "$calendarYear-$mmdd"
+                }
+            }
 
-            val weekString = weekFormat().format(calendar.time)
-
-            val timeString = timeFormat.format(calendar.time)
+            val weekString = weekFormat(calendar).format(calendar.time)
+            val timeString = "%02d:%02d".format(
+                Locale.US,
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+            )
 
             return "$dateString $timeString $weekString"
         }
@@ -110,20 +123,22 @@ class App : Application() {
          * useWeekday 为 true（按星期重复的闹钟）时，落在一周内会用星期几（如 "下周二" 的语感）；
          * 月/年/一次性的闹钟关心的是日期，不该以星期几开头。
          */
-        fun nextTriggerDay(calendar: Calendar?, useWeekday: Boolean = false): String {
+        fun nextTriggerDay(
+            calendar: Calendar?,
+            useWeekday: Boolean = false,
+            now: Calendar = Calendar.getInstance(),
+        ): String {
             if (calendar == null)
                 return ""
-            val now = Calendar.getInstance()
-            if (now.get(Calendar.YEAR) != calendar.get(Calendar.YEAR))
-                return yearMonthDayFormat().format(calendar.time)
 
-            val diff = calendar.get(Calendar.DAY_OF_YEAR) - now.get(Calendar.DAY_OF_YEAR)
+            val diff = dayDiff(now, calendar)
             return when {
-                diff == 0 -> localizedContext().getString(R.string.date_today)
-                diff == 1 -> localizedContext().getString(R.string.date_tomorrow)
-                diff == 2 -> localizedContext().getString(R.string.date_day_after_tomorrow)
-                diff in 3..6 && useWeekday -> weekFormat().format(calendar.time)
-                else -> monthDayFormat().format(calendar.time)
+                diff == 0L -> localizedContext().getString(R.string.date_today)
+                diff == 1L -> localizedContext().getString(R.string.date_tomorrow)
+                diff == 2L -> localizedContext().getString(R.string.date_day_after_tomorrow)
+                diff in 3L..6L && useWeekday -> weekFormat(calendar).format(calendar.time)
+                now.get(Calendar.YEAR) != calendar.get(Calendar.YEAR) -> yearMonthDayFormat(calendar).format(calendar.time)
+                else -> monthDayFormat(calendar).format(calendar.time)
             }
         }
 
@@ -140,7 +155,6 @@ class App : Application() {
         applyStoredLanguage()
         ScheduleService.load()
         RecycleBinService.load()
-        ScheduleService.sort()
         ScheduleService.setNextAlarm()
     }
 }

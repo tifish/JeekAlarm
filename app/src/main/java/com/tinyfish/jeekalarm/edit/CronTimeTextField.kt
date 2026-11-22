@@ -32,6 +32,7 @@ fun CronTimeField(
     label: String,
     text: String,
     modifier: Modifier = Modifier,
+    isError: Boolean = false,
     onChange: (String) -> Unit = {}
 ) {
     var focused by remember { mutableStateOf(false) }
@@ -83,6 +84,7 @@ fun CronTimeField(
                 }
             },
             label = { Text(label) },
+            isError = isError,
             singleLine = true,
             textStyle = LocalTextStyle.current.copy(fontSize = 18.sp),
             modifier = Modifier

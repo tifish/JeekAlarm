@@ -17,7 +17,7 @@ private fun local(resId: Int): String = App.localizedContext().getString(resId)
  * 把重复规则归纳成一句人话，用于主列表的副标题。
  *
  * 只覆盖闹钟里最常见的几种模式，命中则返回短语，否则返回 null——
- * 由调用方退回到“下次触发时间”这个对任意 cron 都成立的兜底显示。
+ * 由调用方退回到“自定义”（或无效提示）兜底显示。
  * 基于解析后的整型集合（空集合 = 通配 *），不碰原始 config 串。
  */
 fun Schedule.describeRecurrence(): String? {

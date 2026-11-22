@@ -2,14 +2,14 @@ package com.tinyfish.jeekalarm.schedule
 
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import java.io.File
-import java.io.IOException
-import java.util.*
+import java.util.Calendar
 
 internal object ScheduleParser {
+    private val json = Json { ignoreUnknownKeys = true }
+
     fun parseJsonLine(line: String): Schedule? {
         return try {
-            Json.decodeFromString<Schedule>(line).apply { timeConfigChanged() }
+            json.decodeFromString<Schedule>(line).apply { timeConfigChanged() }
         } catch (e: Exception) {
             null
         }
@@ -28,22 +28,6 @@ internal object ScheduleParser {
         )
     }
 
-    fun parseStandardCron(cron: String): Schedule? {
-        val parts = cron.split(' ')
-
-        if (parts.size < 5 || parts.size > 6)
-            return null
-
-        return Schedule(
-            minuteConfig = parts[0],
-            hourConfig = parts[1],
-            dayConfig = parts[2],
-            monthConfig = parts[3],
-            weekDayConfig = parts[4],
-            yearConfig = if (parts.size == 5) "*" else parts[5],
-        )
-    }
-
     fun parseTimeConfig(schedule: Schedule) {
         schedule.hours = parseIndexes(Calendar.HOUR_OF_DAY, schedule.hourConfig)
         schedule.minutes = parseIndexes(Calendar.MINUTE, schedule.minuteConfig)
@@ -51,6 +35,10 @@ internal object ScheduleParser {
         schedule.days = parseIndexes(Calendar.DAY_OF_MONTH, schedule.dayConfig)
         schedule.months = parseIndexes(Calendar.MONTH, schedule.monthConfig)
         schedule.years = parseIndexes(Calendar.YEAR, schedule.yearConfig)
+    }
+
+    fun isValidField(indexType: Int, rawContent: String): Boolean {
+        return runCatching { parseIndexes(indexType, rawContent) }.isSuccess
     }
 
     private fun toCalendarMonth(months: MutableList<Int>) {
@@ -67,13 +55,6 @@ internal object ScheduleParser {
         for (i in weekDays.indices) {
             weekDays[i] = (weekDays[i] % 7) + 1
         }
-    }
-
-    @Throws(IOException::class)
-    fun loadFromFile(configFile: File): MutableList<Schedule> {
-        if (!configFile.exists())
-            return mutableListOf()
-        return loadFromLines(configFile.readLines())
     }
 
     fun loadFromLines(lines: List<String>): MutableList<Schedule> {
@@ -103,19 +84,10 @@ internal object ScheduleParser {
         return result
     }
 
-    fun saveToFile(configFile: File, schedules: MutableList<Schedule>) {
-        configFile.parentFile?.mkdirs()
-        if (!configFile.exists())
-            configFile.createNewFile()
-        configFile.bufferedWriter().use {
-            it.write(saveToString(schedules))
-        }
-    }
-
     fun saveToString(schedules: List<Schedule>): String {
         return buildString {
             for (schedule in schedules) {
-                append(Json.encodeToString(schedule))
+                append(json.encodeToString(schedule))
                 appendLine()
             }
         }
@@ -123,10 +95,12 @@ internal object ScheduleParser {
 
     private fun parseIndexes(
         indexType: Int,
-        content: String,
+        rawContent: String,
     ): MutableList<Int> {
         // content format:
         // 1-3,5,6 or */5
+        val content = rawContent.trim()
+        require(content.isNotEmpty()) { "Empty cron field" }
 
         val minCronValue = when (indexType) {
             Calendar.HOUR_OF_DAY -> 0
@@ -150,12 +124,14 @@ internal object ScheduleParser {
         var result = mutableListOf<Int>()
 
         if (content.startsWith("*/")) {
-            val interval = content.substring(2).toInt()
+            val interval = content.substring(2).trim().toInt()
+            require(interval > 0) { "Step interval must be positive: $interval" }
             for (i in minCronValue..maxCronValue step interval) {
                 result.add(i)
             }
         } else {
-            for (part in content.split(",")) {
+            for (rawPart in content.split(",")) {
+                val part = rawPart.trim()
                 when {
                     part == "*" -> {
                         result.clear()
@@ -164,38 +140,37 @@ internal object ScheduleParser {
 
                     part.contains("-") -> {
                         val beginEnd = part.split("-")
-                        assert(beginEnd.size == 2)
-                        val begin = ensureRange(beginEnd[0].toInt(), minCronValue, maxCronValue)
-                        val end = ensureRange(beginEnd[1].toInt(), minCronValue, maxCronValue)
+                        require(beginEnd.size == 2) { "Invalid range: $part" }
+                        val begin = parseInRange(beginEnd[0], minCronValue, maxCronValue)
+                        val end = parseInRange(beginEnd[1], minCronValue, maxCronValue)
+                        require(begin <= end) { "Reversed range: $part" }
                         for (i in begin..end) {
                             result.add(i)
                         }
                     }
 
                     else -> {
-                        result.add(ensureRange(part.toInt(), minCronValue, maxCronValue))
+                        result.add(parseInRange(part, minCronValue, maxCronValue))
                     }
                 }
             }
         }
-
-        result = result.distinct().toMutableList()
 
         when (indexType) {
             Calendar.MONTH -> toCalendarMonth(result)
             Calendar.DAY_OF_WEEK -> toCalendarWeekDay(result)
         }
 
+        // Deduplicate after weekday mapping so 0 and 7 (both Sunday) don't duplicate.
+        result = result.distinct().toMutableList()
         result.sort()
 
         return result
     }
 
-    private fun ensureRange(value: Int, min: Int, max: Int): Int {
-        return when {
-            value < min -> min
-            value > max -> max
-            else -> value
-        }
+    private fun parseInRange(token: String, min: Int, max: Int): Int {
+        val value = token.trim().toInt()
+        require(value in min..max) { "Value $value out of range $min..$max" }
+        return value
     }
 }

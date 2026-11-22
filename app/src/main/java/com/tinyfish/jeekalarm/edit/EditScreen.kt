@@ -1,6 +1,6 @@
 package com.tinyfish.jeekalarm.edit
 
-import android.app.AlertDialog
+import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.clickable
@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -20,18 +21,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
+import com.tinyfish.jeekalarm.alarm.NotificationService
+import com.tinyfish.jeekalarm.schedule.ScheduleParser
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
 import com.tinyfish.ui.LabeledTextField
@@ -42,17 +51,38 @@ import com.tinyfish.ui.SettingSwitchRow
 import com.tinyfish.ui.WidthSpacer
 import com.tinyfish.ui.theme.JeekAlarmTheme
 import java.util.Calendar
+import kotlin.math.roundToInt
 
 @Composable
 fun EditScreen(onNavigateBack: () -> Unit) {
-    // 离开编辑页（FAB 应用 / 系统返回键）都先保存再返回，保持原有行为。
+    val context = LocalContext.current
+    val stopPreviewIfNotRinging = {
+        if (NotificationService.currentAlarmIds.isEmpty())
+            ScheduleService.stopPlaying()
+    }
     val leaveWithSave = {
-        EditViewModel.saveEditingSchedule()
-        ScheduleService.stopPlaying()
+        if (EditViewModel.editing.isValid) {
+            EditViewModel.saveEditingSchedule()
+            stopPreviewIfNotRinging()
+            onNavigateBack()
+        } else {
+            Toast.makeText(context, context.getString(R.string.edit_invalid_schedule), Toast.LENGTH_SHORT).show()
+        }
+    }
+    val leaveWithoutSave = {
+        EditViewModel.cancelEditing()
+        stopPreviewIfNotRinging()
         onNavigateBack()
     }
 
-    BackHandler { leaveWithSave() }
+    // 返回键：新建且未改动、或当前时间配置非法时直接放弃返回，避免生成空白/损坏闹钟；否则保存并返回。
+    BackHandler {
+        if ((EditViewModel.isAdding && !EditViewModel.hasChanges) || !EditViewModel.editing.isValid) {
+            leaveWithoutSave()
+        } else {
+            leaveWithSave()
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -64,8 +94,8 @@ fun EditScreen(onNavigateBack: () -> Unit) {
         bottomBar = {
             BottomBar(
                 onApply = leaveWithSave,
-                onCancel = onNavigateBack,
-                onRemoved = onNavigateBack,
+                onCancel = leaveWithoutSave,
+                onRemoved = leaveWithoutSave,
             )
         },
     ) { padding ->
@@ -122,23 +152,55 @@ private fun Editor(modifier: Modifier = Modifier) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
 
+            if (!schedule.isValid) {
+                Text(
+                    stringResource(R.string.edit_invalid_schedule),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
+
             // 改任意时间字段时，顺带启用该闹钟
-            CronTimeField(stringResource(R.string.edit_cron_hour), schedule.hourConfig) { value ->
+            CronTimeField(
+                label = stringResource(R.string.edit_cron_hour),
+                text = schedule.hourConfig,
+                isError = !ScheduleParser.isValidField(Calendar.HOUR_OF_DAY, schedule.hourConfig),
+            ) { value ->
                 EditViewModel.update { it.copy(hourConfig = value, enabled = true) }
             }
-            CronTimeField(stringResource(R.string.edit_cron_minute), schedule.minuteConfig) { value ->
+            CronTimeField(
+                label = stringResource(R.string.edit_cron_minute),
+                text = schedule.minuteConfig,
+                isError = !ScheduleParser.isValidField(Calendar.MINUTE, schedule.minuteConfig),
+            ) { value ->
                 EditViewModel.update { it.copy(minuteConfig = value, enabled = true) }
             }
-            CronTimeField(stringResource(R.string.edit_cron_weekday), schedule.weekDayConfig) { value ->
+            CronTimeField(
+                label = stringResource(R.string.edit_cron_weekday),
+                text = schedule.weekDayConfig,
+                isError = !ScheduleParser.isValidField(Calendar.DAY_OF_WEEK, schedule.weekDayConfig),
+            ) { value ->
                 EditViewModel.update { it.copy(weekDayConfig = value, enabled = true) }
             }
-            CronTimeField(stringResource(R.string.edit_cron_month), schedule.monthConfig) { value ->
+            CronTimeField(
+                label = stringResource(R.string.edit_cron_month),
+                text = schedule.monthConfig,
+                isError = !ScheduleParser.isValidField(Calendar.MONTH, schedule.monthConfig),
+            ) { value ->
                 EditViewModel.update { it.copy(monthConfig = value, enabled = true) }
             }
-            CronTimeField(stringResource(R.string.edit_cron_day), schedule.dayConfig) { value ->
+            CronTimeField(
+                label = stringResource(R.string.edit_cron_day),
+                text = schedule.dayConfig,
+                isError = !ScheduleParser.isValidField(Calendar.DAY_OF_MONTH, schedule.dayConfig),
+            ) { value ->
                 EditViewModel.update { it.copy(dayConfig = value, enabled = true) }
             }
-            CronTimeField(stringResource(R.string.edit_cron_year), schedule.yearConfig) { value ->
+            CronTimeField(
+                label = stringResource(R.string.edit_cron_year),
+                text = schedule.yearConfig,
+                isError = !ScheduleParser.isValidField(Calendar.YEAR, schedule.yearConfig),
+            ) { value ->
                 EditViewModel.update { it.copy(yearConfig = value, enabled = true) }
             }
         }
@@ -177,13 +239,13 @@ private fun Editor(modifier: Modifier = Modifier) {
             if (schedule.vibration) {
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
-                        stringResource(R.string.edit_vibrate_count, schedule.vibrationCount),
+                        pluralStringResource(R.plurals.edit_vibrate_count, schedule.vibrationCount, schedule.vibrationCount),
                         style = MaterialTheme.typography.bodyMedium,
                     )
                     Slider(
                         value = schedule.vibrationCount.toFloat(),
                         onValueChange = { value ->
-                            EditViewModel.update { it.copy(vibrationCount = value.toInt()) }
+                            EditViewModel.update { it.copy(vibrationCount = value.roundToInt()) }
                         },
                         valueRange = 1f..30f,
                         steps = 28,
@@ -201,7 +263,7 @@ fun BottomBar(
     onCancel: () -> Unit,
     onRemoved: () -> Unit,
 ) {
-    val context = LocalContext.current
+    var showRemoveConfirm by remember { mutableStateOf(false) }
 
     BottomAppBar(
         actions = {
@@ -211,16 +273,7 @@ fun BottomBar(
                 }
             } else {
                 LabeledAction(R.drawable.ic_remove, stringResource(R.string.action_remove)) {
-                    AlertDialog.Builder(context)
-                        .setTitle(context.getString(R.string.action_remove))
-                        .setMessage(context.getString(R.string.edit_dialog_remove_message))
-                        .setPositiveButton(context.getString(R.string.action_yes)) { _, _ ->
-                            ScheduleService.findSchedule(EditViewModel.editScheduleId)
-                                ?.let { ScheduleService.recycle(it) }
-                            onRemoved()
-                        }
-                        .setNegativeButton(context.getString(R.string.action_no), null)
-                        .show()
+                    showRemoveConfirm = true
                 }
             }
 
@@ -246,6 +299,25 @@ fun BottomBar(
             )
         },
     )
+
+    if (showRemoveConfirm) {
+        AlertDialog(
+            onDismissRequest = { showRemoveConfirm = false },
+            title = { Text(stringResource(R.string.action_remove)) },
+            text = { Text(stringResource(R.string.edit_dialog_remove_message)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    showRemoveConfirm = false
+                    ScheduleService.findSchedule(EditViewModel.editScheduleId)
+                        ?.let { ScheduleService.recycle(it) }
+                    onRemoved()
+                }) { Text(stringResource(R.string.action_yes)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showRemoveConfirm = false }) { Text(stringResource(R.string.action_no)) }
+            },
+        )
+    }
 }
 
 /** 底部栏的图标 + 文字按钮，文字在图标下方，便于理解按钮含义。 */

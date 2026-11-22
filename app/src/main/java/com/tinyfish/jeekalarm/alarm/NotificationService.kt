@@ -24,30 +24,30 @@ object NotificationService {
     const val InfoId = 1
     const val AlarmId = 2
 
-    private fun initOnce() {
+    private fun ensureChannels(localized: Context) {
         val infoChannel = NotificationChannel(
             InfoChannel,
-            App.localizedContext().getString(R.string.notif_channel_info_name),
+            localized.getString(R.string.notif_channel_info_name),
             NotificationManager.IMPORTANCE_LOW
         ).apply {
-            description = App.localizedContext().getString(R.string.notif_channel_info_desc)
+            description = localized.getString(R.string.notif_channel_info_desc)
             setShowBadge(false)
         }
         notificationManager.createNotificationChannel(infoChannel)
 
         val alarmChannel = NotificationChannel(
             AlarmChannel,
-            App.localizedContext().getString(R.string.notif_channel_alarm_name),
+            localized.getString(R.string.notif_channel_alarm_name),
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
-            description = App.localizedContext().getString(R.string.notif_channel_alarm_desc)
+            description = localized.getString(R.string.notif_channel_alarm_desc)
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
         }
         notificationManager.createNotificationChannel(alarmChannel)
     }
 
-    fun updateInfo() {
-        val notification = getInfoNotification()
+    fun updateInfo(nextTriggerTime: Calendar? = null) {
+        val notification = getInfoNotification(nextTriggerTime)
         if (notification == null) {
             notificationManager.cancel(InfoId)
             return
@@ -56,8 +56,9 @@ object NotificationService {
         notificationManager.notify(InfoId, notification)
     }
 
-    private fun getInfoNotification(): Notification? {
-        initOnce()
+    private fun getInfoNotification(nextTriggerTime: Calendar?): Notification? {
+        val localized = App.localizedContext()
+        ensureChannels(localized)
 
         val alarmIds = ScheduleService.nextAlarmIds
         if (alarmIds.isEmpty())
@@ -76,11 +77,12 @@ object NotificationService {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val nextAlarmDateString = App.format(schedules.first().getNextTriggerTime(Calendar.getInstance()))
+        val triggerTime = nextTriggerTime ?: schedules.first().getNextTriggerTime(Calendar.getInstance())
+        val nextAlarmDateString = App.format(triggerTime)
         val alarmNames = schedules.joinToString("; ") { it.name }
-        val infoText = App.localizedContext().getString(R.string.notif_info_text, alarmNames, nextAlarmDateString)
+        val infoText = localized.getString(R.string.notif_info_text, alarmNames, nextAlarmDateString)
         return NotificationCompat.Builder(App.context, InfoChannel).run {
-            setContentTitle(App.localizedContext().getString(R.string.notif_title_standby))
+            setContentTitle(localized.getString(R.string.notif_title_standby))
             setContentText(infoText)
             setStyle(NotificationCompat.BigTextStyle().bigText(infoText))
             setOngoing(true)
@@ -95,17 +97,27 @@ object NotificationService {
     }
 
     val currentAlarmIds = mutableStateListOf<Int>()
+    var isTestAlarm = false
+        private set
 
     // 闹钟响铃被关闭时回调，MainActivity 用来把因全屏 Intent 拉起的任务挪回后台。
     var onAlarmDismissed: (() -> Unit)? = null
 
-    fun setCurrentAlarmIds(alarmIds: List<Int>) {
+    fun setCurrentAlarmIds(alarmIds: List<Int>, isTest: Boolean = false): List<Int> {
+        val merged = if (!isTest && !isTestAlarm && currentAlarmIds.isNotEmpty()) {
+            (alarmIds + currentAlarmIds).distinct()
+        } else {
+            alarmIds.distinct()
+        }
+        isTestAlarm = isTest
         currentAlarmIds.clear()
-        currentAlarmIds.addAll(alarmIds)
+        currentAlarmIds.addAll(merged)
+        return merged
     }
 
     fun getAlarmNotification(alarmIds: List<Int> = currentAlarmIds): Notification {
-        initOnce()
+        val localized = App.localizedContext()
+        ensureChannels(localized)
 
         val openIntent = Intent(App.context, MainActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_REORDER_TO_FRONT or Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -131,10 +143,11 @@ object NotificationService {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val alarmNames = getAlarmNames(alarmIds)
+        val alarmNames = getAlarmNames(alarmIds, localized)
         val alarmText = alarmNames.joinToString("\n")
+        val isPlaying = App.isPlaying
         return NotificationCompat.Builder(App.context, AlarmChannel).run {
-            setContentTitle(App.localizedContext().getString(R.string.app_name))
+            setContentTitle(localized.getString(R.string.app_name))
             setContentText(alarmNames.joinToString("; "))
             setStyle(NotificationCompat.BigTextStyle().bigText(alarmText))
             setOngoing(true)
@@ -147,8 +160,12 @@ object NotificationService {
             setContentIntent(openPendingIntent)
             setFullScreenIntent(openPendingIntent, true)
             setDeleteIntent(dismissPendingIntent)
-            addAction(R.drawable.ic_pause, if (App.isPlaying) App.localizedContext().getString(R.string.action_pause) else App.localizedContext().getString(R.string.action_play), pausePendingIntent)
-            addAction(R.drawable.ic_close, App.localizedContext().getString(R.string.action_dismiss), dismissPendingIntent)
+            addAction(
+                if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play_arrow,
+                localized.getString(if (isPlaying) R.string.action_pause else R.string.action_play),
+                pausePendingIntent
+            )
+            addAction(R.drawable.ic_close, localized.getString(R.string.action_dismiss), dismissPendingIntent)
             build()
         }
     }
@@ -160,9 +177,9 @@ object NotificationService {
         notificationManager.notify(AlarmId, getAlarmNotification(currentAlarmIds))
     }
 
-    private fun getAlarmNames(alarmIds: List<Int>): List<String> {
+    private fun getAlarmNames(alarmIds: List<Int>, localized: Context): List<String> {
         return alarmIds.map { alarmId ->
-            ScheduleService.findSchedule(alarmId)?.name ?: App.localizedContext().getString(R.string.alarm_fallback_name, alarmId)
+            ScheduleService.findSchedule(alarmId)?.name ?: localized.getString(R.string.alarm_fallback_name, alarmId)
         }
     }
 
@@ -175,12 +192,15 @@ object NotificationService {
         // 关闭响铃即视为这些闹钟"结束"，触发过的一次性闹钟自动进回收站。
         // 必须在清空 currentAlarmIds 之前取出 id（响铃界面还要靠它取闹钟信息）。
         val finishedIds = currentAlarmIds.toList()
+        val wasTest = isTestAlarm
 
         // 清空响铃状态，UI 层的通知浮层随之消失，露出底下的导航页面。
+        isTestAlarm = false
         currentAlarmIds.clear()
         AlarmRingingService.stop()
 
-        ScheduleService.recycleTriggeredOnceAlarms(finishedIds)
+        if (!wasTest)
+            ScheduleService.recycleTriggeredOnceAlarms(finishedIds)
 
         onAlarmDismissed?.invoke()
     }

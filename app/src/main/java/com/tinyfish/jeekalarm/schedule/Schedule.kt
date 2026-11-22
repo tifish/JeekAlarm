@@ -40,23 +40,37 @@ data class Schedule(
     companion object {
         /** 新建闹钟时的默认名字。 */
         const val DefaultName = "Alarm"
-    }
 
-    fun copyTo(dest: Schedule) {
-        dest.name = name
-        dest.hourConfig = hourConfig
-        dest.minuteConfig = minuteConfig
-        dest.weekDayConfig = weekDayConfig
-        dest.dayConfig = dayConfig
-        dest.monthConfig = monthConfig
-        dest.yearConfig = yearConfig
-        dest.enabled = enabled
-        dest.onlyOnce = onlyOnce
-        dest.playMusic = playMusic
-        dest.musicFile = musicFile
-        dest.musicFolder = musicFolder
-        dest.vibration = vibration
-        dest.vibrationCount = vibrationCount
+        /**
+         * 同时触发多个闹钟时合并播放策略：
+         * 音乐取第一个启用播放音乐的闹钟；振动若任意闹钟启用则取最大振动次数。
+         */
+        fun playCombined(schedules: List<Schedule>) {
+            if (schedules.isEmpty())
+                return
+
+            val musicSchedule = schedules.firstOrNull { it.playMusic }
+            val maxVibrationCount = schedules.filter { it.vibration }.maxOfOrNull { it.vibrationCount }
+
+            val token = ScheduleService.beginPlayback()
+
+            // 选曲和 MediaPlayer.prepare 都可能耗好几秒，必须离开主线程。
+            MusicService.runSerially {
+                if (!ScheduleService.isPlaybackActive(token))
+                    return@runSerially
+
+                if (musicSchedule != null) {
+                    runCatching { musicSchedule.playMusic() }
+                        .onFailure { Log.e(Schedule::class.java.name, "play music failed", it) }
+                }
+
+                if (!ScheduleService.isPlaybackActive(token))
+                    return@runSerially
+
+                if (maxVibrationCount != null)
+                    VibrationService.vibrate(maxVibrationCount)
+            }
+        }
     }
 
     fun timeConfigChanged() {
@@ -67,12 +81,8 @@ data class Schedule(
         try {
             ScheduleParser.parseTimeConfig(this)
             isValid = true
-
-            nextTriggerTimeFrom1980 = getNextTriggerTime(Calendar.getInstance().apply {
-                set(1980, 0, 1, 0, 0, 0)
-            })
         } catch (ex: Exception) {
-            Log.e(this.javaClass.name, ex.message ?: "parse error")
+            runCatching { Log.e(this.javaClass.name, ex.message ?: "parse error") }
             isValid = false
             hours.clear()
             minutes.clear()
@@ -113,10 +123,6 @@ data class Schedule(
         timeConfigChanged()
     }
 
-    @Transient
-    var nextTriggerTimeFrom1980: Calendar? = null
-        private set
-
     fun getNextTriggerTime(now: Calendar? = null): Calendar? {
         if (!isValid)
             return null
@@ -129,9 +135,12 @@ data class Schedule(
         resultTime.clear(Calendar.SECOND)
         resultTime.clear(Calendar.MILLISECOND)
 
+        // Gregorian calendar repeats identically every 400 years, so any valid schedule
+        // matches within 400 years (or before the last configured year).
+        val maxSearchYear = if (years.isNotEmpty()) years.last() else (resultTime[Calendar.YEAR] + 400).coerceAtMost(9999)
+
         // Prepare handler of all cases
         val minTriggerMonth = if (months.size == 0) 0 else months[0]
-        val minTriggerDay = if (days.size == 0) 1 else days[0]
         val minTriggerHour = if (hours.size == 0) 0 else hours[0]
         val minTriggerMinute = if (minutes.size == 0) 0 else minutes[0]
 
@@ -140,14 +149,15 @@ data class Schedule(
         val setMinValueBelow = fun(timePart: Int) {
             when (timePart) {
                 Calendar.YEAR -> {
+                    // Reset day to 1 first so changing month never overflows (e.g. Jan 31 -> Feb -> Mar 3).
+                    resultTime.set(Calendar.DAY_OF_MONTH, 1)
                     resultTime.set(Calendar.MONTH, minTriggerMonth)
-                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
                     resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
                     resultTime.set(Calendar.MINUTE, minTriggerMinute)
                 }
 
                 Calendar.MONTH -> {
-                    resultTime.set(Calendar.DAY_OF_MONTH, minTriggerDay)
+                    resultTime.set(Calendar.DAY_OF_MONTH, 1)
                     resultTime.set(Calendar.HOUR_OF_DAY, minTriggerHour)
                     resultTime.set(Calendar.MINUTE, minTriggerMinute)
                 }
@@ -174,11 +184,14 @@ data class Schedule(
                 }
 
                 Calendar.MONTH -> {
+                    resultTime.set(Calendar.DAY_OF_MONTH, 1)
+                    resultTime.set(Calendar.MONTH, 0)
                     resultTime.add(Calendar.YEAR, 1)
                     setMinValueBelow(Calendar.YEAR)
                 }
 
                 Calendar.DAY_OF_MONTH -> {
+                    resultTime.set(Calendar.DAY_OF_MONTH, 1)
                     resultTime.add(Calendar.MONTH, 1)
                     setMinValueBelow(Calendar.MONTH)
                 }
@@ -199,14 +212,17 @@ data class Schedule(
                 }
             }
 
+            if (resultTime[Calendar.YEAR] > maxSearchYear)
+                return Int.MIN_VALUE
+
             minuteCompareMethod = CompareMethod.EqualOrBigger
 
             return when {
-                orgTime[Calendar.YEAR] != resultTime[Calendar.YEAR] -> Calendar.MONTH
+                orgTime[Calendar.YEAR] != resultTime[Calendar.YEAR] -> Calendar.YEAR
                 orgTime[Calendar.MONTH] != resultTime[Calendar.MONTH] -> Calendar.MONTH
                 orgTime[Calendar.DAY_OF_MONTH] != resultTime[Calendar.DAY_OF_MONTH] -> Calendar.DAY_OF_MONTH
                 orgTime[Calendar.HOUR_OF_DAY] != resultTime[Calendar.HOUR_OF_DAY] -> Calendar.HOUR_OF_DAY
-                else -> throw Exception("not match")
+                else -> Calendar.HOUR_OF_DAY
             }
         }
 
@@ -216,8 +232,9 @@ data class Schedule(
             setMinValueBelow(currentTimePart)
 
             return when (currentTimePart) {
-                Calendar.YEAR -> Calendar.DAY_OF_WEEK
-                Calendar.MONTH -> Calendar.DAY_OF_WEEK
+                // Re-check DAY_OF_MONTH so days like 29/30/31 are validated against the new month's actual length.
+                Calendar.YEAR -> Calendar.DAY_OF_MONTH
+                Calendar.MONTH -> Calendar.DAY_OF_MONTH
                 Calendar.DAY_OF_MONTH -> Calendar.DAY_OF_WEEK
                 Calendar.HOUR_OF_DAY -> Int.MAX_VALUE
                 else -> throw Exception("not match")
@@ -324,9 +341,13 @@ data class Schedule(
         if (partTriggerList.isEmpty()) {
             return when (compareMethod) {
                 CompareMethod.Bigger -> {
-                    assert(partType == Calendar.MINUTE)
-                    time.add(Calendar.MINUTE, 1)
-                    MatchResult.Bigger
+                    check(partType == Calendar.MINUTE)
+                    if (time[Calendar.MINUTE] >= time.getActualMaximum(Calendar.MINUTE)) {
+                        MatchResult.NotMatch
+                    } else {
+                        time.add(Calendar.MINUTE, 1)
+                        MatchResult.Bigger
+                    }
                 }
 
                 else -> MatchResult.Equals
@@ -339,6 +360,8 @@ data class Schedule(
 
         for (value in partTriggerList) {
             if (value < min || value > max) {
+                if (partType == Calendar.DAY_OF_MONTH)
+                    continue
                 throw Exception("invalid trigger time part $value")
             }
 
@@ -349,21 +372,11 @@ data class Schedule(
                 || compareMethod == CompareMethod.Equal && isEqual
             ) {
                 if (partType != Calendar.DAY_OF_WEEK) {
+                    if (isBigger && (partType == Calendar.YEAR || partType == Calendar.MONTH))
+                        time.set(Calendar.DAY_OF_MONTH, 1)
                     time[partType] = value
                 }
-                when {
-                    isBigger -> {
-                        return MatchResult.Bigger
-                    }
-
-                    isEqual -> {
-                        return MatchResult.Equals
-                    }
-
-                    else -> {
-                        assert(false)
-                    }
-                }
+                return if (isBigger) MatchResult.Bigger else MatchResult.Equals
             }
         }
 
@@ -379,17 +392,7 @@ data class Schedule(
     }
 
     fun play() {
-        // 响铃状态立刻置上，界面和通知的播放/暂停按钮不用等实际出声。
-        App.isPlaying = true
-
-        // 选曲和 MediaPlayer.prepare 都可能耗好几秒，必须离开主线程。
-        MusicService.runSerially {
-            if (playMusic)
-                runCatching { playMusic() }.onFailure { Log.e(javaClass.name, "play music failed", it) }
-
-            if (vibration)
-                VibrationService.vibrate(vibrationCount)
-        }
+        playCombined(listOf(this))
     }
 
     /**
@@ -426,41 +429,51 @@ data class Schedule(
         return DocumentsContract.buildDocumentUriUsingTree(treeUri, documentIds[Random.nextInt(documentIds.size)])
     }
 
-    private fun playMusic() {
-        val finalMusicFolder = musicFolder.ifEmpty { SettingsService.defaultMusicFolder }
-
-        if (finalMusicFolder.isNotEmpty()) {
-            if (finalMusicFolder.startsWith("content://")) {
-                val musicUri = randomAudioInTree(Uri.parse(finalMusicFolder)) ?: return
-                MusicService.play(musicUri)
-                return
-            }
-
-            val folder = File(Environment.getExternalStorageDirectory().path, finalMusicFolder)
-            val musicFiles = mutableListOf<File>()
-            for (file in folder.listFiles() ?: return) {
-                val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
-                if (mimeType != null && mimeType.startsWith("audio")) {
-                    musicFiles.add(file)
-                }
-            }
-            if (musicFiles.size == 0)
-                return
-
-            val randomIndex = Random.nextInt(musicFiles.size)
-            MusicService.play(musicFiles[randomIndex])
-
-        } else {
-            val finalMusicFile =
-                if (musicFile.isEmpty())
-                    SettingsService.defaultMusicFile
-                else
-                    musicFile
-
-            if (finalMusicFile.isNotEmpty())
-                MusicService.play(finalMusicFile)
-            else
-                MusicService.play(Settings.System.DEFAULT_ALARM_ALERT_URI)
+    private fun resolveFolderAudio(folderPath: String): Uri? {
+        if (folderPath.startsWith("content://")) {
+            return randomAudioInTree(Uri.parse(folderPath))
         }
+
+        val folder = File(Environment.getExternalStorageDirectory().path, folderPath)
+        val musicFiles = mutableListOf<File>()
+        for (file in folder.listFiles() ?: return null) {
+            val mimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension)
+            if (mimeType != null && mimeType.startsWith("audio")) {
+                musicFiles.add(file)
+            }
+        }
+        if (musicFiles.isEmpty())
+            return null
+
+        return Uri.fromFile(musicFiles[Random.nextInt(musicFiles.size)])
+    }
+
+    private fun resolveFileAudio(musicPath: String): Uri {
+        return if (musicPath.startsWith("content://") || musicPath.startsWith("file://"))
+            Uri.parse(musicPath)
+        else
+            Uri.fromFile(File(Environment.getExternalStorageDirectory().path, musicPath))
+    }
+
+    private fun playMusic() {
+        // Per-alarm music settings take precedence over global defaults.
+        val uriToPlay = when {
+            musicFolder.isNotEmpty() -> resolveFolderAudio(musicFolder)
+            musicFile.isNotEmpty() -> resolveFileAudio(musicFile)
+            SettingsService.defaultMusicFolder.isNotEmpty() -> resolveFolderAudio(SettingsService.defaultMusicFolder)
+            SettingsService.defaultMusicFile.isNotEmpty() -> resolveFileAudio(SettingsService.defaultMusicFile)
+            else -> null
+        }
+
+        if (uriToPlay != null) {
+            try {
+                MusicService.play(uriToPlay)
+                return
+            } catch (ex: Exception) {
+                Log.e(javaClass.name, "play custom music failed, falling back to default alarm", ex)
+            }
+        }
+
+        MusicService.play(Settings.System.DEFAULT_ALARM_ALERT_URI)
     }
 }

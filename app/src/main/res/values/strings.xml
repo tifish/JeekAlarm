@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">JeekAlarm</string>
+    <string name="app_name" translatable="false">JeekAlarm</string>
 
     <!-- Common actions -->
     <string name="action_back">Back</string>
@@ -37,6 +37,7 @@
     <string name="home_empty_title">No alarms yet</string>
     <string name="home_empty_subtitle">Tap + to add your first alarm</string>
     <string name="home_recurrence_custom">Custom</string>
+    <string name="home_recurrence_invalid">Invalid schedule</string>
     <string name="home_next_badge">NEXT</string>
     <string name="home_snackbar_moved">Moved \"%1$s\" to recycle bin</string>
     <string name="home_snackbar_deleted">Deleted \"%1$s\"</string>
@@ -87,6 +88,7 @@
     <string name="edit_guess_time">Guess time from name</string>
     <string name="edit_section_schedule">Schedule</string>
     <string name="edit_cron_syntax">Cron syntax — *: any · 0: fixed · 1-3: range · 1,3: list · */3: step</string>
+    <string name="edit_invalid_schedule">Invalid schedule expression</string>
     <string name="edit_cron_hour">Hour</string>
     <string name="edit_cron_minute">Minute</string>
     <string name="edit_cron_weekday">Weekday</string>
@@ -96,7 +98,10 @@
     <string name="edit_section_sound">Sound &amp; vibration</string>
     <string name="edit_play_music">Play music</string>
     <string name="edit_vibration">Vibration</string>
-    <string name="edit_vibrate_count">Vibrate %1$d times</string>
+    <plurals name="edit_vibrate_count">
+        <item quantity="one">Vibrate %1$d time</item>
+        <item quantity="other">Vibrate %1$d times</item>
+    </plurals>
     <string name="edit_dialog_remove_message">Remove this schedule?</string>
     <string name="edit_action_now">Now</string>
     <string name="edit_fab_add">Add</string>
@@ -105,7 +110,10 @@
     <!-- Recycle bin screen -->
     <string name="recycle_clear_all">Clear all</string>
     <string name="recycle_clear_confirm_title">Clear recycle bin?</string>
-    <string name="recycle_clear_confirm_message">All %1$d alarms here will be permanently deleted.</string>
+    <plurals name="recycle_clear_confirm_message">
+        <item quantity="one">This alarm will be permanently deleted.</item>
+        <item quantity="other">All %1$d alarms here will be permanently deleted.</item>
+    </plurals>
     <string name="recycle_empty_title">Recycle bin is empty</string>
     <string name="recycle_empty_description">Deleted and finished alarms appear here for 30 days</string>
     <string name="recycle_removes_today">removes today</string>
@@ -143,6 +151,8 @@
     <string name="edit_filled_time_auto">Filled time automatically</string>
     <string name="edit_no_time_found">No time found in name</string>
     <string name="ifly_init_error">iFlytek init error code: %1$d</string>
+    <string name="ifly_not_configured">Please set iFlytek App ID in Settings</string>
+    <string name="ifly_recognize_failed">Voice recognition failed: %1$s</string>
 
     <!-- Abbreviated weekday names; index 0 = Sunday (Calendar weekday - 1) -->
     <string-array name="weekday_short_names">

@@ -1,19 +1,30 @@
 package com.tinyfish.jeekalarm
 
 import android.content.SharedPreferences
-import android.net.Uri
 import android.os.Environment
+import android.os.Handler
+import android.os.Looper
 import androidx.compose.runtime.mutableStateOf
+import androidx.core.net.toUri
 import androidx.documentfile.provider.DocumentFile
 import com.tinyfish.jeekalarm.start.App
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.File
+import java.util.concurrent.Executors
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 object SettingsService {
+    private const val SaveDebounceMs = 400L
+
+    private val ioExecutor = Executors.newSingleThreadExecutor { runnable ->
+        Thread(runnable, "SettingsIO")
+    }
+    private val mainHandler: Handler by lazy { Handler(Looper.getMainLooper()) }
+    private var pendingSaveRunnable: Runnable? = null
+
     var defaultMusicFile by SettingsItemState("")
     var defaultMusicFolder by SettingsItemState("")
     var theme by SettingsItemState("Dark")
@@ -32,8 +43,10 @@ object SettingsService {
         }
 
         override fun setValue(thisRef: SettingsService, property: KProperty<*>, value: T) {
+            if (_state.value == value)
+                return
             _state.value = value
-            save()
+            scheduleSave()
         }
     }
 
@@ -42,7 +55,7 @@ object SettingsService {
     }
 
     var settingsDir: String
-        get() = sharedPrefs.getString("ConfigDir", "")!!
+        get() = sharedPrefs.getString("ConfigDir", "") ?: ""
         set(value) {
             sharedPrefs.edit().apply {
                 putString("ConfigDir", value)
@@ -50,22 +63,11 @@ object SettingsService {
             }
         }
 
-    val settingsFile: File
-        get() {
-            val dir =
-                if (settingsDir == "" || settingsDir.startsWith("content://"))
-                    App.context.filesDir
-                else
-                    File(Environment.getExternalStorageDirectory().path, settingsDir)
-
-            return File(dir, "config.json")
-        }
-
     private fun isContentTree(uri: String = settingsDir): Boolean {
         return uri.startsWith("content://")
     }
 
-    fun usesLegacyExternalConfigDir(): Boolean {
+    private fun usesLegacyExternalConfigDir(): Boolean {
         return settingsDir.isNotEmpty() && !isContentTree()
     }
 
@@ -99,7 +101,7 @@ object SettingsService {
         if (!isContentTree())
             return null
 
-        val dir = DocumentFile.fromTreeUri(App.context, Uri.parse(settingsDir)) ?: return null
+        val dir = DocumentFile.fromTreeUri(App.context, settingsDir.toUri()) ?: return null
         val existing = dir.findFile(fileName)
         if (existing != null || !create)
             return existing
@@ -122,10 +124,9 @@ object SettingsService {
     fun readConfigText(fileName: String): String? {
         return runCatching {
             if (isContentTree()) {
-                if (!configExists(fileName))
-                    return null
-
                 val document = configDocument(fileName, false) ?: return null
+                if (!document.exists())
+                    return null
                 return App.context.contentResolver.openInputStream(document.uri)?.bufferedReader()?.use { it.readText() }
             }
 
@@ -183,6 +184,10 @@ object SettingsService {
     private val json = Json { ignoreUnknownKeys = true }
 
     fun load() {
+        cancelPendingSave()
+        // Wait for any in-flight background write to finish before reading.
+        runCatching { ioExecutor.submit {}.get() }
+
         val text = readConfigText("config.json")
         if (text == null)
             return
@@ -212,25 +217,65 @@ object SettingsService {
         }
     }
 
+    private fun capturePlainSnapshot(): SettingsData {
+        return SettingsData(
+            defaultMusicFile = defaultMusicFile,
+            defaultMusicFolder = defaultMusicFolder,
+            theme = theme,
+            language = language,
+            openAiApiUrl = openAiApiUrl,
+            openAiApiKey = openAiApiKey,
+            openAiApiModel = openAiApiModel,
+            iFlyAppId = iFlyAppId,
+        )
+    }
+
+    private fun writeSnapshot(plainSnapshot: SettingsData) {
+        val data = plainSnapshot.copy(
+            openAiApiKey = if (plainSnapshot.openAiApiKey != "") CryptoService.encrypt(plainSnapshot.openAiApiKey) else "",
+            iFlyAppId = if (plainSnapshot.iFlyAppId != "") CryptoService.encrypt(plainSnapshot.iFlyAppId) else "",
+        )
+        writeConfigText("config.json", json.encodeToString(data))
+    }
+
+    private fun cancelPendingSave() {
+        pendingSaveRunnable?.let {
+            mainHandler.removeCallbacks(it)
+            pendingSaveRunnable = null
+        }
+    }
+
+    private fun scheduleSave() {
+        if (_isLoading)
+            return
+
+        cancelPendingSave()
+        val runnable = Runnable {
+            pendingSaveRunnable = null
+            val snapshot = capturePlainSnapshot()
+            ioExecutor.execute { writeSnapshot(snapshot) }
+        }
+        pendingSaveRunnable = runnable
+        mainHandler.postDelayed(runnable, SaveDebounceMs)
+    }
+
+    /** 立即把尚未落盘的防抖改动提交到后台线程（例如切后台时调用）。 */
+    fun flushSave() {
+        if (_isLoading || pendingSaveRunnable == null)
+            return
+
+        cancelPendingSave()
+        val snapshot = capturePlainSnapshot()
+        ioExecutor.execute { writeSnapshot(snapshot) }
+    }
+
+    /** 显式立即保存（例如切换配置文件夹覆盖写入）。 */
     fun save() {
         if (_isLoading)
             return
 
-        val data = SettingsData()
-
-        data.defaultMusicFile = defaultMusicFile
-        data.defaultMusicFolder = defaultMusicFolder
-        data.theme = theme
-        data.language = language
-        data.openAiApiUrl = openAiApiUrl
-        data.openAiApiModel = openAiApiModel
-
-        if (openAiApiKey != "")
-            data.openAiApiKey = CryptoService.encrypt(openAiApiKey)
-
-        if (iFlyAppId != "")
-            data.iFlyAppId = CryptoService.encrypt(iFlyAppId)
-
-        writeConfigText("config.json", json.encodeToString(data))
+        cancelPendingSave()
+        val snapshot = capturePlainSnapshot()
+        runCatching { ioExecutor.submit { writeSnapshot(snapshot) }.get() }
     }
 }

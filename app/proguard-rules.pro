@@ -31,24 +31,16 @@
 }
 
 # Application rules
-
-# Change here com.yourcompany.yourpackage
--keepclassmembers @kotlinx.serialization.Serializable class com.yourcompany.yourpackage.** {
-    # lookup for plugin generated serializable classes
+-keepclassmembers @kotlinx.serialization.Serializable class com.tinyfish.jeekalarm.** {
     *** Companion;
-    # lookup for serializable objects
     *** INSTANCE;
     kotlinx.serialization.KSerializer serializer(...);
 }
-# lookup for plugin generated serializable classes
--if @kotlinx.serialization.Serializable class com.yourcompany.yourpackage.**
--keepclassmembers class com.yourcompany.yourpackage.<1>$Companion {
+-if @kotlinx.serialization.Serializable class com.tinyfish.jeekalarm.**
+-keepclassmembers class com.tinyfish.jeekalarm.<1>$Companion {
     kotlinx.serialization.KSerializer serializer(...);
 }
 
-# Serialization supports named companions but for such classes it is necessary to add an additional rule.
-# This rule keeps serializer and serializable class from obfuscation. Therefore, it is recommended not to use wildcards in it, but to write rules for each such class.
--keepattributes InnerClasses # Needed for `getDeclaredClasses`.
--keep class com.yourcompany.yourpackage.SerializableClassWithNamedCompanion$$serializer {
-    *** INSTANCE;
-}
+# iFlytek MSC SDK (uses JNI callbacks into com.iflytek.**)
+-keep class com.iflytek.** { *; }
+-dontwarn com.iflytek.**

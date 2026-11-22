@@ -36,6 +36,14 @@ object FileSelector {
         )
     }
 
+    fun detach(activity: ComponentActivity) {
+        if (this.activity === activity) {
+            this.activity = null
+            selectFileResultLauncher = null
+            selectFolderResultLauncher = null
+        }
+    }
+
     private var onSelected: (uri: Uri) -> Unit = {}
 
     fun openMusicFile(onFileSelected: (uri: Uri) -> Unit) {

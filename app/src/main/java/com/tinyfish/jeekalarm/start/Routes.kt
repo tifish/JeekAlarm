@@ -11,7 +11,7 @@ object HomeRoute
 object SettingsRoute
 
 @Serializable
-object EditRoute
+data class EditRoute(val scheduleId: Int = -1)
 
 @Serializable
 object RecycleBinRoute

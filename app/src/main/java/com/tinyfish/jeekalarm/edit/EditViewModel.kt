@@ -26,18 +26,42 @@ object EditViewModel {
     var editScheduleId = -1
         private set
 
+    // 每次进入/离开编辑页递增，防止在途的 AI 请求回写到后续打开的其他闹钟。
+    private var editSessionId = 0L
+    private var activeSession = false
+    private var initialEditing = Schedule()
+
     // 单一真相源：正在编辑的副本。所有界面读它、改它，Compose 自动重组。
     var editing by mutableStateOf(Schedule())
         private set
 
+    val hasChanges: Boolean
+        get() = editing != initialEditing
+
     fun startEditing(scheduleId: Int) {
+        editSessionId++
+        activeSession = true
         editScheduleId = scheduleId
         isAdding = scheduleId == -1
-        editing =
+        val initial =
             if (isAdding)
                 Schedule()
             else
                 ScheduleService.findSchedule(scheduleId)?.copy() ?: Schedule()
+        initialEditing = initial
+        editing = initial
+    }
+
+    /** 进程被系统回收后从 NavBackStack 恢复 EditRoute 时，按 route 中的 scheduleId 重新载入编辑态。 */
+    fun ensureEditing(scheduleId: Int) {
+        if (!activeSession || editScheduleId != scheduleId) {
+            startEditing(scheduleId)
+        }
+    }
+
+    fun cancelEditing() {
+        editSessionId++
+        activeSession = false
     }
 
     /** 以不可变方式更新编辑副本：editing = transform(editing) */
@@ -46,6 +70,8 @@ object EditViewModel {
     }
 
     fun saveEditingSchedule() {
+        editSessionId++
+        activeSession = false
         editing.timeConfigChanged()
         if (isAdding) {
             editing.id = ScheduleService.createScheduleId()
@@ -60,19 +86,26 @@ object EditViewModel {
     }
 
     fun guessFromName() {
-        scope.launch { guess() }
+        val sessionId = editSessionId
+        val queryName = editing.name
+        scope.launch { guess(sessionId, queryName) }
     }
 
-    private suspend fun guess() {
+    private suspend fun guess(sessionId: Long, queryName: String) {
         if (SettingsService.openAiApiKey.isEmpty())
             return
 
         val schedule = try {
-            OpenAi.getAnswer(editing.name)
+            OpenAi.getAnswer(queryName)
         } catch (ex: Exception) {
-            Toast.makeText(App.context, App.localizedContext().getString(R.string.edit_ai_request_failed, ex.message ?: ""), Toast.LENGTH_LONG).show()
+            if (sessionId == editSessionId) {
+                Toast.makeText(App.context, App.localizedContext().getString(R.string.edit_ai_request_failed, ex.message ?: ""), Toast.LENGTH_LONG).show()
+            }
             return
         }
+
+        if (sessionId != editSessionId)
+            return
 
         if (schedule != null) {
             editing = editing.copy(
@@ -99,6 +132,7 @@ object EditViewModel {
             monthConfig = (time.get(Calendar.MONTH) + 1).toString(),
             weekDayConfig = "*",
             yearConfig = time.get(Calendar.YEAR).toString(),
+            enabled = true,
         )
     }
 

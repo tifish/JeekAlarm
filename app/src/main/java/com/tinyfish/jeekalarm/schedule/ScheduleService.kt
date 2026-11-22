@@ -1,6 +1,5 @@
 package com.tinyfish.jeekalarm.schedule
 
-import android.os.Environment
 import androidx.compose.runtime.mutableStateListOf
 import com.tinyfish.jeekalarm.MusicService
 import com.tinyfish.jeekalarm.SettingsService
@@ -8,8 +7,8 @@ import com.tinyfish.jeekalarm.VibrationService
 import com.tinyfish.jeekalarm.alarm.AlarmService
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.start.App
-import java.io.File
 import java.util.Calendar
+import java.util.concurrent.atomic.AtomicLong
 
 object ScheduleService {
     private const val ScheduleFileName = "schedule.cron"
@@ -17,22 +16,19 @@ object ScheduleService {
     val scheduleList = mutableStateListOf<Schedule>()
     var nextScheduleId = 1
 
-    val configFile: File
-        get() {
-            val dir = if (SettingsService.settingsDir == "" || SettingsService.settingsDir.startsWith("content://"))
-                App.context.filesDir
-            else
-                File(Environment.getExternalStorageDirectory().path, SettingsService.settingsDir)
+    private val playbackGeneration = AtomicLong(0L)
 
-            return File(dir, ScheduleFileName)
-        }
+    fun beginPlayback(): Long {
+        App.isPlaying = true
+        return playbackGeneration.incrementAndGet()
+    }
+
+    fun isPlaybackActive(token: Long): Boolean {
+        return playbackGeneration.get() == token
+    }
 
     fun load() {
-        val loaded =
-            if (SettingsService.configExists(ScheduleFileName))
-                ScheduleParser.loadFromLines(SettingsService.readConfigLines(ScheduleFileName))
-            else
-                emptyList()
+        val loaded = ScheduleParser.loadFromLines(SettingsService.readConfigLines(ScheduleFileName))
         scheduleList.clear()
         scheduleList.addAll(loaded)
         sort()
@@ -138,7 +134,7 @@ object ScheduleService {
         if (nextAlarm == null) {
             if (nextAlarmIds.isNotEmpty())
                 nextAlarmIds = mutableListOf()
-            NotificationService.updateInfo()
+            NotificationService.updateInfo(null)
             return
         }
 
@@ -146,15 +142,17 @@ object ScheduleService {
             nextAlarmIds = nextAlarm.scheduleIds
 
         AlarmService.setAlarm(nextAlarm.triggerTime, nextAlarm.scheduleIds)
-        NotificationService.updateInfo()
+        NotificationService.updateInfo(nextAlarm.triggerTime)
     }
 
     fun completeTriggeredAlarms(alarmIds: List<Int>) {
         var modified = false
         for (alarmId in alarmIds) {
-            val schedule = findSchedule(alarmId) ?: continue
+            val index = scheduleList.indexOfFirst { it.id == alarmId }
+            if (index < 0) continue
+            val schedule = scheduleList[index]
             if (schedule.onlyOnce && schedule.enabled) {
-                schedule.enabled = false
+                scheduleList[index] = schedule.copy(enabled = false)
                 modified = true
             }
         }
@@ -181,7 +179,7 @@ object ScheduleService {
         var modified = false
         for (alarmId in alarmIds) {
             val schedule = findSchedule(alarmId) ?: continue
-            if (schedule.onlyOnce) {
+            if (schedule.onlyOnce && !schedule.enabled) {
                 scheduleList.removeIf { it.id == schedule.id }
                 if (schedule.name != Schedule.DefaultName)
                     RecycleBinService.add(schedule)
@@ -205,17 +203,25 @@ object ScheduleService {
     // MediaPlayer 的实际操作排到播放线程，和 Schedule.play() 保持先后顺序。
 
     fun stopPlaying() {
+        playbackGeneration.incrementAndGet()
         App.isPlaying = false
 
         VibrationService.stop()
-        MusicService.runSerially { MusicService.stop() }
+        MusicService.runSerially {
+            VibrationService.stop()
+            MusicService.stop()
+        }
     }
 
     fun pausePlaying() {
+        playbackGeneration.incrementAndGet()
         App.isPlaying = false
 
         VibrationService.stop()
-        MusicService.runSerially { MusicService.pause() }
+        MusicService.runSerially {
+            VibrationService.stop()
+            MusicService.pause()
+        }
     }
 
     fun resumePlaying() {

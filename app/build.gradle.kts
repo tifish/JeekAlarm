@@ -25,7 +25,8 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -71,5 +72,4 @@ dependencies {
 
     // iFlytek
     implementation(files("libs/Msc.jar"))
-    implementation(libs.fastjson)
 }

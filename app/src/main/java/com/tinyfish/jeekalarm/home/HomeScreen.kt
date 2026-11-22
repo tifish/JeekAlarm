@@ -47,6 +47,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -59,16 +60,20 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LifecycleEventEffect
 import kotlin.math.roundToInt
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationScreen
@@ -90,6 +95,7 @@ import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.WidthSpacer
 import com.tinyfish.ui.theme.JeekAlarmTheme
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
@@ -101,10 +107,10 @@ fun MainUI() {
     JeekAlarmTheme(SettingsService.theme) {
         val navController = rememberNavController()
 
-        // 进入编辑页：先准备好编辑副本，再导航。
+        // 进入编辑页：先准备好编辑副本，再带 scheduleId 导航（进程重建后仍能恢复目标闹钟）。
         val openEdit: (Int) -> Unit = { id ->
             EditViewModel.startEditing(id)
-            navController.navigate(EditRoute)
+            navController.navigate(EditRoute(id))
         }
         // 底部导航在 Home/Settings 两个标签间切换，保持单实例、不堆栈。
         val goHome: () -> Unit = {
@@ -145,7 +151,9 @@ fun MainUI() {
                     onOpenRecycleBin = openRecycleBin,
                 )
             }
-            composable<EditRoute> {
+            composable<EditRoute> { backStackEntry ->
+                val route = backStackEntry.toRoute<EditRoute>()
+                EditViewModel.ensureEditing(route.scheduleId)
                 EditScreen(onNavigateBack = { navController.popBackStack() })
             }
             composable<RecycleBinRoute> {
@@ -224,8 +232,26 @@ private fun ScheduleList(
 
     // 记录当前滑开露出删除按钮的条目，保证同时只展开一个：展开新条目会收起旧的。
     var openedId by remember { mutableStateOf<Int?>(null) }
+    val inspectionMode = LocalInspectionMode.current
 
-    val now = Calendar.getInstance()
+    // 随前台恢复与每分钟整点刷新当前时间，避免主列表的“今天/明天”和下次触发时间变旧。
+    var currentTimeMillis by remember { mutableLongStateOf(System.currentTimeMillis()) }
+    if (!inspectionMode) {
+        LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
+            currentTimeMillis = System.currentTimeMillis()
+        }
+        LaunchedEffect(Unit) {
+            while (true) {
+                val millisIntoMinute = System.currentTimeMillis() % 60_000L
+                delay(60_000L - millisIntoMinute + 50L)
+                currentTimeMillis = System.currentTimeMillis()
+            }
+        }
+    }
+
+    val now = remember(currentTimeMillis) {
+        Calendar.getInstance().apply { timeInMillis = currentTimeMillis }
+    }
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
@@ -305,7 +331,10 @@ private fun ScheduleItem(
     }
     // 本条滑开时登记为当前展开项；别的条目成为展开项时，收起自己。
     LaunchedEffect(dragState.settledValue) {
-        if (dragState.settledValue == SwipeAnchor.Open) onOpenedChange(schedule.id)
+        when (dragState.settledValue) {
+            SwipeAnchor.Open -> onOpenedChange(schedule.id)
+            SwipeAnchor.Closed -> if (openedId == schedule.id) onOpenedChange(null)
+        }
     }
     LaunchedEffect(openedId) {
         if (openedId != schedule.id && dragState.currentValue != SwipeAnchor.Closed) {
@@ -374,16 +403,19 @@ private fun ScheduleItem(
                     else
                         MaterialTheme.colorScheme.onSurfaceVariant
 
-                    // 主角：下次触发。单一时刻显示“哪天 + 时间”整行同字号；多时刻/通配退回完整串。
+                    // 主角：下次触发。单一时刻显示“哪天 + 时间”整行同字号；多时刻/通配退回完整串；无下次触发时退回原始配置。
+                    val showHeroSingleTime = singleTime && next != null
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(
-                            if (singleTime)
-                                "${App.nextTriggerDay(next, schedule.weekDays.isNotEmpty())} %02d:%02d".format(
-                                    schedule.hours[0], schedule.minutes[0]
-                                )
-                            else
-                                App.format(next),
-                            style = if (singleTime)
+                            when {
+                                showHeroSingleTime ->
+                                    "${App.nextTriggerDay(next, schedule.weekDays.isNotEmpty(), now)} %02d:%02d".format(
+                                        schedule.hours[0], schedule.minutes[0]
+                                    )
+                                next != null -> App.format(next, now)
+                                else -> schedule.timeConfig
+                            },
+                            style = if (showHeroSingleTime)
                                 MaterialTheme.typography.headlineMedium
                             else
                                 MaterialTheme.typography.titleMedium,
@@ -401,11 +433,17 @@ private fun ScheduleItem(
                         style = MaterialTheme.typography.titleMedium,
                         color = strongColor,
                     )
-                    // 重复规则：降为灰色辅助信息。
+                    // 重复规则：无效配置以错误色提示，其余降为灰色辅助信息。
                     Text(
-                        schedule.describeRecurrence() ?: stringResource(R.string.home_recurrence_custom),
+                        when {
+                            !schedule.isValid -> stringResource(R.string.home_recurrence_invalid)
+                            else -> schedule.describeRecurrence() ?: stringResource(R.string.home_recurrence_custom)
+                        },
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        color = if (schedule.isValid)
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        else
+                            MaterialTheme.colorScheme.error,
                     )
                 }
 
@@ -481,7 +519,9 @@ private fun RowScope.AddNavItem(onAdd: () -> Unit) {
                     onClick = onAdd,
                     onLongClick = {
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        onAdd()
+                        if (IFly.isConfigured()) {
+                            onAdd()
+                        }
                         IFly.showDialog(context) { recognizedName ->
                             EditViewModel.update { it.copy(name = recognizedName) }
                             EditViewModel.guessFromName()

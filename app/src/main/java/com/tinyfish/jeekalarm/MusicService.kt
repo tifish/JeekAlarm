@@ -10,11 +10,14 @@ import android.os.Environment
 import android.os.Handler
 import android.os.Looper
 import android.util.Log
+import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.start.App
 import java.io.File
 import java.util.concurrent.Executors
 
 object MusicService {
+    private val mainHandler = Handler(Looper.getMainLooper())
+
     /**
      * 播放相关的慢操作（扫描音乐文件夹、MediaPlayer.prepare）都排到这条单线程上。
      * 放在主线程会卡住输入分发，系统判 ANR 直接杀进程——闹钟看起来就是"顿几秒然后界面消失、声音没了"。
@@ -26,6 +29,13 @@ object MusicService {
 
     fun runSerially(block: () -> Unit) {
         playbackExecutor.execute(block)
+    }
+
+    private fun syncPlayingState(playing: Boolean) {
+        mainHandler.post {
+            App.isPlaying = playing
+            NotificationService.updateAlarm()
+        }
     }
 
     // 媒体服务进程挂掉（MEDIA_ERROR_SERVER_DIED）时这个实例就废了，只能释放重建，所以不能用 by lazy。
@@ -58,27 +68,27 @@ object MusicService {
             .setWillPauseWhenDucked(false)
             // 必须显式给 Handler：这个请求是在没有 Looper 的播放线程上懒加载的，
             // 不带 Handler 的重载会去取当前线程的 Looper，直接抛 IllegalStateException。
-            .setOnAudioFocusChangeListener({ handleAudioFocusChange(it) }, Handler(Looper.getMainLooper()))
+            .setOnAudioFocusChangeListener({ handleAudioFocusChange(it) }, mainHandler)
             .build()
     }
     private var prepared = false
     private var hasAudioFocus = false
     private var pausedByFocusLoss = false
 
-    fun play(musicPath: String, loop: Boolean = true): MediaPlayer {
+    fun play(musicPath: String, loop: Boolean = true) {
         val uri =
             if (musicPath.startsWith("content://") || musicPath.startsWith("file://"))
                 Uri.parse(musicPath)
             else
                 Uri.fromFile(File(Environment.getExternalStorageDirectory().path, musicPath))
-        return play(uri, loop)
+        play(uri, loop)
     }
 
-    fun play(file: File, loop: Boolean = true): MediaPlayer {
-        return play(Uri.fromFile(file), loop)
+    fun play(file: File, loop: Boolean = true) {
+        play(Uri.fromFile(file), loop)
     }
 
-    fun play(uri: Uri, loop: Boolean = true): MediaPlayer {
+    fun play(uri: Uri, loop: Boolean = true) {
         if (!requestAudioFocus())
             throw IllegalStateException("Audio focus request failed")
 
@@ -90,6 +100,7 @@ object MusicService {
                 setDataSource(App.context, uri)
 
                 setAudioAttributes(alarmAudioAttributes)
+                setVolume(1f, 1f)
 
                 isLooping = loop
 
@@ -101,14 +112,12 @@ object MusicService {
         } catch (ex: Exception) {
             // prepare 失败是同步抛异常，走不到 OnErrorListener，这里自己复位回 Idle，
             // 否则播放器卡在错误状态，后面的 stop / isPlaying 都会再抛 IllegalStateException。
-            runCatching { mediaPlayer.reset() }
+            runCatching { mediaPlayerOrNull?.reset() }
             prepared = false
             pausedByFocusLoss = false
             abandonAudioFocus()
             throw ex
         }
-
-        return mediaPlayer
     }
 
     fun stop() {
@@ -133,7 +142,10 @@ object MusicService {
     fun resume() {
         if (prepared && requestAudioFocus()) {
             pausedByFocusLoss = false
+            mediaPlayer.setVolume(1f, 1f)
             mediaPlayer.start()
+        } else {
+            syncPlayingState(false)
         }
     }
 
@@ -172,7 +184,7 @@ object MusicService {
         }
 
         abandonAudioFocus()
-        App.isPlaying = false
+        syncPlayingState(false)
     }
 
     private fun handleAudioFocusChange(focusChange: Int) {
@@ -184,33 +196,35 @@ object MusicService {
         when (focusChange) {
             AudioManager.AUDIOFOCUS_GAIN -> {
                 hasAudioFocus = true
-                mediaPlayer.setVolume(1f, 1f)
-                if (prepared && pausedByFocusLoss) {
-                    pausedByFocusLoss = false
-                    mediaPlayer.start()
-                    App.isPlaying = true
+                if (prepared) {
+                    mediaPlayerOrNull?.setVolume(1f, 1f)
+                    if (pausedByFocusLoss) {
+                        pausedByFocusLoss = false
+                        mediaPlayerOrNull?.start()
+                        syncPlayingState(true)
+                    }
                 }
             }
 
             AudioManager.AUDIOFOCUS_LOSS -> {
-                if (prepared && mediaPlayer.isPlaying)
-                    mediaPlayer.pause()
+                if (prepared && mediaPlayerOrNull?.isPlaying == true)
+                    mediaPlayerOrNull?.pause()
                 pausedByFocusLoss = false
                 hasAudioFocus = false
-                App.isPlaying = false
+                syncPlayingState(false)
             }
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
-                if (prepared && mediaPlayer.isPlaying) {
-                    mediaPlayer.pause()
+                if (prepared && mediaPlayerOrNull?.isPlaying == true) {
+                    mediaPlayerOrNull?.pause()
                     pausedByFocusLoss = true
-                    App.isPlaying = false
+                    syncPlayingState(false)
                 }
             }
 
             AudioManager.AUDIOFOCUS_LOSS_TRANSIENT_CAN_DUCK -> {
                 if (prepared)
-                    mediaPlayer.setVolume(0.3f, 0.3f)
+                    mediaPlayerOrNull?.setVolume(0.3f, 0.3f)
             }
         }
     }

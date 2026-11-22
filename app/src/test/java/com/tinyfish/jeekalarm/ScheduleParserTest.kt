@@ -96,4 +96,47 @@ class ScheduleParserTest {
         Assert.assertEquals(listOf(2038, 2039, 2040), cronSchedule.years)
     }
 
+    @Test
+    fun parseSundayZeroAndSevenDeduplicates() {
+        val both = ScheduleParser.parseTextLine("name 8 0 0,7 * * *")
+        Assert.assertTrue(both.isValid)
+        Assert.assertEquals(listOf(1), both.weekDays)
+
+        val all = ScheduleParser.parseTextLine("name 8 0 0-7 * * *")
+        Assert.assertTrue(all.isValid)
+        Assert.assertEquals(listOf(1, 2, 3, 4, 5, 6, 7), all.weekDays)
+    }
+
+    @Test
+    fun invalidRangesAndStepsMarkInvalid() {
+        val reversed = ScheduleParser.parseTextLine("name 22-6 0 * * * *")
+        Assert.assertFalse(reversed.isValid)
+
+        val tripleRange = ScheduleParser.parseTextLine("name 1-2-3 0 * * * *")
+        Assert.assertFalse(tripleRange.isValid)
+
+        val zeroStep = ScheduleParser.parseTextLine("name */0 0 * * * *")
+        Assert.assertFalse(zeroStep.isValid)
+
+        val outOfRangeHour = ScheduleParser.parseTextLine("name 25 0 * * * *")
+        Assert.assertFalse(outOfRangeHour.isValid)
+
+        val outOfRangeMonth = ScheduleParser.parseTextLine("name 8 0 * 1 13 *")
+        Assert.assertFalse(outOfRangeMonth.isValid)
+
+        Assert.assertTrue(ScheduleParser.isValidField(java.util.Calendar.HOUR_OF_DAY, "0-23"))
+        Assert.assertFalse(ScheduleParser.isValidField(java.util.Calendar.HOUR_OF_DAY, "24"))
+    }
+
+    @Test
+    fun parseJsonLineIgnoresUnknownKeys() {
+        val parsed = ScheduleParser.parseJsonLine(
+            """{"id":5,"name":"Test","hourConfig":"8","minuteConfig":"30","futureField":true}"""
+        )
+        Assert.assertNotNull(parsed)
+        Assert.assertEquals(5, parsed!!.id)
+        Assert.assertEquals(listOf(8), parsed.hours)
+        Assert.assertEquals(listOf(30), parsed.minutes)
+    }
+
 }
