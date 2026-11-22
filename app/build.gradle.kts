@@ -9,6 +9,14 @@ kotlin {
     jvmToolchain(21)
 }
 
+val gitCommitCount: Int = runCatching {
+    providers.exec {
+        workingDir = rootProject.projectDir
+        commandLine("git", "rev-list", "--count", "HEAD")
+        isIgnoreExitValue = true
+    }.standardOutput.asText.map { it.trim().toIntOrNull() ?: 1 }.get()
+}.getOrDefault(1).coerceAtLeast(1)
+
 android {
     namespace = "com.tinyfish.jeekalarm"
     compileSdk = 35
@@ -17,8 +25,8 @@ android {
         applicationId = "com.tinyfish.jeekalarm"
         minSdk = 26
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = gitCommitCount
+        versionName = gitCommitCount.toString()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,6 +47,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 

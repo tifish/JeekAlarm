@@ -91,6 +91,7 @@ import com.tinyfish.jeekalarm.start.EditRoute
 import com.tinyfish.jeekalarm.start.HomeRoute
 import com.tinyfish.jeekalarm.start.RecycleBinRoute
 import com.tinyfish.jeekalarm.start.SettingsRoute
+import com.tinyfish.jeekalarm.update.UpdateDialog
 import com.tinyfish.ui.HeightSpacer
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.WidthSpacer
@@ -165,6 +166,8 @@ fun MainUI() {
         // 因此后台 Service/广播只需更新闹钟状态，完全不必参与导航。
         if (NotificationService.currentAlarmIds.isNotEmpty()) {
             NotificationScreen()
+        } else {
+            UpdateDialog()
         }
     }
 }

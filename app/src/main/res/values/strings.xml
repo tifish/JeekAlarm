@@ -62,6 +62,44 @@
     <string name="language_system">Follow system</string>
     <string name="language_english">English</string>
     <string name="language_chinese">中文</string>
+    <string name="settings_updates">App updates</string>
+    <string name="settings_current_version">Current version: %1$s</string>
+    <string name="settings_auto_check_update">Auto-check for updates</string>
+    <string name="settings_auto_check_update_subtitle">Check for new releases on startup</string>
+
+    <!-- App updates -->
+    <string name="update_status_checking">Checking for updates…</string>
+    <string name="update_status_up_to_date">Already up to date</string>
+    <string name="update_status_available">New version %1$s available</string>
+    <string name="update_status_downloading_percent">Downloading update (%1$d%%)…</string>
+    <string name="update_status_downloading">Downloading update…</string>
+    <string name="update_status_ready">Version %1$s downloaded and ready to install</string>
+    <string name="update_action_check">Check for updates</string>
+    <string name="update_action_update_to">Update to %1$s</string>
+    <string name="update_action_install_version">Install %1$s</string>
+    <string name="update_action_download_install">Download &amp; install</string>
+    <string name="update_action_open_release_page">Open release page</string>
+    <string name="update_action_later">Later</string>
+    <string name="update_action_skip_version">Skip this version</string>
+    <string name="update_action_background">Hide</string>
+    <string name="update_action_install_now">Install now</string>
+    <string name="update_action_allow_and_install">Allow &amp; install</string>
+    <string name="update_action_retry">Retry</string>
+    <string name="update_dialog_available_title">Update available (%1$s)</string>
+    <string name="update_dialog_no_notes">No release notes provided.</string>
+    <string name="update_dialog_downloading_title">Downloading %1$s</string>
+    <string name="update_dialog_ready_title">Ready to install %1$s</string>
+    <string name="update_dialog_ready_message">The update package has been downloaded. Tap Install now to continue.</string>
+    <string name="update_dialog_permission_needed">Please allow JeekAlarm to install unknown apps in system settings to complete the update.</string>
+    <string name="update_dialog_error_title">Update failed</string>
+    <string name="update_error_network">Network error, please try again later</string>
+    <string name="update_error_rate_limited">GitHub API rate limit exceeded, please try again later</string>
+    <string name="update_error_http">Server returned HTTP %1$d</string>
+    <string name="update_error_storage">Unable to prepare download storage</string>
+    <string name="update_error_download_failed">Failed to download update package</string>
+    <string name="update_error_verification_failed">Update package verification failed</string>
+    <string name="update_error_invalid_apk">Downloaded file is not a valid JeekAlarm APK</string>
+    <string name="update_error_install_failed">Failed to start package installer</string>
 
     <!-- Permission rows -->
     <string name="perm_notifications">Notifications</string>

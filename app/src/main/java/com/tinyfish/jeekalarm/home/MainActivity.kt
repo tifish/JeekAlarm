@@ -12,6 +12,7 @@ import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.alarm.NotificationService
 import com.tinyfish.jeekalarm.edit.FileSelector
 import com.tinyfish.jeekalarm.schedule.ScheduleService
+import com.tinyfish.jeekalarm.update.UpdateService
 
 
 class MainActivity : AppCompatActivity() {
@@ -58,6 +59,7 @@ class MainActivity : AppCompatActivity() {
 
         ScheduleService.setNextAlarm()
         showCurrentAlarms()
+        UpdateService.onAppResumed(this)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -79,6 +81,7 @@ class MainActivity : AppCompatActivity() {
         NotificationService.onAlarmDismissed = alarmDismissedCallback
 
         showCurrentAlarms()
+        UpdateService.checkOnStartupIfNeeded()
 
         // 返回键交给 Compose 的 NavHost 与各屏幕的 BackHandler 处理。
         setContent {

@@ -13,6 +13,7 @@ import com.tinyfish.jeekalarm.R
 import com.tinyfish.jeekalarm.SettingsService
 import com.tinyfish.jeekalarm.schedule.RecycleBinService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
+import com.tinyfish.jeekalarm.update.UpdateService
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
@@ -156,5 +157,6 @@ class App : Application() {
         ScheduleService.load()
         RecycleBinService.load()
         ScheduleService.setNextAlarm()
+        UpdateService.cleanupOldApksAsync()
     }
 }

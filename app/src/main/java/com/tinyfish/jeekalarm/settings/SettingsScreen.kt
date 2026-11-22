@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
@@ -48,10 +49,13 @@ import com.tinyfish.jeekalarm.home.NavigationBottomBar
 import com.tinyfish.jeekalarm.schedule.RecycleBinService
 import com.tinyfish.jeekalarm.schedule.ScheduleService
 import com.tinyfish.jeekalarm.start.App
+import com.tinyfish.jeekalarm.update.UpdateService
+import com.tinyfish.jeekalarm.update.UpdateState
 import com.tinyfish.ui.LabeledTextField
 import com.tinyfish.ui.MyFileSelector
 import com.tinyfish.ui.MyTopBar
 import com.tinyfish.ui.SectionCard
+import com.tinyfish.ui.SettingSwitchRow
 import com.tinyfish.ui.WidthSpacer
 import com.tinyfish.ui.theme.JeekAlarmTheme
 
@@ -186,6 +190,104 @@ private fun Editor(modifier: Modifier = Modifier, onOpenRecycleBin: () -> Unit =
         }
 
         ConfigFolderGroup()
+
+        UpdateSection()
+    }
+}
+
+@Composable
+private fun UpdateSection() {
+    val context = LocalContext.current
+    val updateState = UpdateService.state
+
+    val statusText: String? = when (updateState) {
+        UpdateState.Idle -> null
+        UpdateState.Checking -> stringResource(R.string.update_status_checking)
+        is UpdateState.UpToDate -> stringResource(R.string.update_status_up_to_date)
+        is UpdateState.Available -> stringResource(R.string.update_status_available, updateState.release.tagName)
+        is UpdateState.Downloading -> {
+            val progress = updateState.progress
+            if (progress != null) {
+                stringResource(R.string.update_status_downloading_percent, (progress * 100).toInt())
+            } else {
+                stringResource(R.string.update_status_downloading)
+            }
+        }
+        is UpdateState.ReadyToInstall -> stringResource(R.string.update_status_ready, updateState.release.tagName)
+        is UpdateState.Error -> updateState.message
+    }
+
+    val statusColor = when (updateState) {
+        is UpdateState.Error -> MaterialTheme.colorScheme.error
+        is UpdateState.Available, is UpdateState.ReadyToInstall -> MaterialTheme.colorScheme.primary
+        else -> MaterialTheme.colorScheme.onSurfaceVariant
+    }
+
+    val buttonText = when (updateState) {
+        UpdateState.Checking -> stringResource(R.string.update_status_checking)
+        is UpdateState.Available -> stringResource(R.string.update_action_update_to, updateState.release.tagName)
+        is UpdateState.Downloading -> {
+            val progress = updateState.progress
+            if (progress != null) {
+                stringResource(R.string.update_status_downloading_percent, (progress * 100).toInt())
+            } else {
+                stringResource(R.string.update_status_downloading)
+            }
+        }
+        is UpdateState.ReadyToInstall -> stringResource(R.string.update_action_install_version, updateState.release.tagName)
+        else -> stringResource(R.string.update_action_check)
+    }
+
+    SectionCard(title = stringResource(R.string.settings_updates)) {
+        Column(Modifier.fillMaxWidth()) {
+            Text(
+                stringResource(R.string.settings_current_version, UpdateService.formattedCurrentVersion()),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+            if (statusText != null) {
+                Text(
+                    statusText,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = statusColor,
+                )
+            }
+        }
+
+        SettingSwitchRow(
+            title = stringResource(R.string.settings_auto_check_update),
+            subtitle = stringResource(R.string.settings_auto_check_update_subtitle),
+            checked = SettingsService.autoCheckUpdate,
+            onCheckedChange = { SettingsService.autoCheckUpdate = it },
+        )
+
+        FilledTonalButton(
+            onClick = {
+                when (updateState) {
+                    is UpdateState.Available, is UpdateState.Downloading -> UpdateService.openUpdateDialog()
+                    is UpdateState.ReadyToInstall -> {
+                        if (PermissionsService.canRequestPackageInstalls(context)) {
+                            UpdateService.installDownloadedApk(context)
+                        } else {
+                            UpdateService.openUpdateDialog()
+                        }
+                    }
+                    else -> UpdateService.checkForUpdateManually()
+                }
+            },
+            enabled = updateState !is UpdateState.Checking,
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            if (updateState is UpdateState.Checking) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(18.dp),
+                    strokeWidth = 2.dp,
+                )
+            } else {
+                Icon(ImageVector.vectorResource(R.drawable.ic_update), null)
+            }
+            WidthSpacer(8.dp)
+            Text(buttonText)
+        }
     }
 }
 

@@ -77,6 +77,18 @@ object PermissionsService {
         startSettingsActivity(context, appDetailsIntent(context))
     }
 
+    fun canRequestPackageInstalls(context: Context): Boolean {
+        return context.packageManager.canRequestPackageInstalls()
+    }
+
+    fun openInstallUnknownAppsSettings(context: Context) {
+        val intent = Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES).apply {
+            data = "package:${context.packageName}".toUri()
+        }
+        if (!startSettingsActivity(context, intent))
+            openAppDetailsSettings(context)
+    }
+
     private fun appDetailsIntent(context: Context): Intent {
         return Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
             data = "package:${context.packageName}".toUri()

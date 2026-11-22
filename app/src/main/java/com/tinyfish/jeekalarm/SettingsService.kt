@@ -34,6 +34,7 @@ object SettingsService {
     var openAiApiKey by SettingsItemState("")
     var openAiApiModel by SettingsItemState("")
     var iFlyAppId by SettingsItemState("")
+    var autoCheckUpdate by SettingsItemState(true)
 
     class SettingsItemState<T>(initial: T) : ReadWriteProperty<SettingsService, T> {
         private val _state = mutableStateOf(initial)
@@ -61,6 +62,18 @@ object SettingsService {
                 putString("ConfigDir", value)
                 apply()
             }
+        }
+
+    var lastUpdateCheckTimeMs: Long
+        get() = sharedPrefs.getLong("LastUpdateCheckTimeMs", 0L)
+        set(value) {
+            sharedPrefs.edit().putLong("LastUpdateCheckTimeMs", value).apply()
+        }
+
+    var skippedUpdateVersion: String
+        get() = sharedPrefs.getString("SkippedUpdateVersion", "") ?: ""
+        set(value) {
+            sharedPrefs.edit().putString("SkippedUpdateVersion", value).apply()
         }
 
     private fun isContentTree(uri: String = settingsDir): Boolean {
@@ -178,6 +191,7 @@ object SettingsService {
         var openAiApiKey: String = "",
         var openAiApiModel: String = "",
         var iFlyAppId: String = "",
+        var autoCheckUpdate: Boolean = true,
     )
 
     private var _isLoading = false
@@ -212,6 +226,7 @@ object SettingsService {
             if (data.iFlyAppId != "")
                 data.iFlyAppId = CryptoService.decrypt(data.iFlyAppId)
             iFlyAppId = data.iFlyAppId
+            autoCheckUpdate = data.autoCheckUpdate
         } finally {
             _isLoading = false
         }
@@ -227,6 +242,7 @@ object SettingsService {
             openAiApiKey = openAiApiKey,
             openAiApiModel = openAiApiModel,
             iFlyAppId = iFlyAppId,
+            autoCheckUpdate = autoCheckUpdate,
         )
     }
 
